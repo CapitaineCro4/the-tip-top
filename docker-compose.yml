@@ -44,15 +44,14 @@ services:
     build:
       context: ./front
       dockerfile: Dockerfile
+      args:
+        - NODE_ENV=$NODE_ENV
+        - NEXT_PUBLIC_API_URL=$NEXT_PUBLIC_API_URL
     container_name: front
     ports:
       - "3000:3000"
     depends_on:
       - api
-    volumes:
-      - ./front:/app
-      - /app/node_modules
-      - /app/.next
     environment:
       - WATCHPACK_POLLING=true
       - NEXT_PUBLIC_API_URL=$NEXT_PUBLIC_API_URL

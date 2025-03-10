@@ -21,6 +21,8 @@ export function register(data: CreateUser): Promise<void> {
 }
 
 export function getMe(): Promise<User> {
+  console.log('Salut');
+
   return apis.tiptop
     .get('/auth/me')
     .then(

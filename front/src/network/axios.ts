@@ -16,6 +16,8 @@ const parameters = {
 };
 
 const middleware = (instance: Axios): Axios => {
+  console.log('Salut');
+
   instance.interceptors.request.use(onRequestSuccess, onRequestError);
   instance.interceptors.response.use(onResponseSuccess, onResponseError);
   return instance;

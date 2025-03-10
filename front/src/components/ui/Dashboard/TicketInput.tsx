@@ -6,14 +6,16 @@ import { TicketGenerator } from './TicketGenerator';
 import { createGame } from '@/network/api-routes/Game';
 import { AuthContext } from '@/context/AuthContext';
 import { Gain } from '@/domain/gain/GainType';
-import Confetti from 'react-confetti'; // Import de la bibliothèque confetti
+import Confetti from 'react-confetti';
 
 export const TicketInput = () => {
   const { user } = useContext(AuthContext);
   const [ticketCode, setTicketCode] = useState('');
-  const [status, setStatus] = useState<'idle' | 'success' | 'error'>('idle');
+  const [status, setStatus] = useState<
+    'idle' | 'success' | 'error' | 'alreadyUsed'
+  >('idle');
   const [gain, setGain] = useState<Gain | null>(null);
-  const [showConfetti, setShowConfetti] = useState(false); // État pour déclencher les confettis
+  const [showConfetti, setShowConfetti] = useState(false);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -26,24 +28,23 @@ export const TicketInput = () => {
       setGain(data.gain);
       setTicketCode('');
       setStatus('success');
-      setShowConfetti(true); // Déclenche les confettis en cas de succès
-      // Arrête les confettis après 5 secondes
-      setTimeout(() => setShowConfetti(false), 5000);
-    } catch{
-      setStatus('error');
-      setShowConfetti(false); // Pas de confettis en cas d'erreur
+      if (data.gain) {
+        setShowConfetti(true); // Déclenche les confettis uniquement si un gain est obtenu
+        setTimeout(() => setShowConfetti(false), 5000); // Arrête après 5 secondes
+      }
+    } catch {
+      setShowConfetti(false);
     }
   };
 
   return (
     <div className="max-w-xl bg-white p-6 shadow-sm relative">
-      {/* Affichage des confettis */}
       {showConfetti && (
         <Confetti
           width={window.innerWidth}
           height={window.innerHeight}
-          numberOfPieces={200} // Nombre de confettis
-          recycle={false} // Les confettis disparaissent après l'animation
+          numberOfPieces={200}
+          recycle={false}
         />
       )}
 
@@ -70,7 +71,6 @@ export const TicketInput = () => {
           type="submit"
           className="w-full bg-[#242E61] text-white py-2 hover:bg-[#1a2347] transition-colors relative overflow-hidden"
         >
-          {/* Ajout d'un effet visuel au bouton */}
           <span className="relative z-10">
             {dashboardContent.ticketSection.buttonText}
           </span>
@@ -82,13 +82,18 @@ export const TicketInput = () => {
             {dashboardContent.ticketSection.errorMessage}
           </p>
         )}
-        {status === 'success' && (
+        {status === 'alreadyUsed' && (
+          <p className="text-red-500 text-sm">Ticket déjà utilisé</p>
+        )}
+        {status === 'success' && gain && (
           <p className="text-green-500 text-sm">
-            {dashboardContent.ticketSection.successMessage}
+            Vous avez gagné {gain.name} !
           </p>
         )}
-        {gain && (
-          <p className="text-green-500 text-sm">{JSON.stringify(gain)}</p>
+        {status === 'success' && !gain && (
+          <p className="text-gray-500 text-sm">
+            Désolé, pas de gain cette fois.
+          </p>
         )}
       </form>
 
