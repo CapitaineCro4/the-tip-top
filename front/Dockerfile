@@ -17,4 +17,4 @@ COPY . .
 EXPOSE 3000
 
 # Utiliser la commande de développement au lieu de build + start
-CMD ["yarn", "dev"] 
+CMD ["yarn", "start"] 
