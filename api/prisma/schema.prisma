@@ -1,0 +1,70 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id            Int         @id @default(autoincrement())
+  firstName     String
+  lastName      String
+  email         String      @unique
+  password      String      // Hashé avec bcrypt
+  gender        String     // Pour stats
+  birthDate     DateTime   // Pour stats
+  createdAt     DateTime    @default(now())
+  updatedAt     DateTime    @updatedAt
+  games         Game[]
+}
+
+// Table Jeux Concours (définition générale)
+model Game {
+  id            Int         @id @default(autoincrement())
+  description   String?     // desc du jeux
+  ticketId      Int
+  ticket        Ticket      @relation(fields: [ticketId], references: [id])
+  userId        Int
+  user          User        @relation(fields: [userId], references: [id])
+  createdAt     DateTime    @default(now())
+  updatedAt     DateTime    @updatedAt
+}
+
+// Table Session du Jeu Concours (instance temporelle)
+model Session {
+  id            Int         @id @default(autoincrement())
+  name          String
+  startDate     DateTime    // Ex. 2025-03-01
+  endDate       DateTime    // Ex. 2025-03-30
+  claimEndDate  DateTime    // Ex. 2025-04-29 (30 jours après fin)
+  tickets       Ticket[]
+
+  createdAt     DateTime    @default(now())
+  updatedAt     DateTime    @updatedAt
+}
+
+// Table Ticket
+model Ticket {
+  id            Int         @id @default(autoincrement())
+  code          String      @unique 
+  used          Boolean     @default(false)
+  totalQuantityGain Int
+  gainId        Int
+  gain          Gain        @relation(fields: [gainId], references: [id])
+  sessionId     Int
+  session       Session     @relation(fields: [sessionId], references: [id])
+  games         Game[]
+  createdAt     DateTime    @default(now())
+  updatedAt     DateTime    @updatedAt
+}
+
+// Table Gain (lots)
+model Gain {
+  id            Int         @id @default(autoincrement())
+  name          String      // Ex. "Infuseur à thé"
+  value         Float       // Ex. 0, 39, 69
+  probability   Int         // Ex. 0, 100, 80
+  tickets       Ticket[]
+}

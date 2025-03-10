@@ -1,0 +1,13 @@
+# env
+.env
+
+# api
+api/node_modules
+
+# front
+front/node_modules
+
+# ds_store
+**/.DS_Store
+
+.eslintcache

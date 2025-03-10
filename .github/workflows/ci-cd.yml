@@ -1,0 +1,110 @@
+name: CI/CD Pipeline
+
+on:
+  push:
+    branches: [develop]
+  pull_request:
+    branches: [develop]
+
+jobs:
+  build-and-test:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      # Configuration de Node.js pour le Front
+      - name: Setup Node.js for Front
+        uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+          cache: "yarn"
+          cache-dependency-path: front/yarn.lock
+
+      # Installation des dépendances Front
+      - name: Install Front Dependencies
+        working-directory: ./front
+        run: |
+          yarn install --frozen-lockfile
+          yarn add -D prettier
+
+      # Configuration de Node.js pour l'API
+      - name: Setup Node.js for API
+        uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+          cache: "yarn"
+          cache-dependency-path: api/yarn.lock
+
+      # Installation des dépendances API
+      - name: Install API Dependencies
+        working-directory: ./api
+        run: |
+          yarn install --frozen-lockfile
+          yarn add -D prettier @typescript-eslint/parser @typescript-eslint/eslint-plugin eslint
+
+      # Vérification du formatage et linting Front
+      - name: Check Front Format and Lint
+        working-directory: ./front
+        run: |
+          yarn format
+          yarn lint
+          yarn format:check
+
+      # Vérification du formatage et linting API
+      - name: Check API Format and Lint
+        working-directory: ./api
+        run: |
+          yarn format
+          yarn lint
+          yarn format:check
+
+      - name: Install Docker
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y ca-certificates curl gnupg
+          sudo install -m 0755 -d /etc/apt/keyrings
+          curl -fsSL https://download.docker.com/linux/ubuntu/gpg | sudo tee /etc/apt/keyrings/docker.asc > /dev/null
+          sudo chmod a+r /etc/apt/keyrings/docker.asc
+          echo "deb [arch=$(dpkg --print-architecture) signed-by=/etc/apt/keyrings/docker.asc] https://download.docker.com/linux/ubuntu $(lsb_release -cs) stable" | sudo tee /etc/apt/sources.list.d/docker.list > /dev/null
+          sudo apt-get update
+          sudo apt-get install -y docker-ce docker-ce-cli containerd.io
+
+      - name: Install Docker Compose
+        run: |
+          sudo curl -L "https://github.com/docker/compose/releases/latest/download/docker-compose-$(uname -s)-$(uname -m)" -o /usr/local/bin/docker-compose
+          sudo chmod +x /usr/local/bin/docker-compose
+          docker-compose version
+
+      - name: Login to Docker Hub
+        uses: docker/login-action@v3
+        with:
+          username: ${{ secrets.DOCKERHUB_USERNAME }}
+          password: ${{ secrets.DOCKERHUB_TOKEN }}
+
+      - name: Create env file
+        run: |
+          echo "API_PORT=3001" >> .env
+          echo "DATABASE_URL=postgresql://admin:admin@postgres_db:5432/mydatabase?schema=public" >> .env
+
+      # Ajout des étapes de build et push Docker
+      - name: Build and Push API Docker Image
+        run: |
+          docker build -t ${{ secrets.DOCKERHUB_USERNAME }}/the-tip-top-api:latest ./api
+          docker push ${{ secrets.DOCKERHUB_USERNAME }}/the-tip-top-api:latest
+
+      - name: Build and Push Front Docker Image
+        run: |
+          docker build -t ${{ secrets.DOCKERHUB_USERNAME }}/the-tip-top-front:latest ./front
+          docker push ${{ secrets.DOCKERHUB_USERNAME }}/the-tip-top-front:latest
+
+      - name: Build and test
+        run: |
+          docker compose build
+          docker compose up -d
+          docker compose ps
+          # Attendre que les services soient prêts
+          sleep 30
+          # Ici tu peux ajouter des tests
+          docker compose down

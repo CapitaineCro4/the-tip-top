@@ -1,0 +1,60 @@
+services:
+  postgres_db:
+    image: postgres:15-alpine
+    container_name: postgres_db
+    environment:
+      POSTGRES_USER: admin
+      POSTGRES_PASSWORD: admin
+      POSTGRES_DB: mydatabase
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    ports:
+      - "5432:5432"
+
+  pgadmin:
+    image: dpage/pgadmin4
+    container_name: pgadmin
+    environment:
+      PGADMIN_DEFAULT_EMAIL: admin@admin.com
+      PGADMIN_DEFAULT_PASSWORD: admin
+    ports:
+      - "5050:80"
+    depends_on:
+      - postgres_db
+
+  api:
+    build:
+      context: ./api
+      dockerfile: Dockerfile
+    container_name: api
+    env_file: ./.env
+    ports:
+      - $API_PORT:$API_PORT
+    depends_on:
+      - postgres_db
+    environment:
+      - DATABASE_URL=$DATABASE_URL
+      - API_PORT=$API_PORT
+      - JWT_SECRET=$JWT_SECRET
+    volumes:
+      - ./api:/usr/src/app/api
+      - /usr/src/app/api/node_modules
+
+  front:
+    build:
+      context: ./front
+      dockerfile: Dockerfile
+    container_name: front
+    ports:
+      - "3000:3000"
+    depends_on:
+      - api
+    volumes:
+      - ./front:/app
+      - /app/node_modules
+      - /app/.next
+    environment:
+      - WATCHPACK_POLLING=true
+      - NEXT_PUBLIC_API_URL=$NEXT_PUBLIC_API_URL
+volumes:
+  postgres_data:
