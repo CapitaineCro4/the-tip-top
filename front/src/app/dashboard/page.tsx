@@ -1,6 +1,5 @@
 'use client';
 
-import { useState } from 'react';
 import { dashboardContent } from '@/content/dashboardContent';
 import { DashboardLayout } from '@/components/ui/Dashboard/DashboardLayout';
 import { TicketInput } from '@/components/ui/Dashboard/TicketInput';

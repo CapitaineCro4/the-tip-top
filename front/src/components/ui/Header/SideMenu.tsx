@@ -5,11 +5,10 @@ import { FiX } from 'react-icons/fi'
 import Link from 'next/link'
 
 interface SideMenuProps {
-  isOpen: boolean
   onClose: () => void
 }
 
-export const SideMenu = ({ isOpen, onClose }: SideMenuProps) => {
+export const SideMenu = ({ onClose }: SideMenuProps) => {
   return (
     <>
       <motion.div

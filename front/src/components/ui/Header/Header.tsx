@@ -65,7 +65,7 @@ export const Header = () => {
 
       <AnimatePresence>
         {isMenuOpen && (
-          <SideMenu isOpen={isMenuOpen} onClose={() => setIsMenuOpen(false)} />
+          <SideMenu onClose={() => setIsMenuOpen(false)} />
         )}
       </AnimatePresence>
 

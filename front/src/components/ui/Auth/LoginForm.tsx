@@ -20,7 +20,7 @@ export const LoginForm = ({ onClose }: { onClose: () => void }) => {
       .then(() => {
         onClose();
       })
-      .catch((error: Error) => {
+      .catch((error) => {
         const message = error.response?.data?.message ?? error.message;
         if (message.toLowerCase().indexOf('invalid') !== -1) {
           setError('Email ou mot de passe incorrect');

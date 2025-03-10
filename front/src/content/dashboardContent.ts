@@ -22,6 +22,7 @@ export const dashboardContent = {
           { value: 'mr', label: 'Monsieur' },
           { value: 'mme', label: 'Madame' },
         ],
+        placeholder: 'Sélectionnez',
       },
       firstName: {
         label: 'Prénom',

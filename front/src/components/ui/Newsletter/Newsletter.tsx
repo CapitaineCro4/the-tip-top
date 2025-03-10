@@ -19,7 +19,7 @@ export const Newsletter = () => {
       await new Promise((resolve) => setTimeout(resolve, 1000));
       setStatus('success');
       setEmail('');
-    } catch (error) {
+    } catch {
       setStatus('error');
     } finally {
       setIsSubmitting(false);

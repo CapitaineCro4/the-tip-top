@@ -20,7 +20,7 @@ export const TicketHistory = () => {
 
   useEffect(() => {
     loadUserGames();
-  }, []);
+  }, [loadUserGames]);
 
   useEffect(() => {
     setTickets(
@@ -33,10 +33,6 @@ export const TicketHistory = () => {
       }))
     );
   }, [userGames, userGames.length]);
-
-  const handleDownload = (ticketId: string) => {
-    // Logique de téléchargement du ticket
-  };
 
   return (
     <div className="bg-white p-6 rounded-lg shadow-sm">
@@ -93,10 +89,7 @@ export const TicketHistory = () => {
                     </span>
                   </td>
                   <td className="px-6 py-4 whitespace-nowrap">
-                    <button
-                      onClick={() => handleDownload(ticket.id)}
-                      className="text-[#242E61] hover:text-[#1a2347] transition-colors"
-                    >
+                    <button className="text-[#242E61] hover:text-[#1a2347] transition-colors">
                       <FiDownload className="w-5 h-5" />
                     </button>
                   </td>

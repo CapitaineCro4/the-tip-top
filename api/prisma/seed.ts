@@ -4,11 +4,10 @@ import { Password } from '../src/utils/Password';
 
 async function main() {
   const password = await Password.crypt('123456');
+  const demoPassword = await Password.crypt('R1@vraidufaux');
 
-  await prisma.user.upsert({
-    where: { email: 'toto@thetiptop.com' },
-    update: {},
-    create: {
+  const users = [
+    {
       email: 'toto@thetiptop.com',
       firstName: 'Toto',
       lastName: 'Toto',
@@ -16,7 +15,23 @@ async function main() {
       gender: 'MALE',
       birthDate: new Date('2000-01-01'),
     },
-  });
+    {
+      email: 'joe@gmail.com',
+      firstName: 'Joe',
+      lastName: 'Dubois',
+      password: demoPassword,
+      gender: 'MALE',
+      birthDate: new Date('2002-03-25'),
+    },
+  ];
+
+  for (const user of users) {
+    await prisma.user.upsert({
+      where: { email: user.email },
+      update: {},
+      create: user,
+    });
+  }
 
   const gains = [
     {

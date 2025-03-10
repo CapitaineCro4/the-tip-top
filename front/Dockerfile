@@ -1,20 +1,17 @@
-# Utiliser une image Node.js officielle comme base
-FROM node:18-alpine
-
-# Définir le répertoire de travail dans le conteneur
+# Étape 1 : Construction de l'application
+FROM node:18-alpine AS builder
 WORKDIR /app
-
-# Copier les fichiers de configuration
 COPY package.json yarn.lock ./
-
-# Installer les dépendances
 RUN yarn install
-
-# Copier le reste des fichiers source
 COPY . .
+RUN yarn build
 
-# Exposer le port sur lequel l'application s'exécute
+# Étape 2 : Image finale pour la production
+FROM node:18-alpine
+WORKDIR /app
+COPY --from=builder /app/.next ./.next
+COPY --from=builder /app/node_modules ./node_modules
+COPY --from=builder /app/package*.json ./
+ENV NODE_ENV=production
 EXPOSE 3000
-
-# Utiliser la commande de développement au lieu de build + start
-CMD ["yarn", "start"] 
+CMD ["yarn", "start"]

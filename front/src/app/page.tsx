@@ -7,7 +7,7 @@ import { Newsletter } from '@/components/ui/Newsletter/Newsletter';
 export default function Home() {
   return (
     <div>
-      <Hero imageSrc={store} />
+      <Hero imageSrc={store.src} />
       <ProductCarousel />
       <Review />
       <Newsletter />

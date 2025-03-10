@@ -56,5 +56,33 @@ services:
     environment:
       - WATCHPACK_POLLING=true
       - NEXT_PUBLIC_API_URL=$NEXT_PUBLIC_API_URL
+      - NODE_ENV=$NODE_ENV
+
+  prometheus:
+    image: prom/prometheus:latest
+    container_name: prometheus
+    volumes:
+      - ./prometheus.yml:/etc/prometheus/prometheus.yml
+    ports:
+      - "9090:9090"
+    restart: unless-stopped
+
+  pushgateway:
+    image: prom/pushgateway:latest
+    container_name: pushgateway
+    ports:
+      - "9091:9091"
+    restart: unless-stopped
+
+  grafana:
+    image: grafana/grafana:latest
+    container_name: grafana
+    ports:
+      - "3004:3004"
+    volumes:
+      - grafana-data:/var/lib/grafana
+    restart: unless-stopped
+
 volumes:
   postgres_data:
+  grafana-data:

@@ -63,13 +63,13 @@ const ProductCarousel: React.FC = () => {
             Comment participer ?
           </h2>
           <p className="text-center text-sm md:text-xl mt-2 text-white">
-            Pour participer, il vous suffit d'effectuer un achat pour un montant
-            de 49€. En plus de savourer nos délicieux thés, vous aurez la chance
-            de remporter l'un de nos nombreux lots
+            Pour participer, il vous suffit d&apos;effectuer un achat pour un
+            montant de 49€. En plus de savourer nos délicieux thés, vous aurez
+            la chance de remporter l&apos;un de nos nombreux lots
           </p>
           <p className="text-center text-sm md:text-xl mt-2 text-white">
-            * Un grand tirrage final sera organisé et designera le gagnat du grand
-            prix. d'une valeur de 360€.
+            * Un grand tirrage final sera organisé et designera le gagnat du
+            grand prix. d&apos;une valeur de 360€.
           </p>
         </div>
       </div>
