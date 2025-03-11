@@ -1,11 +1,11 @@
-'use client'
+'use client';
 
-import { motion } from 'motion/react'
-import { FiX } from 'react-icons/fi'
-import Link from 'next/link'
+import { motion } from 'motion/react';
+import { FiX } from 'react-icons/fi';
+import Link from 'next/link';
 
 interface SideMenuProps {
-  onClose: () => void
+  onClose: () => void;
 }
 
 export const SideMenu = ({ onClose }: SideMenuProps) => {
@@ -46,34 +46,46 @@ export const SideMenu = ({ onClose }: SideMenuProps) => {
             </li>
             <li>
               <Link
-                href="/"
+                href="/#products"
                 className="block text-sm md:text-xl p-2 hover:bg-[#16803C] hover:text-white/80 transition-all duration-300"
-                onClick={onClose}
+                onClick={(e) => {
+                  e.preventDefault();
+                  onClose();
+                  const element = document.getElementById('products');
+                  element?.scrollIntoView({ behavior: 'smooth' });
+                }}
               >
                 Lots à remporter
               </Link>
             </li>
             <li>
               <Link
-                href="/"
+                href="/#how-to-participate"
                 className="block text-sm md:text-xl p-2 hover:bg-[#16803C] hover:text-white/80 transition-all duration-300"
-                onClick={onClose}
+                onClick={(e) => {
+                  e.preventDefault();
+                  onClose();
+                  const element = document.getElementById('how-to-participate');
+                  element?.scrollIntoView({ behavior: 'smooth' });
+                }}
               >
                 Comment participer
               </Link>
             </li>
+
             <li>
               <Link
-                href="/"
+                href="/faq"
                 className="block text-sm md:text-xl p-2 hover:bg-[#16803C] hover:text-white/80 transition-all duration-300"
                 onClick={onClose}
               >
                 FAQ
               </Link>
             </li>
+
             <li>
               <Link
-                href="/"
+                href="/contact"
                 className="block text-sm md:text-xl p-2 hover:bg-[#16803C] hover:text-white/80 transition-all duration-300"
                 onClick={onClose}
               >
@@ -85,4 +97,4 @@ export const SideMenu = ({ onClose }: SideMenuProps) => {
       </motion.div>
     </>
   );
-} 
+};

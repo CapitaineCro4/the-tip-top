@@ -1,30 +1,20 @@
-# Étape 1 : Construction de l'application
-FROM node:18-alpine AS builder
+# Utiliser une image Node.js officielle comme base
+FROM node:18-alpine as builder
 
-# Définir des arguments pour le build
-ARG NODE_ENV
-ARG NEXT_PUBLIC_API_URL
-
-# Définir les variables d’environnement pour le build
-ENV NODE_ENV=$NODE_ENV
-ENV NEXT_PUBLIC_API_URL=$NEXT_PUBLIC_API_URL
-
+# Définir le répertoire de travail dans le conteneur
 WORKDIR /app
+
+# Copier les fichiers de configuration
 COPY package.json yarn.lock ./
+
+# Installer les dépendances
 RUN yarn install
+
+# Copier le reste des fichiers source
 COPY . .
-RUN yarn build
 
-# Étape 2 : Image finale pour la production
-FROM node:18-alpine
-WORKDIR /app
-COPY --from=builder /app/.next ./.next
-COPY --from=builder /app/node_modules ./node_modules
-COPY --from=builder /app/package*.json ./
-
-# Définir les variables d’environnement pour le runtime
-ENV NODE_ENV=$NODE_ENV
-ENV NEXT_PUBLIC_API_URL=$NEXT_PUBLIC_API_URL
-
+# Exposer le port sur lequel l'application s'exécute
 EXPOSE 3000
-CMD ["yarn", "start"]
+
+# Utiliser la commande de développement au lieu de build + start
+CMD ["yarn", "dev"] 

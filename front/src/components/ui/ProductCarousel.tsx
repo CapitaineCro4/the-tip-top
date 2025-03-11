@@ -5,7 +5,7 @@ const ProductCarousel: React.FC = () => {
   const { products } = productContent;
 
   return (
-    <section className="">
+    <section className="" id="products">
       <div className="flex justify-center items-center bg-[#f2cb7d] relative overflow-hidden">
         <div className="absolute top-0 left-0 w-full h-16 rotate-180">
           <svg
@@ -56,7 +56,10 @@ const ProductCarousel: React.FC = () => {
       <div className="flex justify-center items-center bg-[#f2cb7d] pt-6 md:pt-0 pb-20">
         <div className="flex items-center justify-center"></div>
 
-        <div className="flex flex-col items-center justify-center max-w-4xl md:mt-12">
+        <div
+          className="flex flex-col items-center justify-center max-w-4xl md:mt-12"
+          id="how-to-participate"
+        >
           <Image src={teaLogo} alt="lot" width={180} height={180} />
 
           <h2 className="text-2xl md:text-3xl font-bold text-center mb-8 z-10  md:mb-6 text-white">

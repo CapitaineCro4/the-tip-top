@@ -18,6 +18,7 @@ model User {
   createdAt     DateTime    @default(now())
   updatedAt     DateTime    @updatedAt
   games         Game[]
+  isAdmin       Boolean     @default(false)
 }
 
 // Table Jeux Concours (définition générale)

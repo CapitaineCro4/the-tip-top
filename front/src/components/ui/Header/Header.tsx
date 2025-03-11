@@ -1,24 +1,39 @@
 'use client';
 
-import { useContext, useState } from 'react';
-import { AnimatePresence } from 'motion/react';
-import { FiMenu, FiUser, FiLogOut } from 'react-icons/fi';
+import { useState, useRef, useEffect } from 'react';
+import { AnimatePresence } from 'framer-motion';
+import { FiMenu, FiUser } from 'react-icons/fi';
 import { Logo } from './Logo';
 import { SideMenu } from './SideMenu';
 import { AuthForm } from '../Auth/AuthForm';
-import { AuthContext } from '@/context/AuthContext';
-import { useRouter } from 'next/navigation';
+import { UserDropdown } from './UserDropdown';
+import { useAuth } from '@/hooks/useAuth';
 
 export const Header = () => {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [isAuthOpen, setIsAuthOpen] = useState(false);
-  const { user, hasAuthenticatedDashboard, isAuthenticated, logout } =
-    useContext(AuthContext);
-  const router = useRouter();
+  const [isDropdownOpen, setIsDropdownOpen] = useState(false);
+  const { user, isAuthenticated, logout, hasAuthenticatedDashboard, isAdmin } =
+    useAuth();
+  const dropdownRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    const handleClickOutside = (event: MouseEvent) => {
+      if (
+        dropdownRef.current &&
+        !dropdownRef.current.contains(event.target as Node)
+      ) {
+        setIsDropdownOpen(false);
+      }
+    };
+
+    document.addEventListener('mousedown', handleClickOutside);
+    return () => document.removeEventListener('mousedown', handleClickOutside);
+  }, []);
 
   const handleUserClick = (): void => {
     if (isAuthenticated()) {
-      router.push('/dashboard');
+      setIsDropdownOpen(!isDropdownOpen);
     } else {
       setIsAuthOpen(true);
     }
@@ -40,33 +55,30 @@ export const Header = () => {
         <Logo />
 
         <div className="flex items-center gap-2">
-          <button
-            onClick={handleUserClick}
-            className="p-2 hover:bg-gray-100 rounded-full flex items-center gap-2"
-            aria-label="Compte"
-          >
-            {isAuthenticated() && (
-              <span className="text-gray-500">{user?.fullName()}</span>
-            )}
+          <div className="relative" ref={dropdownRef}>
+            <button
+              onClick={handleUserClick}
+              className="p-2 hover:bg-gray-100 rounded-full flex items-center gap-2"
+              aria-label="Compte"
+            >
+              <FiUser className="w-6 h-6" />
+            </button>
 
-            <FiUser className="w-6 h-6" />
-          </button>
-
-          {isAuthenticated() && (
-            <div className="flex items-center gap-4">
-              <span className="text-gray-500">|</span>
-              <button onClick={() => logout()}>
-                <FiLogOut className="w-6 h-6" />
-              </button>
-            </div>
-          )}
+            <AnimatePresence>
+              {isDropdownOpen && isAuthenticated() && (
+                <UserDropdown
+                  userName={user?.fullName() || ''}
+                  onLogout={logout}
+                  isAdmin={isAdmin()}
+                />
+              )}
+            </AnimatePresence>
+          </div>
         </div>
       </div>
 
       <AnimatePresence>
-        {isMenuOpen && (
-          <SideMenu onClose={() => setIsMenuOpen(false)} />
-        )}
+        {isMenuOpen && <SideMenu onClose={() => setIsMenuOpen(false)} />}
       </AnimatePresence>
 
       <AnimatePresence>

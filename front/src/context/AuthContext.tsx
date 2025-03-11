@@ -14,6 +14,7 @@ import { Game } from '@/domain/game/GameType';
 
 export const AuthContext = createContext<{
   user: User | null;
+  setUser: (user: User) => void;
   isAuthenticated: () => boolean;
   hasAuthenticatedDashboard: () => boolean;
   login: (email: string, password: string) => Promise<void>;
@@ -23,6 +24,7 @@ export const AuthContext = createContext<{
   loadUserGames: () => Promise<void>;
 }>({
   user: null,
+  setUser: () => {},
   isAuthenticated: () => false,
   hasAuthenticatedDashboard: () => false,
   login: async () => {},
@@ -100,6 +102,7 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
     <AuthContext.Provider
       value={{
         user,
+        setUser,
         isAuthenticated,
         hasAuthenticatedDashboard,
         login,

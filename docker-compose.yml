@@ -29,31 +29,33 @@ services:
     container_name: api
     env_file: ./.env
     ports:
-      - "3002:3002" 
+      - $API_PORT:$API_PORT
     depends_on:
       - postgres_db
     environment:
       - DATABASE_URL=$DATABASE_URL
-      - API_PORT=3002
+      - API_PORT=$API_PORT
       - JWT_SECRET=$JWT_SECRET
     volumes:
       - ./api:/usr/src/app/api
+      - /usr/src/app/api/node_modules
 
   front:
     build:
       context: ./front
       dockerfile: Dockerfile
-      args:
-        - NODE_ENV=production
-        - NEXT_PUBLIC_API_URL=http://dsp5-archi-f24a-15m-g4.fr/api
     container_name: front
     ports:
       - "3000:3000"
     depends_on:
       - api
+    volumes:
+      - ./front:/app
+      - /app/node_modules
+      - /app/.next
     environment:
-      - NODE_ENV=production
-      - NEXT_PUBLIC_API_URL=http://dsp5-archi-f24a-15m-g4.fr/api
+      - WATCHPACK_POLLING=true
+      - NEXT_PUBLIC_API_URL=$NEXT_PUBLIC_API_URL
 
   prometheus:
     image: prom/prometheus:latest
