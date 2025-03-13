@@ -42,9 +42,7 @@ jobs:
       - name: Optimize Front Assets
         working-directory: ./front
         run: |
-          yarn build --mode production
-          # Exemple avec Webpack (ajuste selon ton setup)
-          npx webpack --config webpack.config.js --mode production || echo "Webpack not used, skipping..."
+          yarn build
 
       # Configuration Node.js pour l'API
       - name: Setup Node.js for API
