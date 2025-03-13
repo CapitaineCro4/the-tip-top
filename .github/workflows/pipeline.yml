@@ -167,15 +167,16 @@ jobs:
           VPS_USER: "root"
           VPS_PASSWORD: ${{ secrets.VPS_PASSWORD }}
         run: |
-          sshpass -p "$VPS_PASSWORD" ssh -o StrictHostKeyChecking=no $VPS_USER@$VPS_HOST << 'EOF'
-            echo "Deploying to dev..."
-            cd /root/the-tip-top-app
-            git pull origin develop || { echo "Git pull failed"; exit 1; }
-            docker rm -f pushgateway prometheus grafana postgres_db api front backup || true
-            docker-compose down || { echo "Docker-compose down failed"; exit 1; }
-            docker-compose up --build -d || { echo "Docker-compose up failed"; exit 1; }
-            echo "Deployment to dev finished!"
-          EOF
+            sshpass -p "$VPS_PASSWORD" ssh -o StrictHostKeyChecking=no $VPS_USER@$VPS_HOST << 'EOF'
+                echo "Deploying to dev..."
+                cd /root/the-tip-top-app
+                git fetch origin develop
+                git reset --hard origin/develop || { echo "Git reset failed"; exit 1; }
+                docker rm -f pushgateway prometheus grafana postgres_db api front backup || true
+                docker-compose down || { echo "Docker-compose down failed"; exit 1; }
+                docker-compose up --build -d || { echo "Docker-compose up failed"; exit 1; }
+                echo "Deployment to dev finished!"
+            EOF
 
       - name: Deploy to Preprod
         if: github.ref == 'refs/heads/preprod'
