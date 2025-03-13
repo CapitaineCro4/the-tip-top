@@ -146,7 +146,7 @@ jobs:
           echo "DATABASE_URL=postgresql://admin:admin@postgres_db:5432/mydatabase?schema=public" >> .env
           echo "JWT_SECRET=secret" >> .env
           echo "FRONT_PORT=3000" >> .env
-          echo "NEXT_PUBLIC_API_URL=https://dsp5-archi-f24a-15m-g4.fr/api" >> .env
+          echo "NEXT_PUBLIC_API_URL=http://dsp5-archi-f24a-15m-g4.fr/api" >> .env
 
       # Build et push des images Docker
       - name: Build and Push API Docker Image
@@ -289,7 +289,7 @@ jobs:
     if: github.ref == 'refs/heads/main'
     environment:
       name: production
-      url: https://dsp5-archi-f24a-15m-g4.fr
+      url: http://dsp5-archi-f24a-15m-g4.fr
     steps:
       - name: Checkout code
         uses: actions/checkout@v3
