@@ -159,14 +159,14 @@ jobs:
           docker build -t ${{ secrets.DOCKERHUB_USERNAME }}/the-tip-top-front:latest ./front
           docker push ${{ secrets.DOCKERHUB_USERNAME }}/the-tip-top-front:latest
 
-          
+
   # Job pour le déploiement
   deploy:
     runs-on: ubuntu-latest
     needs: ci
     steps:
       - name: Checkout code
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
 
       - name: Install sshpass
         run: sudo apt-get update && sudo apt-get install -y sshpass
