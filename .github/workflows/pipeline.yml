@@ -87,7 +87,7 @@ jobs:
       - name: Run Front Unit Tests
         working-directory: ./front
         run: |
-          yarn test:unit --coverage
+          yarn test --coverage
         env:
           NODE_ENV: test
 
@@ -149,7 +149,6 @@ jobs:
           docker build -t ${{ secrets.DOCKERHUB_USERNAME }}/the-tip-top-front:latest ./front
           docker push ${{ secrets.DOCKERHUB_USERNAME }}/the-tip-top-front:latest
 
-          
   # Job pour le déploiement
   deploy:
     runs-on: ubuntu-latest

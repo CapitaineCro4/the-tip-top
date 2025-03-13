@@ -45,30 +45,24 @@ describe('Hero Component', () => {
   });
 
   it('opens auth form when participate button is clicked', () => {
-    // Initially, auth form should not be visible
+
     expect(screen.queryByTestId('mock-auth-form')).not.toBeInTheDocument();
 
-    // Clique sur le bouton participer
     const participateButton = screen.getByText(heroContent.buttonText);
     fireEvent.click(participateButton);
 
-    // Le formulaire d'inscription devrait maintenant être visible
     expect(screen.getByTestId('mock-auth-form')).toBeInTheDocument();
   });
 
   it('closes auth form when clicking on it', () => {
-    // Ouvre le formulaire d'inscription
     const participateButton = screen.getByText(heroContent.buttonText);
     fireEvent.click(participateButton);
 
-    // Le formulaire d'inscription devrait être visible
     const authForm = screen.getByTestId('mock-auth-form');
     expect(authForm).toBeInTheDocument();
 
-    // Clique sur le formulaire d'inscription pour le fermer
     fireEvent.click(authForm);
-
-    // Le formulaire d'inscription ne devrait plus être visible
+    
     expect(screen.queryByTestId('mock-auth-form')).not.toBeInTheDocument();
   });
 });
