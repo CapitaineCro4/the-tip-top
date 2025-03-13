@@ -52,7 +52,11 @@ router.post('/login', async (req, res) => {
     passport.authenticate(
       'login',
       { session: false },
-      async (err: any, user: User, info: any) => {
+      async (
+        err: Error | null,
+        user: User | false,
+        info: { message: string }
+      ) => {
         if (err) {
           return res.status(500).json({ message: err });
         }
@@ -81,7 +85,11 @@ router.post('/admin/login', async (req, res) => {
     passport.authenticate(
       'admin/login',
       { session: false },
-      async (err: any, user: User, info: any) => {
+      async (
+        err: Error | null,
+        user: User | false,
+        info: { message: string }
+      ) => {
         if (err) {
           return res.status(500).json({ message: err });
         }
