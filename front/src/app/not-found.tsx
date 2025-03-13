@@ -18,7 +18,7 @@ export default function NotFound() {
         </div>
 
         {/* Message d'erreur */}
-        <div className="space-y-4 text-white">
+        <div className="space-y-4 text-white mt-2 md:mt-2">
           <h1 className="text-6xl font-bold">404</h1>
           <h2 className="text-2xl font-semibold">
             Oups ! Cette page s&apos;est évaporée comme du thé...
