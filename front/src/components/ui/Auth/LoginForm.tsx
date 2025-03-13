@@ -5,18 +5,18 @@ import { useContext, useState } from 'react';
 import { FcGoogle } from 'react-icons/fc';
 import { FaFacebook } from 'react-icons/fa';
 import { AuthContext } from '@/context/AuthContext';
-import { auth, googleProvider } from '@/config/firebase';
-import { signInWithPopup, UserCredential } from 'firebase/auth';
+/* import { auth, googleProvider } from '@/config/firebase';
+import { signInWithPopup, UserCredential } from 'firebase/auth'; */
 import { useRouter } from 'next/navigation';
-import axios from 'axios';
+/* import axios from 'axios';
 import Cookies from 'js-cookie';
-import { TOKEN_KEY } from '@/shared/constants';
+import { TOKEN_KEY } from '@/shared/constants'; */
 
-const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3001';
+/* const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3001'; */
 
 export const LoginForm = ({ onClose }: { onClose: () => void }) => {
   const [showPassword, setShowPassword] = useState(false);
-  const { login, setUser } = useContext(AuthContext);
+  const { login } = useContext(AuthContext);
   const [error, setError] = useState('');
   const router = useRouter();
 
@@ -40,7 +40,7 @@ export const LoginForm = ({ onClose }: { onClose: () => void }) => {
       });
   };
 
-  const handleGoogleSignIn = async () => {
+  /*   const handleGoogleSignIn = async () => {
     try {
       const result: UserCredential = await signInWithPopup(
         auth,
@@ -104,7 +104,7 @@ export const LoginForm = ({ onClose }: { onClose: () => void }) => {
       }
     }
   };
-
+ */
   return (
     <div>
       <h2 className="text-2xl font-bold mb-4 text-center">Connexion</h2>
@@ -164,7 +164,7 @@ export const LoginForm = ({ onClose }: { onClose: () => void }) => {
           <span className="text-[#231F20]">FACEBOOK</span>
         </button>
         <button
-          onClick={handleGoogleSignIn}
+          /* onClick={handleGoogleSignIn} */
           type="button"
           className="bg-white text-[#231F20] px-6 py-3 flex items-center w-[200px] text-center justify-center border-2 border-transparent hover:bg-gray-200 transition-all duration-300"
         >
