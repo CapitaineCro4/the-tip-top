@@ -19,20 +19,23 @@ export const TicketHistory = () => {
   const [tickets, setTickets] = useState<Ticket[]>([]);
 
   useEffect(() => {
-    loadUserGames();
-  }, [loadUserGames]);
-
-  useEffect(() => {
-    setTickets(
-      userGames.map((game) => ({
-        id: game.id.toString(),
-        date: game.createdAt,
-        number: game.ticket.code,
-        gain: game.ticket.gain.name,
-        status: game.ticket ? 'won' : 'pending',
-      }))
-    );
-  }, [userGames, userGames.length]);
+    loadUserGames()
+      .then(() => {
+        setTickets(
+          userGames.map((game) => ({
+            id: game.id.toString(),
+            date: game.createdAt,
+            number: game.ticket.code,
+            gain: game.ticket.gain.name,
+            status: game.ticket ? 'won' : 'pending',
+          }))
+        );
+      })
+      .catch((error) => {
+        console.error('Error loading user games:', error);
+      });
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [userGames]);
 
   return (
     <div className="bg-white p-6 rounded-lg shadow-sm">

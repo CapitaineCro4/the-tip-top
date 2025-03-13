@@ -27,6 +27,9 @@ export const UserDropdown = ({
         <div className="px-4 py-2 text-sm text-gray-700 border-b border-gray-100">
           {userName}
         </div>
+        <div className="w-full px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 flex items-center gap-2 cursor-pointer">
+          <Link href="/dashboard">Dashboard</Link>
+        </div>
 
         {isAdmin && (
           <Link

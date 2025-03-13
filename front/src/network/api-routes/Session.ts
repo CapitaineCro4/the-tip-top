@@ -1,4 +1,4 @@
-import { Session } from '@/domain/session/SessionType';
+import { CreateSession, Session } from '@/domain/session/SessionType';
 import { apis } from '../axios';
 import type { AxiosResponse } from 'axios';
 import { SessionFactory } from '@/domain/session/Session';
@@ -22,5 +22,13 @@ export function getSessions(): Promise<Session[]> {
             SessionFactory.createFromApi(session)
           )
         )
+    );
+}
+
+export function createSession(data: CreateSession): Promise<string> {
+  return apis.tiptop
+    .post('/sessions', data)
+    .then((response: AxiosResponse): Promise<string> =>
+      Promise.resolve(response.data)
     );
 }

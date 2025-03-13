@@ -37,6 +37,27 @@ export const configure = (app: Express): void => {
   );
 
   passport.use(
+    'admin/login',
+    new LocalStrategy(
+      { usernameField: 'email', passwordField: 'password' },
+      async (email, password, done) => {
+        try {
+          const user = await userService.findOneBy({
+            email,
+            password,
+            isAdmin: true,
+          });
+          return done(undefined, user);
+        } catch (error) {
+          return done(undefined, false, {
+            message: 'Invalid email or password',
+          });
+        }
+      }
+    )
+  );
+
+  passport.use(
     new JWTStrategy(
       {
         jwtFromRequest: ExtractJWT.fromAuthHeaderAsBearerToken(),

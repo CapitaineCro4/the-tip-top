@@ -76,4 +76,33 @@ router.post('/login', async (req, res) => {
   }
 });
 
+router.post('/admin/login', async (req, res) => {
+  try {
+    passport.authenticate(
+      'admin/login',
+      { session: false },
+      async (err: any, user: User, info: any) => {
+        if (err) {
+          return res.status(500).json({ message: err });
+        }
+
+        if (!user) {
+          return res.status(404).json({ message: info.message });
+        }
+
+        const token = jwt.sign({ id: user.id }, passportConfig.JWT_SECRET, {
+          expiresIn: '7d',
+        });
+        res.status(201).json({ token });
+      }
+    )(req, res);
+  } catch (error) {
+    if (error instanceof HttpError) {
+      res.status(400).json({ message: error.message, target: error.target });
+    } else {
+      res.status(500).json({ message: 'Internal server error' });
+    }
+  }
+});
+
 export { router as AuthRoutes };

@@ -11,3 +11,14 @@ export function getUser(id: string): Promise<User> {
         Promise.resolve(UserFactory.createFromApi(response.data))
     );
 }
+
+export function getUsers(): Promise<User[]> {
+  return apis.tiptop
+    .get('/users')
+    .then(
+      (response: AxiosResponse): Promise<User[]> =>
+        Promise.resolve(
+          response.data.map((user: User) => UserFactory.createFromApi(user))
+        )
+    );
+}

@@ -19,7 +19,7 @@ export const TicketInput = () => {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    setStatus('idle'); // Réinitialisation du statut
+    setStatus('idle');
     try {
       const data = await createGame({
         ticketCode,
@@ -29,8 +29,8 @@ export const TicketInput = () => {
       setTicketCode('');
       setStatus('success');
       if (data.gain) {
-        setShowConfetti(true); // Déclenche les confettis uniquement si un gain est obtenu
-        setTimeout(() => setShowConfetti(false), 5000); // Arrête après 5 secondes
+        setShowConfetti(true);
+        setTimeout(() => setShowConfetti(false), 5000);
       }
     } catch {
       setShowConfetti(false);

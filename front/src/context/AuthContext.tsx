@@ -4,6 +4,7 @@ import { createContext, useCallback, useEffect, useState } from 'react';
 import {
   getMe,
   login as loginApi,
+  adminLogin as adminLoginApi,
   getMeGames,
 } from '@/network/api-routes/Authentication';
 import { User } from '@/domain/user/UserType';
@@ -17,7 +18,9 @@ export const AuthContext = createContext<{
   setUser: (user: User) => void;
   isAuthenticated: () => boolean;
   hasAuthenticatedDashboard: () => boolean;
+  isUserAdmin: () => boolean;
   login: (email: string, password: string) => Promise<void>;
+  adminLogin: (email: string, password: string) => Promise<void>;
   logout: () => Promise<void>;
   loading: boolean;
   userGames: Game[];
@@ -27,7 +30,9 @@ export const AuthContext = createContext<{
   setUser: () => {},
   isAuthenticated: () => false,
   hasAuthenticatedDashboard: () => false,
+  isUserAdmin: () => false,
   login: async () => {},
+  adminLogin: async () => {},
   logout: async () => {},
   loading: false,
   userGames: [],
@@ -47,7 +52,6 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
   }, []);
 
   const login = async (email: string, password: string): Promise<void> => {
-    console.log('login', email, password);
     setLoading(true);
 
     return loginApi(email, password)
@@ -57,6 +61,20 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
       .then(getCurrentUser)
       .then(() => {
         router.push('/dashboard');
+      })
+      .finally(() => setLoading(false));
+  };
+
+  const adminLogin = async (email: string, password: string): Promise<void> => {
+    setLoading(true);
+
+    return adminLoginApi(email, password)
+      .then(async (token) => {
+        Cookies.set(TOKEN_KEY, token);
+      })
+      .then(getCurrentUser)
+      .then(() => {
+        router.push('/admin');
       })
       .finally(() => setLoading(false));
   };
@@ -94,9 +112,17 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
     return !!user;
   }, [user]);
 
+  const isUserAdmin = useCallback(() => {
+    return !!user?.isAdmin;
+  }, [user]);
+
   const hasAuthenticatedDashboard = useCallback(() => {
-    return isAuthenticated() && window.location.pathname === '/dashboard';
-  }, [isAuthenticated]);
+    return (
+      isAuthenticated() &&
+      !isUserAdmin() &&
+      window.location.pathname === '/dashboard'
+    );
+  }, [isAuthenticated, isUserAdmin]);
 
   return (
     <AuthContext.Provider
@@ -105,7 +131,9 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
         setUser,
         isAuthenticated,
         hasAuthenticatedDashboard,
+        isUserAdmin,
         login,
+        adminLogin,
         logout,
         loading,
         userGames,

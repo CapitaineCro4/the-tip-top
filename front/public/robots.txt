@@ -1,0 +1,9 @@
+User-agent: *
+Allow: /
+Sitemap: http://dsp5-archi-f24a-15m-g4.fr/sitemap.xml
+
+
+Disallow: /admin/
+Disallow: /private/
+Disallow: /cgi-bin/
+Disallow: /tmp/ 

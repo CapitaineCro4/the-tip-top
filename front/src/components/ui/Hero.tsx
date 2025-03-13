@@ -7,7 +7,7 @@ import { AnimatePresence } from 'motion/react';
 import { AuthForm } from './Auth/AuthForm';
 
 const Hero: React.FC<{ imageSrc: string }> = ({ imageSrc }) => {
-  const { title, subtitle, description, buttonText, contestDates } =
+  const { title, subtitle, description, buttonText, contestDates, alt } =
     heroContent;
   const [isAuthOpen, setIsAuthOpen] = useState(false);
 
@@ -19,7 +19,7 @@ const Hero: React.FC<{ imageSrc: string }> = ({ imageSrc }) => {
           <div className="relative">
             <Image
               src={imageSrc}
-              alt="Store Interior"
+              alt={alt}
               width={500}
               height={300}
               className="w-full h-auto object-cover border-8 border-white shadow-lg transform -rotate-3 hover:rotate-0 transition-all duration-300"
@@ -40,7 +40,7 @@ const Hero: React.FC<{ imageSrc: string }> = ({ imageSrc }) => {
           </div>
 
           {/* Title */}
-          <h1 className="text-3xl md:text-4xl font-bold mb-4 leading-tight">
+          <h1 className="text-3xl md:text-3xl font-bold mb-4 leading-tight">
             {title}
           </h1>
 
@@ -51,7 +51,9 @@ const Hero: React.FC<{ imageSrc: string }> = ({ imageSrc }) => {
           <p className="text-base md:text-lg mb-6">{description}</p>
 
           {/* Button */}
+
           <button
+            id="participate-btn"
             onClick={() => setIsAuthOpen(true)}
             className="bg-white text-green-700 py-2 px-6 hover:scale-105 transition-all duration-300 hover:bg-gray-200"
           >

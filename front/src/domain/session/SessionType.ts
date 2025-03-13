@@ -16,4 +16,5 @@ export type CreateSession = {
   startDate: string;
   endDate: string;
   claimEndDate: string;
+  ticketsQuantity?: number;
 };

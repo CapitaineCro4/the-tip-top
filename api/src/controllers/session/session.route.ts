@@ -53,13 +53,14 @@ router.get('/:id', async (req, res) => {
 });
 
 router.post('/', async (req, res) => {
-  const data = req.body as CreateSession;
+  const data = req.body as CreateSession & { ticketsQuantity?: number };
 
   try {
-    const sessionId = await sessionService.create(data);
+    const { ticketsQuantity, ...sessionData } = data;
+    const sessionId = await sessionService.create(sessionData);
     const gains = await gainService.findAll();
 
-    const totalRecords = TICKET_QUANTITY_PER_SESSION;
+    const totalRecords = ticketsQuantity || TICKET_QUANTITY_PER_SESSION;
     const batchSize = 1000;
     const totalBatches = Math.ceil(totalRecords / batchSize);
 

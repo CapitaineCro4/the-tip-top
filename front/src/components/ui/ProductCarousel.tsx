@@ -53,11 +53,11 @@ const ProductCarousel: React.FC = () => {
         </div>
       </div>
 
-      <div className="flex justify-center items-center bg-[#f2cb7d] pt-6 md:pt-0 pb-20">
+      <div className="flex justify-center items-center bg-[#2A5C4C] pt-6 md:pt-0 pb-20">
         <div className="flex items-center justify-center"></div>
 
         <div
-          className="flex flex-col items-center justify-center max-w-4xl md:mt-12"
+          className="flex flex-col items-center justify-center max-w-4xl md:mt-1"
           id="how-to-participate"
         >
           <Image src={teaLogo} alt="lot" width={180} height={180} />
@@ -70,8 +70,8 @@ const ProductCarousel: React.FC = () => {
             montant de 49€. En plus de savourer nos délicieux thés, vous aurez
             la chance de remporter l&apos;un de nos nombreux lots
           </p>
-          <p className="text-center text-sm md:text-xl mt-2 text-white">
-            * Un grand tirrage final sera organisé et designera le gagnat du
+          <p className="text-center text-sm md:text-xl mt-4 md:mt-6 text-white">
+            * Un grand tirage final sera organisé et designera le gagnat du
             grand prix. d&apos;une valeur de 360€.
           </p>
         </div>
