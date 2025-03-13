@@ -23,19 +23,19 @@ jobs:
           VPS_PASSWORD: ${{ secrets.VPS_PASSWORD }}
         run: |
           sshpass -p "$VPS_PASSWORD" ssh -o StrictHostKeyChecking=no $VPS_USER@$VPS_HOST << 'EOF'
-              echo "Starting deployment..."
-              if [ ! -d "/root/the-tip-top-app" ]; then
-                echo "Directory not found, creating and cloning..."
-                mkdir -p /root/the-tip-top-app
-                cd /root/the-tip-top-app
-                git clone https://github.com/ton-username/ton-depot.git .
-              else
-                cd /root/the-tip-top-app
-              fi
-              git pull origin main || { echo "Git pull failed"; exit 1; }
-              # Supprime les conteneurs existants pour éviter les conflits
-              docker rm -f pushgateway prometheus grafana postgres_db api front backup || true
-              docker-compose down || { echo "Docker-compose down failed"; exit 1; }
-              docker-compose up --build -d || { echo "Docker-compose up failed"; exit 1; }
-              echo "Deployment finished!"
-            EOF
+            echo "Starting deployment..."
+            if [ ! -d "/root/the-tip-top-app" ]; then
+              echo "Directory not found, creating and cloning..."
+              mkdir -p /root/the-tip-top-app
+              cd /root/the-tip-top-app
+              git clone https://github.com/CapitaineCro4/the-tip-top.git .
+            else
+              cd /root/the-tip-top-app
+            fi
+            git pull origin main || { echo "Git pull failed"; exit 1; }
+            # Supprime les conteneurs existants pour éviter les conflits
+            docker rm -f pushgateway prometheus grafana postgres_db api front backup || true
+            docker-compose down || { echo "Docker-compose down failed"; exit 1; }
+            docker-compose up --build -d || { echo "Docker-compose up failed"; exit 1; }
+            echo "Deployment finished!"
+          EOF
