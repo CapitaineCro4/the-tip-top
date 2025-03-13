@@ -47,7 +47,10 @@ app.get('/', (req: Request, res: Response) => {
 app.use('/api', router);
 
 // Ne démarrer le serveur que si ce fichier est exécuté directement
-if (require.main === module) {
+const isMainModule =
+  process.argv[1]?.endsWith('server.ts') ||
+  process.argv[1]?.endsWith('server.js');
+if (isMainModule) {
   const PORT = process.env.API_PORT || 3002;
   app.listen(PORT, () => console.log(`🚀 Server running on port ${PORT}`));
 }
