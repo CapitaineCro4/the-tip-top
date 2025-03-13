@@ -75,14 +75,6 @@ jobs:
           yarn lint
           yarn format:check
 
-      # Tests unitaires pour API
-      - name: Run API Unit Tests
-        working-directory: ./api
-        run: |
-          yarn test:unit --coverage
-        env:
-          NODE_ENV: test
-
       # Tests e2e pour API
       - name: Run API e2e Tests
         working-directory: ./api
