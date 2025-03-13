@@ -121,6 +121,7 @@ export const LoginForm = ({ onClose }: { onClose: () => void }) => {
             placeholder="Adresse email *"
             className="w-full px-6 py-3 border-2 placeholder:text-black border-transparent focus:border-white bg-white/60 text-black placeholder-gray-300 outline-none transition-all"
             name="email"
+            required
           />
         </div>
         <div className="relative">
@@ -129,6 +130,7 @@ export const LoginForm = ({ onClose }: { onClose: () => void }) => {
             placeholder="Mot de passe *"
             className="w-full px-6 py-3 border-2 placeholder:text-black border-transparent focus:border-white bg-white/60 text-black placeholder-gray-300 outline-none transition-all"
             name="password"
+            required
           />
           <button
             type="button"

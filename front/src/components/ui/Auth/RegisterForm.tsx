@@ -4,17 +4,34 @@ import { FiEye, FiEyeOff } from 'react-icons/fi';
 import { useContext, useState, useRef } from 'react';
 import { register } from '@/network/api-routes/Authentication';
 import { AuthContext } from '@/context/AuthContext';
+import { validatePassword } from '@/utils/validation';
 
 export const RegisterForm = ({ onClose }: { onClose: () => void }) => {
   const { login } = useContext(AuthContext);
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
+  const [passwordErrors, setPasswordErrors] = useState<string[]>([]);
+  const [passwordSuggestions, setPasswordSuggestions] = useState<string[]>([]);
+  const [matchError, setMatchError] = useState<string>('');
   const formRef = useRef<HTMLFormElement>(null);
 
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     const formData = new FormData(e.target as HTMLFormElement);
     const data = Object.fromEntries(formData);
+
+    // Réinitialiser les erreurs
+    setPasswordErrors([]);
+    setPasswordSuggestions([]);
+    setMatchError('');
+
+    // Validation du mot de passe
+    const passwordValidation = validatePassword(data.password as string);
+    if (!passwordValidation.isValid) {
+      setPasswordErrors(passwordValidation.errors);
+      setPasswordSuggestions(passwordValidation.suggestions);
+      return;
+    }
 
     if (
       checkPassword(data.password as string, data.confirmPassword as string)
@@ -37,7 +54,7 @@ export const RegisterForm = ({ onClose }: { onClose: () => void }) => {
           alert(error.message);
         });
     } else {
-      alert('Les mots de passe ne correspondent pas');
+      setMatchError('Les mots de passe ne correspondent pas');
     }
   };
 
@@ -52,6 +69,9 @@ export const RegisterForm = ({ onClose }: { onClose: () => void }) => {
 
     setShowPassword(false);
     setShowConfirmPassword(false);
+    setPasswordErrors([]);
+    setPasswordSuggestions([]);
+    setMatchError('');
   };
 
   return (
@@ -121,35 +141,62 @@ export const RegisterForm = ({ onClose }: { onClose: () => void }) => {
             name="birthDate"
           />
         </div>
-        <div className="relative">
-          <input
-            type={showPassword ? 'text' : 'password'}
-            placeholder="Mot de passe *"
-            className="w-full px-6 py-3 border-2 placeholder:text-black border-transparent focus:border-white bg-white/60 text-black placeholder-gray-300 outline-none transition-all"
-            name="password"
-          />
-          <button
-            type="button"
-            onClick={() => setShowPassword(!showPassword)}
-            className="absolute right-2 top-1/2 -translate-y-1/2 text-gray-500"
-          >
-            {showPassword ? <FiEyeOff size={20} /> : <FiEye size={20} />}
-          </button>
+        <div className="space-y-2">
+          <div className="relative">
+            <input
+              type={showPassword ? 'text' : 'password'}
+              placeholder="Mot de passe *"
+              className="w-full px-6 py-3 border-2 placeholder:text-black border-transparent focus:border-white bg-white/60 text-black placeholder-gray-300 outline-none transition-all"
+              name="password"
+            />
+            <button
+              type="button"
+              onClick={() => setShowPassword(!showPassword)}
+              className="absolute right-2 top-1/2 -translate-y-1/2 text-gray-500"
+            >
+              {showPassword ? <FiEyeOff size={20} /> : <FiEye size={20} />}
+            </button>
+          </div>
+          {passwordErrors.length > 0 && (
+            <div className="text-red-500 text-sm">
+              {passwordErrors.map((error, index) => (
+                <p key={index}>{error}</p>
+              ))}
+            </div>
+          )}
+          {passwordSuggestions.length > 0 && (
+            <div className="text-yellow-400 text-sm">
+              {passwordSuggestions.map((suggestion, index) => (
+                <p key={index}>{suggestion}</p>
+              ))}
+            </div>
+          )}
         </div>
-        <div className="relative">
-          <input
-            type={showConfirmPassword ? 'text' : 'password'}
-            placeholder="Confirmation mot de passe *"
-            className="w-full px-6 py-3 border-2 placeholder:text-black border-transparent focus:border-white bg-white/60 text-black placeholder-gray-300 outline-none transition-all"
-            name="confirmPassword"
-          />
-          <button
-            type="button"
-            onClick={() => setShowConfirmPassword(!showConfirmPassword)}
-            className="absolute right-2 top-1/2 -translate-y-1/2 text-gray-500"
-          >
-            {showConfirmPassword ? <FiEyeOff size={20} /> : <FiEye size={20} />}
-          </button>
+        <div className="space-y-2">
+          <div className="relative">
+            <input
+              type={showConfirmPassword ? 'text' : 'password'}
+              placeholder="Confirmation mot de passe *"
+              className="w-full px-6 py-3 border-2 placeholder:text-black border-transparent focus:border-white bg-white/60 text-black placeholder-gray-300 outline-none transition-all"
+              name="confirmPassword"
+            />
+            <button
+              type="button"
+              onClick={() => setShowConfirmPassword(!showConfirmPassword)}
+              className="absolute right-2 top-1/2 -translate-y-1/2 text-gray-500"
+            >
+              {showConfirmPassword ? (
+                <FiEyeOff size={20} />
+              ) : (
+                <FiEye size={20} />
+              )}
+            </button>
+          </div>
+          {matchError && (
+            <div className="text-red-500 text-sm">
+              <p>{matchError}</p>
+            </div>
+          )}
         </div>
         <button
           type="submit"
