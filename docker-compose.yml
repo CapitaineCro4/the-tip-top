@@ -11,6 +11,16 @@ services:
     ports:
       - "5432:5432"
 
+  postgres-exporter:
+    image: prometheuscommunity/postgres-exporter:latest
+    container_name: postgres-exporter
+    environment:
+      DATA_SOURCE_NAME: "postgresql://admin:admin@postgres_db:5432/mydatabase?sslmode=disable"
+    ports:
+      - "9187:9187"
+    depends_on:
+      - postgres_db
+
   pgadmin:
     image: dpage/pgadmin4
     container_name: pgadmin
@@ -81,6 +91,20 @@ services:
     volumes:
       - grafana-data:/var/lib/grafana
     restart: unless-stopped
+
+  backup:
+    image: postgres:15-alpine
+    container_name: backup
+    volumes:
+      - ./backups:/backups
+    environment:
+      - POSTGRES_USER=admin
+      - POSTGRES_PASSWORD=admin
+      - POSTGRES_DB=mydatabase
+    command: >
+      sh -c "sleep 10 && pg_dump -h postgres_db -U admin mydatabase > /backups/backup_$(date +%Y%m%d_%H%M%S).sql"
+    depends_on:
+      - postgres_db
 
 volumes:
   postgres_data:

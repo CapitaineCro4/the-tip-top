@@ -5,6 +5,7 @@ export type User = {
   email: string;
   gender: string;
   birthDate: string;
+  isAdmin: boolean;
   createdAt: string;
   updatedAt: string;
 

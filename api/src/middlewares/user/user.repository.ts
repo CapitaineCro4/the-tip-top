@@ -19,6 +19,7 @@ export class UserRepository implements UserRepositoryInterface {
     if (where.firstName) whereParams.firstName = where.firstName;
     if (where.lastName) whereParams.lastName = where.lastName;
     if (where.email) whereParams.email = where.email;
+    if (where.isAdmin) whereParams.isAdmin = where.isAdmin;
 
     const user = await prisma.user.findFirst({
       where: {
@@ -29,10 +30,13 @@ export class UserRepository implements UserRepositoryInterface {
     if (!user) return null;
 
     if (where.password) {
+      console.log('where.password', where.password);
       const isPasswordValid = await Password.compare(
         where.password,
         user.password
       );
+      console.log('isPasswordValid', isPasswordValid);
+      console.log('user.password', user.password);
       if (!isPasswordValid) return null;
     }
 
@@ -76,6 +80,7 @@ export class UserRepository implements UserRepositoryInterface {
     data.email = entity.email;
     data.gender = entity.gender;
     data.birthDate = entity.birthDate;
+    data.isAdmin = entity.isAdmin;
     data.createdAt = entity.createdAt;
     data.updatedAt = entity.updatedAt;
     return data;

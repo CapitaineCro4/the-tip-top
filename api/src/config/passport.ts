@@ -27,7 +27,28 @@ export const configure = (app: Express): void => {
         try {
           const user = await userService.findOneBy({ email, password });
           return done(undefined, user);
-        } catch (error) {
+        } catch {
+          return done(undefined, false, {
+            message: 'Invalid email or password',
+          });
+        }
+      }
+    )
+  );
+
+  passport.use(
+    'admin/login',
+    new LocalStrategy(
+      { usernameField: 'email', passwordField: 'password' },
+      async (email, password, done) => {
+        try {
+          const user = await userService.findOneBy({
+            email,
+            password,
+            isAdmin: true,
+          });
+          return done(undefined, user);
+        } catch {
           return done(undefined, false, {
             message: 'Invalid email or password',
           });
@@ -46,7 +67,7 @@ export const configure = (app: Express): void => {
         try {
           const user = await userService.findOne(jwtPayload.id);
           return cb(undefined, user);
-        } catch (error) {
+        } catch {
           return cb(undefined, false, {
             message: 'Invalid token',
           });

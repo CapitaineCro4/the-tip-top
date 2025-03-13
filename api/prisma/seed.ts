@@ -5,6 +5,7 @@ import { Password } from '../src/utils/Password';
 async function main() {
   const password = await Password.crypt('123456');
   const demoPassword = await Password.crypt('R1@vraidufaux');
+  const adminPassword = await Password.crypt('DSPuma2i@admin');
 
   const users = [
     {
@@ -14,6 +15,7 @@ async function main() {
       password,
       gender: 'MALE',
       birthDate: new Date('2000-01-01'),
+      isAdmin: false,
     },
     {
       email: 'joe@gmail.com',
@@ -22,6 +24,16 @@ async function main() {
       password: demoPassword,
       gender: 'MALE',
       birthDate: new Date('2002-03-25'),
+      isAdmin: false,
+    },
+    {
+      email: 'admin@thetiptop.com',
+      firstName: 'Admin',
+      lastName: 'Admin',
+      password: adminPassword,
+      gender: 'MALE',
+      birthDate: new Date('2000-01-01'),
+      isAdmin: true,
     },
   ];
 

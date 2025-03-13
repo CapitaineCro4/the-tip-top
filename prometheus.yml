@@ -2,9 +2,18 @@ global:
   scrape_interval: 15s
 
 scrape_configs:
-  - job_name: "pushgateway"
+  - job_name: 'prometheus'
     static_configs:
-      - targets: ["pushgateway:9091"]
-  - job_name: "cadvisor"
+      - targets: ['localhost:9090']
+
+  - job_name: 'pushgateway'
     static_configs:
-      - targets: ["localhost:8080"]
+      - targets: ['pushgateway:9091']
+
+  - job_name: 'api'
+    static_configs:
+      - targets: ['api:3002']
+
+  - job_name: 'postgres-exporter'
+    static_configs:
+      - targets: ['postgres-exporter:9187']

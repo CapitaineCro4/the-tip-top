@@ -5,9 +5,14 @@ import bodyParser from 'body-parser';
 import cors from 'cors';
 import session from 'express-session';
 import * as passportConfig from './config/passport';
+import client from 'prom-client'; // Importe prom-client
 
 const app = express();
 const prisma = new PrismaClient();
+
+// Active la collecte des métriques par défaut (CPU, mémoire, etc.)
+const collectDefaultMetrics = client.collectDefaultMetrics;
+collectDefaultMetrics({ register: client.register });
 
 app.use(express.json());
 app.use(bodyParser.json());
@@ -24,11 +29,17 @@ app.use(
 
 passportConfig.configure(app);
 
+// Endpoint pour exposer les métriques à Prometheus
+app.get('/metrics', async (req: Request, res: Response) => {
+  res.set('Content-Type', client.register.contentType);
+  res.end(await client.register.metrics());
+});
+
 // Root endpoint
 app.get('/', (req: Request, res: Response) => {
   res.json({
     message:
-      'Bienvenue sur l\'API du site du jeu concours Thé tip top, pour plus d\'informations veuillez consulter la documentation sur le site',
+      "Bienvenue sur l'API du site du jeu concours Thé tip top, pour plus d'informations veuillez consulter la documentation sur le site",
     documentation: 'https://teetiptop.com/api',
   });
 });

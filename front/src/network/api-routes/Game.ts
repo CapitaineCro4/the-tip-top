@@ -3,6 +3,7 @@ import { Game, CreateGame } from '@/domain/game/GameType';
 import { GameFactory } from '@/domain/game/Game';
 import type { AxiosResponse } from 'axios';
 import { Gain } from '@/domain/gain/GainType';
+
 export function getGame(id: string): Promise<Game> {
   return apis.tiptop
     .get(`/games/${id}`)
