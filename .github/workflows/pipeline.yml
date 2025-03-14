@@ -177,49 +177,11 @@ jobs:
             ./api/test-results.json
             ./front/test-results.json
 
-  # Job pour l'optimisation des assets
-  optimize:
-    needs: build
-    runs-on: ubuntu-latest
-    steps:
-      - name: Checkout code
-        uses: actions/checkout@v4
-
-      # Récupérer les artifacts du build
-      - name: Download build artifacts
-        uses: actions/download-artifact@v4
-        with:
-          name: build-artifacts
-
-      # Configuration Node.js
-      - name: Setup Node.js
-        uses: actions/setup-node@v4
-        with:
-          node-version: "20"
-
-      # Optimisation Front
-      - name: Install Optimization Dependencies
-        working-directory: ./front
-        run: |
-          yarn add -D terser-webpack-plugin optimize-css-assets-webpack-plugin
-          yarn install --frozen-lockfile
-
-      - name: Optimize Front Assets
-        working-directory: ./front
-        run: yarn build
-
-      # Stocker les assets optimisés
-      - name: Upload optimized artifacts
-        uses: actions/upload-artifact@v4
-        with:
-          name: optimized-artifacts
-          path: |
-            ./front/.next
-            ./api/dist
+  # Job pour l'optimisation des assets à rajouter
 
   # Job pour la construction et le push des images Docker
   docker:
-    needs: [test, optimize]
+    needs: [test]
     runs-on: ubuntu-latest
     steps:
       - name: Checkout code
