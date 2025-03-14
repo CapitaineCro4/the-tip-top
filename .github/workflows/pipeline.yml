@@ -15,6 +15,12 @@ on:
     - cron: "0 0 * * *" # Tous les jours à minuit UTC
   workflow_dispatch: # Permet de déclencher manuellement
 
+# Définition des permissions
+permissions:
+  contents: write
+  pages: write
+  id-token: write
+
 jobs:
   # Job pour la CI (build, tests, optimisation)
   ci:
@@ -103,6 +109,20 @@ jobs:
             ./api/test-results.json
             ./front/test-results.json
 
+      # Publication des rapports de test sur GitHub Pages
+      - name: Deploy Test Reports to GitHub Pages
+        if: always()
+        uses: peaceiris/actions-gh-pages@v3
+        with:
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          publish_dir: ./front/coverage/lcov-report
+          destination_dir: test-coverage
+          enable_jekyll: false
+          keep_files: true
+          user_name: "github-actions[bot]"
+          user_email: "github-actions[bot]@users.noreply.github.com"
+          commit_message: "docs: mise à jour des rapports de test"
+
       # Installer Docker
       - name: Install Docker
         run: |
@@ -167,16 +187,16 @@ jobs:
           VPS_USER: "root"
           VPS_PASSWORD: ${{ secrets.VPS_PASSWORD }}
         run: |
-            sshpass -p "$VPS_PASSWORD" ssh -o StrictHostKeyChecking=no $VPS_USER@$VPS_HOST << 'EOF'
-                echo "Deploying to dev..."
-                cd /root/the-tip-top-app
-                git fetch origin develop
-                git reset --hard origin/develop || { echo "Git reset failed"; exit 1; }
-                docker rm -f pushgateway prometheus grafana postgres_db api front backup || true
-                docker-compose down || { echo "Docker-compose down failed"; exit 1; }
-                docker-compose up --build -d || { echo "Docker-compose up failed"; exit 1; }
-                echo "Deployment to dev finished!"
-            EOF
+          sshpass -p "$VPS_PASSWORD" ssh -o StrictHostKeyChecking=no $VPS_USER@$VPS_HOST << 'EOF'
+              echo "Deploying to dev..."
+              cd /root/the-tip-top-app
+              git fetch origin develop
+              git reset --hard origin/develop || { echo "Git reset failed"; exit 1; }
+              docker rm -f pushgateway prometheus grafana postgres_db api front backup || true
+              docker-compose down || { echo "Docker-compose down failed"; exit 1; }
+              docker-compose up --build -d || { echo "Docker-compose up failed"; exit 1; }
+              echo "Deployment to dev finished!"
+          EOF
 
       - name: Deploy to Preprod
         if: github.ref == 'refs/heads/preprod'
