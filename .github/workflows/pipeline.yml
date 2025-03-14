@@ -23,14 +23,14 @@ permissions:
   id-token: write
 
 jobs:
-  # Job pour la CI (build, tests, optimisation)
-  ci:
+  # Job pour la construction (build) des applications
+  build:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
 
-      # Configuration Node.js pour le Front
+      # Configuration et build du Front
       - name: Setup Node.js for Front
         uses: actions/setup-node@v4
         with:
@@ -38,20 +38,15 @@ jobs:
           cache: "yarn"
           cache-dependency-path: front/yarn.lock
 
-      # Installation des dépendances Front
       - name: Install Front Dependencies
         working-directory: ./front
-        run: |
-          yarn install --frozen-lockfile
-          yarn add -D prettier terser-webpack-plugin optimize-css-assets-webpack-plugin
+        run: yarn install --frozen-lockfile
 
-      # Optimisation des assets Front (minification/compression)
-      - name: Optimize Front Assets
+      - name: Build Front
         working-directory: ./front
-        run: |
-          yarn build
+        run: yarn build
 
-      # Configuration Node.js pour l'API
+      # Configuration et build de l'API
       - name: Setup Node.js for API
         uses: actions/setup-node@v4
         with:
@@ -59,14 +54,56 @@ jobs:
           cache: "yarn"
           cache-dependency-path: api/yarn.lock
 
-      # Installation des dépendances API
+      - name: Install API Dependencies
+        working-directory: ./api
+        run: yarn install --frozen-lockfile
+
+      # Stocker les builds pour les autres jobs
+      - name: Upload build artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: build-artifacts
+          path: |
+            ./front/.next
+            ./api/dist
+
+  # Job pour les tests et la qualité du code
+  test:
+    needs: build
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      # Configuration Front
+      - name: Setup Node.js for Front
+        uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+          cache: "yarn"
+          cache-dependency-path: front/yarn.lock
+
+      - name: Install Front Dependencies
+        working-directory: ./front
+        run: |
+          yarn install --frozen-lockfile
+          yarn add -D prettier
+
+      # Configuration API
+      - name: Setup Node.js for API
+        uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+          cache: "yarn"
+          cache-dependency-path: api/yarn.lock
+
       - name: Install API Dependencies
         working-directory: ./api
         run: |
           yarn install --frozen-lockfile
           yarn add -D prettier @typescript-eslint/parser @typescript-eslint/eslint-plugin eslint jest @types/jest ts-jest supertest @types/supertest
 
-      # Vérification du formatage et linting Front
+      # Tests et linting Front
       - name: Check Front Format and Lint
         working-directory: ./front
         run: |
@@ -74,7 +111,14 @@ jobs:
           yarn lint
           yarn format:check
 
-      # Vérification du formatage et linting API
+      - name: Run Front Unit Tests
+        working-directory: ./front
+        run: |
+          yarn test --coverage
+        env:
+          NODE_ENV: test
+
+      # Tests et linting API
       - name: Check API Format and Lint
         working-directory: ./api
         run: |
@@ -82,19 +126,10 @@ jobs:
           yarn lint
           yarn format:check
 
-      # Tests e2e pour API
       - name: Run API e2e Tests
         working-directory: ./api
         run: |
           yarn test:e2e
-        env:
-          NODE_ENV: test
-
-      # Tests unitaires pour Front
-      - name: Run Front Unit Tests
-        working-directory: ./front
-        run: |
-          yarn test --coverage
         env:
           NODE_ENV: test
 
@@ -110,7 +145,61 @@ jobs:
             ./api/test-results.json
             ./front/test-results.json
 
-      # Installer Docker
+  # Job pour l'optimisation des assets
+  optimize:
+    needs: build
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      # Récupérer les artifacts du build
+      - name: Download build artifacts
+        uses: actions/download-artifact@v4
+        with:
+          name: build-artifacts
+
+      # Configuration Node.js
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+
+      # Optimisation Front
+      - name: Install Optimization Dependencies
+        working-directory: ./front
+        run: |
+          yarn add -D terser-webpack-plugin optimize-css-assets-webpack-plugin
+          yarn install --frozen-lockfile
+
+      - name: Optimize Front Assets
+        working-directory: ./front
+        run: yarn build
+
+      # Stocker les assets optimisés
+      - name: Upload optimized artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: optimized-artifacts
+          path: |
+            ./front/.next
+            ./api/dist
+
+  # Job pour la construction et le push des images Docker
+  docker:
+    needs: [test, optimize]
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      # Récupérer les artifacts optimisés
+      - name: Download optimized artifacts
+        uses: actions/download-artifact@v4
+        with:
+          name: optimized-artifacts
+
+      # Installation de Docker
       - name: Install Docker
         run: |
           sudo apt-get update
@@ -122,21 +211,21 @@ jobs:
           sudo apt-get update
           sudo apt-get install -y docker-ce docker-ce-cli containerd.io
 
-      # Installer Docker Compose
+      # Installation de Docker Compose
       - name: Install Docker Compose
         run: |
           sudo curl -L "https://github.com/docker/compose/releases/latest/download/docker-compose-$(uname -s)-$(uname -m)" -o /usr/local/bin/docker-compose
           sudo chmod +x /usr/local/bin/docker-compose
           docker-compose version
 
-      # Login to Docker Hub
+      # Login Docker Hub
       - name: Login to Docker Hub
         uses: docker/login-action@v3
         with:
           username: ${{ secrets.DOCKERHUB_USERNAME }}
           password: ${{ secrets.DOCKERHUB_TOKEN }}
 
-      # Créer un fichier .env
+      # Création du fichier .env
       - name: Create env file
         run: |
           echo "API_PORT=3002" >> .env
@@ -145,7 +234,7 @@ jobs:
           echo "FRONT_PORT=3000" >> .env
           echo "NEXT_PUBLIC_API_URL=http://dsp5-archi-f24a-15m-g4.fr/api" >> .env
 
-      # Build et push des images Docker
+      # Build et push des images
       - name: Build and Push API Docker Image
         run: |
           docker build -t ${{ secrets.DOCKERHUB_USERNAME }}/the-tip-top-api:latest ./api
@@ -156,10 +245,10 @@ jobs:
           docker build -t ${{ secrets.DOCKERHUB_USERNAME }}/the-tip-top-front:latest ./front
           docker push ${{ secrets.DOCKERHUB_USERNAME }}/the-tip-top-front:latest
 
-  # Job pour le déploiement
-  deploy:
+  # Job pour le déploiement sur dev et preprod
+  deploy-dev-preprod:
     runs-on: ubuntu-latest
-    needs: ci
+    needs: docker
     steps:
       - name: Checkout code
         uses: actions/checkout@v3
@@ -202,9 +291,10 @@ jobs:
             echo "Deployment to preprod finished!"
           EOF
 
+  # Job pour le déploiement en production
   deploy-production:
     runs-on: ubuntu-latest
-    needs: ci
+    needs: docker
     if: github.ref == 'refs/heads/main'
     environment:
       name: production
@@ -243,8 +333,8 @@ jobs:
           EOF
 
   # Job pour la publication des rapports de test
-  pages:
-    needs: ci
+  coverage-test-visualization-page:
+    needs: docker
     runs-on: ubuntu-latest
     environment:
       name: Coverage test visualization page
@@ -269,13 +359,12 @@ jobs:
         uses: actions/deploy-pages@v4
 
   # Job pour la sauvegarde automatique vers Google Drive
-  backup:
+  backup-to-google-drive:
     runs-on: ubuntu-latest
-    needs: ci
+    needs: docker
     environment:
       name: backup
-      url: https://drive.google.com # URL générique pour l'environnement, ajustez si nécessaire
-
+      url: https://drive.google.com/drive/folders/1YOHfU8s4J2wy5Wl1-d_jYY9wZs_-eqoO
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
@@ -291,13 +380,19 @@ jobs:
 
       - name: Create backup archive
         run: |
-          # Crée une archive des fichiers à sauvegarder
-          tar -czf backup-$(date +%Y%m%d-%H%M%S).tar.gz .
+          # Créer un répertoire temporaire et copier les fichiers
+          TEMP_DIR=$(mktemp -d)
+          cp -r . "$TEMP_DIR/"
+          BACKUP_NAME="backup-$(date +%Y%m%d-%H%M%S).tar.gz"
+          # Créer l'archive à partir du répertoire temporaire
+          tar -czf "$BACKUP_NAME" -C "$TEMP_DIR" .
+          # Nettoyer le répertoire temporaire
+          rm -rf "$TEMP_DIR"
 
       - name: Upload backup to Google Drive
         env:
           GOOGLE_CREDENTIALS: ${{ secrets.GOOGLE_CREDENTIALS }}
-          FOLDER_ID: "1YOHfU8s4J2wy5Wl1-d_jYY9wZs_-eqoO" # Remplacez par l'ID du dossier Google Drive
+          FOLDER_ID:
         run: |
           echo "$GOOGLE_CREDENTIALS" > credentials.json
           python -c "
