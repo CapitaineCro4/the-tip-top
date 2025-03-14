@@ -397,6 +397,7 @@ jobs:
           pip install google-auth-httplib2 google-auth-oauthlib google-api-python-client
 
       - name: Create backup archive
+        id: create_backup
         run: |
           # Créer un répertoire temporaire et copier les fichiers
           TEMP_DIR=$(mktemp -d)
@@ -406,27 +407,44 @@ jobs:
           tar -czf "$BACKUP_NAME" -C "$TEMP_DIR" .
           # Nettoyer le répertoire temporaire
           rm -rf "$TEMP_DIR"
+          # Sauvegarder le nom du fichier pour l'étape suivante
+          echo "backup_name=$BACKUP_NAME" >> $GITHUB_OUTPUT
 
       - name: Upload backup to Google Drive
         env:
           GOOGLE_CREDENTIALS: ${{ secrets.GOOGLE_CREDENTIALS }}
-          FOLDER_ID:
+          FOLDER_ID: "1YOHfU8s4J2wy5Wl1-d_jYY9wZs_-eqoO"
         run: |
           echo "$GOOGLE_CREDENTIALS" > credentials.json
-          python -c "
+          BACKUP_NAME="${{ steps.create_backup.outputs.backup_name }}"
+          cat << 'EOF' > upload_to_drive.py
+          import os
           from google.oauth2.service_account import Credentials
           from googleapiclient.discovery import build
           from googleapiclient.http import MediaFileUpload
-          import os
 
-          creds = Credentials.from_service_account_file('credentials.json')
-          drive_service = build('drive', 'v3', credentials=creds)
+          creds = Credentials.from_service_account_file("credentials.json")
+          drive_service = build("drive", "v3", credentials=creds)
 
-          file_metadata = {'name': 'backup-$(date +%Y%m%d-%H%M%S).tar.gz', 'parents': ['$FOLDER_ID']}
-          media = MediaFileUpload('backup-$(date +%Y%m%d-%H%M%S).tar.gz')
-          file = drive_service.files().create(body=file_metadata, media_body=media, fields='id').execute()
-          print(f'File ID: {file.get(\"id\")}')
-          "
+          backup_name = os.environ.get("BACKUP_NAME")
+          folder_id = os.environ.get("FOLDER_ID")
+
+          file_metadata = {
+              "name": backup_name,
+              "parents": [folder_id]
+          }
+
+          media = MediaFileUpload(backup_name, resumable=True)
+          file = drive_service.files().create(
+              body=file_metadata,
+              media_body=media,
+              fields="id"
+          ).execute()
+
+          print(f"File ID: {file.get('id')}")
+          EOF
+
+          python upload_to_drive.py
 
       - name: Clean up
         if: always()
