@@ -109,20 +109,6 @@ jobs:
             ./api/test-results.json
             ./front/test-results.json
 
-      # Publication des rapports de test sur GitHub Pages
-      - name: Deploy Test Reports to GitHub Pages
-        if: always()
-        uses: peaceiris/actions-gh-pages@v3
-        with:
-          github_token: ${{ secrets.GITHUB_TOKEN }}
-          publish_dir: ./front/coverage/lcov-report
-          destination_dir: test-coverage
-          enable_jekyll: false
-          keep_files: true
-          user_name: "github-actions[bot]"
-          user_email: "github-actions[bot]@users.noreply.github.com"
-          commit_message: "docs: mise à jour des rapports de test"
-
       # Installer Docker
       - name: Install Docker
         run: |
@@ -254,3 +240,29 @@ jobs:
             docker-compose up --build -d || { echo "Docker-compose up failed"; exit 1; }
             echo "Deployment to production finished!"
           EOF
+
+  # Job pour la publication des rapports de test
+  pages:
+    needs: ci
+    runs-on: ubuntu-latest
+    environment:
+      name: pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - name: Setup Pages
+        uses: actions/configure-pages@v4
+
+      - name: Download test reports
+        uses: actions/download-artifact@v4
+        with:
+          name: test-reports
+          path: coverage-reports
+
+      - name: Upload artifact
+        uses: actions/upload-pages-artifact@v3
+        with:
+          path: "coverage-reports/front/coverage/lcov-report"
+
+      - name: Deploy to GitHub Pages
+        id: deployment
+        uses: actions/deploy-pages@v4
