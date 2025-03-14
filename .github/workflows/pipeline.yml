@@ -40,11 +40,15 @@ jobs:
 
       - name: Install Front Dependencies
         working-directory: ./front
-        run: yarn install --frozen-lockfile
+        run: |
+          yarn install --frozen-lockfile
+          yarn add -D prettier terser-webpack-plugin optimize-css-assets-webpack-plugin
 
       - name: Build Front
         working-directory: ./front
-        run: yarn build
+        run: |
+          yarn build
+          ls -la .next || echo "No .next directory found"
 
       # Configuration et build de l'API
       - name: Setup Node.js for API
@@ -56,16 +60,44 @@ jobs:
 
       - name: Install API Dependencies
         working-directory: ./api
-        run: yarn install --frozen-lockfile
+        run: |
+          yarn install --frozen-lockfile
+          yarn add -D typescript @types/node ts-node
 
-      # Stocker les builds pour les autres jobs
+      - name: Build API
+        working-directory: ./api
+        run: |
+          yarn build
+          ls -la dist || echo "No dist directory found"
+
+      # Vérifier et stocker les builds
+      - name: Verify and Upload Build Artifacts
+        run: |
+          mkdir -p artifacts/front
+          mkdir -p artifacts/api
+
+          # Copier les fichiers du front s'ils existent
+          if [ -d "front/.next" ]; then
+            cp -r front/.next/* artifacts/front/
+          else
+            echo "Front build directory not found"
+            exit 1
+          fi
+
+          # Copier les fichiers de l'API s'ils existent
+          if [ -d "api/dist" ]; then
+            cp -r api/dist/* artifacts/api/
+          else
+            echo "API build directory not found"
+            exit 1
+          fi
+
       - name: Upload build artifacts
         uses: actions/upload-artifact@v4
         with:
           name: build-artifacts
-          path: |
-            ./front/.next
-            ./api/dist
+          path: artifacts/
+          retention-days: 1
 
   # Job pour les tests et la qualité du code
   test:
