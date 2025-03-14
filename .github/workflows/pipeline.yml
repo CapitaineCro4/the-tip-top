@@ -1,0 +1,467 @@
+name: CI/CD Pipeline with Backup and Deploy
+
+on:
+  push:
+    branches:
+      - develop
+      - preprod
+      - main
+  pull_request:
+    branches:
+      - develop
+      - preprod
+      - main
+  schedule:
+    - cron: "0 0 * * *" # Tous les jours à minuit UTC
+    - cron: "0 0 * * 0" # Tous les dimanches à minuit UTC (hebdomadaire)
+  workflow_dispatch: # Permet de déclencher manuellement si besoin
+
+# Définition des permissions
+permissions:
+  contents: write
+  pages: write
+  id-token: write
+
+jobs:
+  # Job pour la construction (build) des applications
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      # Configuration et build du Front
+      - name: Setup Node.js for Front
+        uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+          cache: "yarn"
+          cache-dependency-path: front/yarn.lock
+
+      - name: Install Front Dependencies
+        working-directory: ./front
+        run: |
+          yarn install --frozen-lockfile
+          yarn add -D prettier terser-webpack-plugin optimize-css-assets-webpack-plugin
+
+      - name: Build Front
+        working-directory: ./front
+        run: |
+          yarn build
+          ls -la .next || echo "No .next directory found"
+
+      # Configuration et build de l'API
+      - name: Setup Node.js for API
+        uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+          cache: "yarn"
+          cache-dependency-path: api/yarn.lock
+
+      - name: Install API Dependencies
+        working-directory: ./api
+        run: |
+          yarn install --frozen-lockfile
+          yarn add -D typescript @types/node ts-node
+
+      - name: Build API
+        working-directory: ./api
+        run: |
+          yarn build
+          ls -la dist || echo "No dist directory found"
+
+      # Vérifier et stocker les builds
+      - name: Verify and Upload Build Artifacts
+        run: |
+          mkdir -p artifacts/front
+          mkdir -p artifacts/api
+
+          # Copier les fichiers du front s'ils existent
+          if [ -d "front/.next" ]; then
+            cp -r front/.next/* artifacts/front/
+          else
+            echo "Front build directory not found"
+            exit 1
+          fi
+
+          # Copier les fichiers de l'API s'ils existent
+          if [ -d "api/dist" ]; then
+            cp -r api/dist/* artifacts/api/
+          else
+            echo "API build directory not found"
+            exit 1
+          fi
+
+      - name: Upload build artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: build-artifacts
+          path: artifacts/
+          retention-days: 1
+
+  # Job pour les tests et la qualité du code
+  test:
+    needs: build
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      # Configuration Front
+      - name: Setup Node.js for Front
+        uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+          cache: "yarn"
+          cache-dependency-path: front/yarn.lock
+
+      - name: Install Front Dependencies
+        working-directory: ./front
+        run: |
+          yarn install --frozen-lockfile
+          yarn add -D prettier
+
+      # Configuration API
+      - name: Setup Node.js for API
+        uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+          cache: "yarn"
+          cache-dependency-path: api/yarn.lock
+
+      - name: Install API Dependencies
+        working-directory: ./api
+        run: |
+          yarn install --frozen-lockfile
+          yarn add -D prettier @typescript-eslint/parser @typescript-eslint/eslint-plugin eslint jest @types/jest ts-jest supertest @types/supertest
+
+      # Tests et linting Front
+      - name: Check Front Format and Lint
+        working-directory: ./front
+        run: |
+          yarn format
+          yarn lint
+          yarn format:check
+
+      - name: Run Front Unit Tests
+        working-directory: ./front
+        run: |
+          yarn test --coverage
+        env:
+          NODE_ENV: test
+
+      # Tests et linting API
+      - name: Check API Format and Lint
+        working-directory: ./api
+        run: |
+          yarn format
+          yarn lint
+          yarn format:check
+
+      - name: Run API e2e Tests
+        working-directory: ./api
+        run: |
+          yarn test:e2e
+        env:
+          NODE_ENV: test
+
+      # Stocker les rapports de tests
+      - name: Store Test Reports
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: test-reports
+          path: |
+            ./api/coverage/
+            ./front/coverage/
+            ./api/test-results.json
+            ./front/test-results.json
+
+  # Job pour l'optimisation des assets à rajouter
+
+  # Job pour la construction et le push des images Docker
+  docker:
+    needs: [test]
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      # Récupérer les artifacts du build
+      - name: Download build artifacts
+        uses: actions/download-artifact@v4
+        with:
+          name: build-artifacts
+          path: artifacts
+
+      # Restaurer les artifacts dans leur emplacement d'origine
+      - name: Restore build artifacts
+        run: |
+          # Restaurer les fichiers du front
+          mkdir -p front/.next
+          cp -r artifacts/front/* front/.next/
+
+          # Restaurer les fichiers de l'API
+          mkdir -p api/dist
+          cp -r artifacts/api/* api/dist/
+
+      # Installation de Docker
+      - name: Install Docker
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y ca-certificates curl gnupg
+          sudo install -m 0755 -d /etc/apt/keyrings
+          curl -fsSL https://download.docker.com/linux/ubuntu/gpg | sudo tee /etc/apt/keyrings/docker.asc > /dev/null
+          sudo chmod a+r /etc/apt/keyrings/docker.asc
+          echo "deb [arch=$(dpkg --print-architecture) signed-by=/etc/apt/keyrings/docker.asc] https://download.docker.com/linux/ubuntu $(lsb_release -cs) stable" | sudo tee /etc/apt/sources.list.d/docker.list > /dev/null
+          sudo apt-get update
+          sudo apt-get install -y docker-ce docker-ce-cli containerd.io
+
+      # Installation de Docker Compose
+      - name: Install Docker Compose
+        run: |
+          sudo curl -L "https://github.com/docker/compose/releases/latest/download/docker-compose-$(uname -s)-$(uname -m)" -o /usr/local/bin/docker-compose
+          sudo chmod +x /usr/local/bin/docker-compose
+          docker-compose version
+
+      # Login Docker Hub
+      - name: Login to Docker Hub
+        uses: docker/login-action@v3
+        with:
+          username: ${{ secrets.DOCKERHUB_USERNAME }}
+          password: ${{ secrets.DOCKERHUB_TOKEN }}
+
+      # Création du fichier .env
+      - name: Create env file
+        run: |
+          echo "API_PORT=3002" >> .env
+          echo "DATABASE_URL=postgresql://admin:admin@postgres_db:5432/mydatabase?schema=public" >> .env
+          echo "JWT_SECRET=secret" >> .env
+          echo "FRONT_PORT=3000" >> .env
+          echo "NEXT_PUBLIC_API_URL=http://dsp5-archi-f24a-15m-g4.fr/api" >> .env
+
+      # Vérifier la structure des répertoires
+      - name: Check directory structure
+        run: |
+          echo "Checking API directory:"
+          ls -la ./api
+          echo "Checking Front directory:"
+          ls -la ./front
+
+      # Build et push des images avec plus de logs
+      - name: Build and Push API Docker Image
+        run: |
+          echo "Building API image..."
+          docker build -t ${{ secrets.DOCKERHUB_USERNAME }}/the-tip-top-api:latest ./api --progress=plain
+          echo "Pushing API image..."
+          docker push ${{ secrets.DOCKERHUB_USERNAME }}/the-tip-top-api:latest
+
+      - name: Build and Push Front Docker Image
+        run: |
+          echo "Building Front image..."
+          docker build -t ${{ secrets.DOCKERHUB_USERNAME }}/the-tip-top-front:latest ./front --progress=plain
+          echo "Pushing Front image..."
+          docker push ${{ secrets.DOCKERHUB_USERNAME }}/the-tip-top-front:latest
+
+  # Job pour le déploiement sur dev et preprod
+  deploy-dev-preprod:
+    runs-on: ubuntu-latest
+    needs: docker
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v3
+
+      - name: Install sshpass
+        run: sudo apt-get update && sudo apt-get install -y sshpass
+
+      - name: Deploy to Dev
+        if: github.ref == 'refs/heads/develop'
+        env:
+          VPS_HOST: "46.202.132.119"
+          VPS_USER: "root"
+          VPS_PASSWORD: ${{ secrets.VPS_PASSWORD }}
+        run: |
+          sshpass -p "$VPS_PASSWORD" ssh -o StrictHostKeyChecking=no $VPS_USER@$VPS_HOST << 'EOF'
+              echo "Deploying to dev..."
+              cd /root/the-tip-top-app
+              git fetch origin develop
+              git reset --hard origin/develop || { echo "Git reset failed"; exit 1; }
+              docker rm -f pushgateway prometheus grafana postgres_db api front backup || true
+              docker-compose down || { echo "Docker-compose down failed"; exit 1; }
+              docker-compose up --build -d || { echo "Docker-compose up failed"; exit 1; }
+              echo "Deployment to dev finished!"
+          EOF
+
+      - name: Deploy to Preprod
+        if: github.ref == 'refs/heads/preprod'
+        env:
+          VPS_HOST: "46.202.132.119"
+          VPS_USER: "root"
+          VPS_PASSWORD: ${{ secrets.VPS_PASSWORD }}
+        run: |
+          sshpass -p "$VPS_PASSWORD" ssh -o StrictHostKeyChecking=no $VPS_USER@$VPS_HOST << 'EOF'
+            echo "Deploying to preprod..."
+            cd /root/the-tip-top-app
+            git pull origin preprod || { echo "Git pull failed"; exit 1; }
+            docker rm -f pushgateway prometheus grafana postgres_db api front backup || true
+            docker-compose down || { echo "Docker-compose down failed"; exit 1; }
+            docker-compose up --build -d || { echo "Docker-compose up failed"; exit 1; }
+            echo "Deployment to preprod finished!"
+          EOF
+
+  # Job pour le déploiement en production
+  deploy-production:
+    runs-on: ubuntu-latest
+    needs: docker
+    if: github.ref == 'refs/heads/main'
+    environment:
+      name: production
+      url: http://dsp5-archi-f24a-15m-g4.fr
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v3
+
+      - name: Install sshpass
+        run: sudo apt-get update && sudo apt-get install -y sshpass
+
+      - name: Request manual approval
+        uses: trstringer/manual-approval@v1
+        with:
+          secret: ${{ github.token }}
+          approvers: CapitaineCro4
+          minimum-approvals: 1
+          issue-title: "Manual approval required for production deployment"
+          issue-body: "Please approve to deploy to production."
+
+      - name: Deploy to Production
+        if: success()
+        env:
+          VPS_HOST: "46.202.132.119"
+          VPS_USER: "root"
+          VPS_PASSWORD: ${{ secrets.VPS_PASSWORD }}
+        run: |
+          sshpass -p "$VPS_PASSWORD" ssh -o StrictHostKeyChecking=no $VPS_USER@$VPS_HOST << 'EOF'
+            echo "Deploying to production..."
+            cd /root/the-tip-top-app
+            git pull origin main || { echo "Git pull failed"; exit 1; }
+            docker rm -f pushgateway prometheus grafana postgres_db api front backup || true
+            docker-compose down || { echo "Docker-compose down failed"; exit 1; }
+            docker-compose up --build -d || { echo "Docker-compose up failed"; exit 1; }
+            echo "Deployment to production finished!"
+          EOF
+
+  # Job pour la publication des rapports de test
+  coverage-test-visualization-page:
+    needs: docker
+    runs-on: ubuntu-latest
+    environment:
+      name: Coverage test visualization page
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - name: Setup Pages
+        uses: actions/configure-pages@v4
+
+      - name: Download test reports
+        uses: actions/download-artifact@v4
+        with:
+          name: test-reports
+          path: coverage-reports
+
+      - name: Upload artifact
+        uses: actions/upload-pages-artifact@v3
+        with:
+          path: "coverage-reports/front/coverage/lcov-report"
+
+      - name: Deploy to GitHub Pages
+        id: deployment
+        uses: actions/deploy-pages@v4
+
+  # Job pour la sauvegarde automatique vers Google Drive
+  backup-to-google-drive:
+    runs-on: ubuntu-latest
+    needs: docker
+    environment:
+      name: backup
+      url: https://drive.google.com/drive/folders/1YOHfU8s4J2wy5Wl1-d_jYY9wZs_-eqoO
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.x"
+
+      - name: Install Google Drive API client
+        run: |
+          pip install google-auth-httplib2 google-auth-oauthlib google-api-python-client
+
+      - name: Create backup archive
+        id: create_backup
+        run: |
+          # Créer un répertoire temporaire et copier les fichiers
+          TEMP_DIR=$(mktemp -d)
+          cp -r . "$TEMP_DIR/"
+          BACKUP_NAME="backup-$(date +%Y%m%d-%H%M%S).tar.gz"
+          # Créer l'archive à partir du répertoire temporaire
+          tar -czf "$BACKUP_NAME" -C "$TEMP_DIR" .
+          # Nettoyer le répertoire temporaire
+          rm -rf "$TEMP_DIR"
+          # Sauvegarder le nom du fichier pour l'étape suivante
+          echo "backup_name=$BACKUP_NAME" >> $GITHUB_OUTPUT
+
+      - name: Upload backup to Google Drive
+        env:
+          GOOGLE_CREDENTIALS: ${{ secrets.GOOGLE_CREDENTIALS }}
+          FOLDER_ID: "1YOHfU8s4J2wy5Wl1-d_jYY9wZs_-eqoO"
+          BACKUP_NAME: ${{ steps.create_backup.outputs.backup_name }}
+        run: |
+          echo "$GOOGLE_CREDENTIALS" > credentials.json
+
+          # Vérifier que les variables sont définies
+          echo "Backup name: $BACKUP_NAME"
+          echo "Folder ID: $FOLDER_ID"
+          ls -l "$BACKUP_NAME"
+
+          cat << 'EOF' > upload_to_drive.py
+          import os
+          from google.oauth2.service_account import Credentials
+          from googleapiclient.discovery import build
+          from googleapiclient.http import MediaFileUpload
+
+          # Récupérer et vérifier les variables d'environnement
+          backup_name = os.environ.get("BACKUP_NAME")
+          folder_id = os.environ.get("FOLDER_ID")
+
+          if not backup_name or not folder_id:
+              raise ValueError(f"Missing required environment variables. BACKUP_NAME: {backup_name}, FOLDER_ID: {folder_id}")
+
+          if not os.path.exists(backup_name):
+              raise FileNotFoundError(f"Backup file not found: {backup_name}")
+
+          # Initialiser le service Google Drive
+          creds = Credentials.from_service_account_file("credentials.json")
+          drive_service = build("drive", "v3", credentials=creds)
+
+          file_metadata = {
+              "name": backup_name,
+              "parents": [folder_id]
+          }
+
+          media = MediaFileUpload(backup_name, resumable=True)
+          file = drive_service.files().create(
+              body=file_metadata,
+              media_body=media,
+              fields="id"
+          ).execute()
+
+          print(f"File ID: {file.get('id')}")
+          EOF
+
+          # Exécuter le script avec les variables d'environnement
+          python upload_to_drive.py
+
+      - name: Clean up
+        if: always()
+        run: |
+          rm -f credentials.json backup-*.tar.gz
