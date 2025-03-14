@@ -184,15 +184,6 @@ jobs:
     needs: [test]
     runs-on: ubuntu-latest
     steps:
-      - name: Checkout code
-        uses: actions/checkout@v4
-
-      # Récupérer les artifacts optimisés
-      - name: Download optimized artifacts
-        uses: actions/download-artifact@v4
-        with:
-          name: optimized-artifacts
-
       # Installation de Docker
       - name: Install Docker
         run: |
