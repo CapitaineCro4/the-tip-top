@@ -184,6 +184,27 @@ jobs:
     needs: [test]
     runs-on: ubuntu-latest
     steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      # Récupérer les artifacts du build
+      - name: Download build artifacts
+        uses: actions/download-artifact@v4
+        with:
+          name: build-artifacts
+          path: artifacts
+
+      # Restaurer les artifacts dans leur emplacement d'origine
+      - name: Restore build artifacts
+        run: |
+          # Restaurer les fichiers du front
+          mkdir -p front/.next
+          cp -r artifacts/front/* front/.next/
+
+          # Restaurer les fichiers de l'API
+          mkdir -p api/dist
+          cp -r artifacts/api/* api/dist/
+
       # Installation de Docker
       - name: Install Docker
         run: |
@@ -219,15 +240,27 @@ jobs:
           echo "FRONT_PORT=3000" >> .env
           echo "NEXT_PUBLIC_API_URL=http://dsp5-archi-f24a-15m-g4.fr/api" >> .env
 
-      # Build et push des images
+      # Vérifier la structure des répertoires
+      - name: Check directory structure
+        run: |
+          echo "Checking API directory:"
+          ls -la ./api
+          echo "Checking Front directory:"
+          ls -la ./front
+
+      # Build et push des images avec plus de logs
       - name: Build and Push API Docker Image
         run: |
-          docker build -t ${{ secrets.DOCKERHUB_USERNAME }}/the-tip-top-api:latest ./api
+          echo "Building API image..."
+          docker build -t ${{ secrets.DOCKERHUB_USERNAME }}/the-tip-top-api:latest ./api --progress=plain
+          echo "Pushing API image..."
           docker push ${{ secrets.DOCKERHUB_USERNAME }}/the-tip-top-api:latest
 
       - name: Build and Push Front Docker Image
         run: |
-          docker build -t ${{ secrets.DOCKERHUB_USERNAME }}/the-tip-top-front:latest ./front
+          echo "Building Front image..."
+          docker build -t ${{ secrets.DOCKERHUB_USERNAME }}/the-tip-top-front:latest ./front --progress=plain
+          echo "Pushing Front image..."
           docker push ${{ secrets.DOCKERHUB_USERNAME }}/the-tip-top-front:latest
 
   # Job pour le déploiement sur dev et preprod
