@@ -291,8 +291,8 @@ jobs:
 
       - name: Create backup archive
         run: |
-          # Crée une archive des fichiers à sauvegarder (par exemple, le répertoire de l'application)
-          tar -czf backup-$(date +%Y%m%d-%H%M%S).tar.gz -C /github/workspace .
+          # Crée une archive des fichiers à sauvegarder
+          tar -czf backup-$(date +%Y%m%d-%H%M%S).tar.gz .
 
       - name: Upload backup to Google Drive
         env:
