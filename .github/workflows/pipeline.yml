@@ -11,9 +11,6 @@ on:
       - develop
       - preprod
       - main
-  schedule:
-    - cron: "0 0 * * *" # Tous les jours à minuit UTC
-  workflow_dispatch: # Permet de déclencher manuellement
 
 # Définition des permissions
 permissions:
@@ -246,7 +243,7 @@ jobs:
     needs: ci
     runs-on: ubuntu-latest
     environment:
-      name: pages
+      name: Coverage test visualization page
       url: ${{ steps.deployment.outputs.page_url }}
     steps:
       - name: Setup Pages
@@ -266,3 +263,61 @@ jobs:
       - name: Deploy to GitHub Pages
         id: deployment
         uses: actions/deploy-pages@v4
+
+
+    # Job pour la sauvegarde automatique vers Google Drive
+  backup:
+    runs-on: ubuntu-latest
+    needs: ci
+    environment:
+      name: backup
+      url: https://drive.google.com  # URL générique pour l'environnement, ajustez si nécessaire
+    schedule:
+      - cron: "0 0 * * *"  # Tous les jours à minuit UTC
+      - cron: "0 0 * * 0"  # Tous les dimanches à minuit UTC (hebdomadaire)
+    workflow_dispatch:  # Permet de déclencher manuellement si besoin
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.x"
+
+      - name: Install Google Drive API client
+        run: |
+          pip install google-auth-httplib2 google-auth-oauthlib google-api-python-client
+
+      - name: Create backup archive
+        run: |
+          # Crée une archive des fichiers à sauvegarder (par exemple, le répertoire de l'application)
+          tar -czf backup-$(date +%Y%m%d-%H%M%S).tar.gz -C /github/workspace .
+
+      - name: Upload backup to Google Drive
+        env:
+          GOOGLE_CREDENTIALS: ${{ secrets.GOOGLE_CREDENTIALS }}
+        run: |
+          echo "$GOOGLE_CREDENTIALS" > credentials.json
+          python -c "
+          from google.oauth2.service_account import Credentials
+          from googleapiclient.discovery import build
+          from googleapiclient.http import MediaFileUpload
+          import os
+
+          creds = Credentials.from_service_account_file('credentials.json')
+          drive_service = build('drive', 'v3', credentials=creds)
+
+          file_metadata = {'name': 'backup-$(date +%Y%m%d-%H%M%S).tar.gz', 'parents': ['FOLDER_ID']}
+          media = MediaFileUpload('backup-$(date +%Y%m%d-%H%M%S).tar.gz')
+          file = drive_service.files().create(body=file_metadata, media_body=media, fields='id').execute()
+          print(f'File ID: {file.get(\"id\")}')
+          "
+        env:
+          FOLDER_ID: "1YOHfU8s4J2wy5Wl1-d_jYY9wZs_-eqoO"  # Remplacez par l'ID du dossier Google Drive
+
+      - name: Clean up
+        if: always()
+        run: |
+          rm -f credentials.json backup-*.tar.gz
