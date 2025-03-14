@@ -414,20 +414,34 @@ jobs:
         env:
           GOOGLE_CREDENTIALS: ${{ secrets.GOOGLE_CREDENTIALS }}
           FOLDER_ID: "1YOHfU8s4J2wy5Wl1-d_jYY9wZs_-eqoO"
+          BACKUP_NAME: ${{ steps.create_backup.outputs.backup_name }}
         run: |
           echo "$GOOGLE_CREDENTIALS" > credentials.json
-          BACKUP_NAME="${{ steps.create_backup.outputs.backup_name }}"
+
+          # Vérifier que les variables sont définies
+          echo "Backup name: $BACKUP_NAME"
+          echo "Folder ID: $FOLDER_ID"
+          ls -l "$BACKUP_NAME"
+
           cat << 'EOF' > upload_to_drive.py
           import os
           from google.oauth2.service_account import Credentials
           from googleapiclient.discovery import build
           from googleapiclient.http import MediaFileUpload
 
-          creds = Credentials.from_service_account_file("credentials.json")
-          drive_service = build("drive", "v3", credentials=creds)
-
+          # Récupérer et vérifier les variables d'environnement
           backup_name = os.environ.get("BACKUP_NAME")
           folder_id = os.environ.get("FOLDER_ID")
+
+          if not backup_name or not folder_id:
+              raise ValueError(f"Missing required environment variables. BACKUP_NAME: {backup_name}, FOLDER_ID: {folder_id}")
+
+          if not os.path.exists(backup_name):
+              raise FileNotFoundError(f"Backup file not found: {backup_name}")
+
+          # Initialiser le service Google Drive
+          creds = Credentials.from_service_account_file("credentials.json")
+          drive_service = build("drive", "v3", credentials=creds)
 
           file_metadata = {
               "name": backup_name,
@@ -444,6 +458,7 @@ jobs:
           print(f"File ID: {file.get('id')}")
           EOF
 
+          # Exécuter le script avec les variables d'environnement
           python upload_to_drive.py
 
       - name: Clean up
