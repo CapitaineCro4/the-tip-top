@@ -5,6 +5,7 @@ import { useContext, useState, useRef } from 'react';
 import { register } from '@/network/api-routes/Authentication';
 import { AuthContext } from '@/context/AuthContext';
 import { validatePassword } from '@/utils/validation';
+import Link from 'next/link';
 
 export const RegisterForm = ({ onClose }: { onClose: () => void }) => {
   const { login } = useContext(AuthContext);
@@ -209,9 +210,9 @@ export const RegisterForm = ({ onClose }: { onClose: () => void }) => {
         En cliquant sur « CRÉER UN COMPTE », vous reconnaissez être informé et
         vous acceptez que vos données soient traitées selon les conditions
         suivantes et conformément à notre{' '}
-        <a href="#" className="underline">
+        <Link href="/politique-confidentialite" className="underline">
           POLITIQUE DE CONFIDENTIALITÉ
-        </a>
+        </Link>
         .
       </p>
     </div>

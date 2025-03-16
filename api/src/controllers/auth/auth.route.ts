@@ -113,4 +113,31 @@ router.post('/admin/login', async (req, res) => {
   }
 });
 
+router.get(
+  '/google',
+  passport.authenticate('google', { scope: ['profile', 'email'] })
+);
+
+router.get(
+  '/google/callback',
+  passport.authenticate('google', { session: false }),
+  async (req, res) => {
+    try {
+      const user = req.user as User;
+      const token = jwt.sign({ id: user.id }, passportConfig.JWT_SECRET, {
+        expiresIn: '7d',
+      });
+
+      // Rediriger vers le frontend avec le token
+      res.redirect(
+        `${process.env.NEXT_PUBLIC_FRONTEND_URL}/auth/callback?token=${token}`
+      );
+    } catch (error) {
+      res.redirect(
+        `${process.env.NEXT_PUBLIC_FRONTEND_URL}/login?error=auth_failed`
+      );
+    }
+  }
+);
+
 export { router as AuthRoutes };

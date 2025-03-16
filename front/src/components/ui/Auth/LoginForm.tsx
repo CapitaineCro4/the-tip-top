@@ -1,22 +1,15 @@
 'use client';
 
 import { FiEye, FiEyeOff } from 'react-icons/fi';
-import { useContext, useState } from 'react';
+import { useState } from 'react';
 import { FcGoogle } from 'react-icons/fc';
 import { FaFacebook } from 'react-icons/fa';
-import { AuthContext } from '@/context/AuthContext';
-/* import { auth, googleProvider } from '@/config/firebase';
-import { signInWithPopup, UserCredential } from 'firebase/auth'; */
+import { useAuth } from '@/hooks/useAuth';
 import { useRouter } from 'next/navigation';
-/* import axios from 'axios';
-import Cookies from 'js-cookie';
-import { TOKEN_KEY } from '@/shared/constants'; */
-
-/* const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3001'; */
 
 export const LoginForm = ({ onClose }: { onClose: () => void }) => {
   const [showPassword, setShowPassword] = useState(false);
-  const { login } = useContext(AuthContext);
+  const { login } = useAuth();
   const [error, setError] = useState('');
   const router = useRouter();
 
@@ -40,71 +33,8 @@ export const LoginForm = ({ onClose }: { onClose: () => void }) => {
       });
   };
 
-  /*   const handleGoogleSignIn = async () => {
-    try {
-      const result: UserCredential = await signInWithPopup(
-        auth,
-        googleProvider
-      );
-      const { user: googleUser } = result;
+  const googleAuthUrl = `${process.env.NEXT_PUBLIC_API_URL}/auth/google`;
 
-      if (!googleUser.email) {
-        throw new Error('Email non disponible');
-      }
-
-      console.log("Envoi des données à l'API:", {
-        email: googleUser.email,
-        firstName: googleUser.displayName?.split(' ')[0] || '',
-        lastName: googleUser.displayName?.split(' ').slice(1).join(' ') || '',
-        photoURL: googleUser.photoURL,
-      });
-
-      // Envoyer les informations à notre API
-      const response = await axios.post(
-        `${API_URL}/api/auth/google`,
-        {
-          email: googleUser.email,
-          firstName: googleUser.displayName?.split(' ')[0] || '',
-          lastName: googleUser.displayName?.split(' ').slice(1).join(' ') || '',
-          photoURL: googleUser.photoURL,
-        },
-        {
-          withCredentials: true,
-          headers: {
-            'Content-Type': 'application/json',
-          },
-        }
-      );
-
-      console.log("Réponse de l'API:", response.data);
-
-      // Sauvegarder le token
-      Cookies.set(TOKEN_KEY, response.data.token);
-
-      // Mettre à jour le contexte avec les informations de l'utilisateur
-      setUser(response.data.user);
-
-      // Fermer le modal et rediriger
-      onClose();
-      router.push('/dashboard');
-    } catch (error) {
-      if (axios.isAxiosError(error)) {
-        console.error('Erreur détaillée:', {
-          status: error.response?.status,
-          data: error.response?.data,
-          config: error.config,
-        });
-        setError(
-          error.response?.data?.message ||
-            'Erreur lors de la connexion avec Google'
-        );
-      } else {
-        setError('Erreur lors de la connexion avec Google');
-        console.error('Erreur non-Axios:', error);
-      }
-    }
-  };
- */
   return (
     <div>
       <h2 className="text-2xl font-bold mb-4 text-center">Connexion</h2>
@@ -163,16 +93,15 @@ export const LoginForm = ({ onClose }: { onClose: () => void }) => {
           </span>
           <span className="text-[#231F20]">FACEBOOK</span>
         </button>
-        <button
-          /* onClick={handleGoogleSignIn} */
-          type="button"
+        <a
+          href={googleAuthUrl}
           className="bg-white text-[#231F20] px-6 py-3 flex items-center w-[200px] text-center justify-center border-2 border-transparent hover:bg-gray-200 transition-all duration-300"
         >
           <span className="mr-2">
             <FcGoogle />
           </span>
           GOOGLE
-        </button>
+        </a>
       </div>
     </div>
   );

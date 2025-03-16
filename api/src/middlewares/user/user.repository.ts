@@ -19,6 +19,7 @@ export class UserRepository implements UserRepositoryInterface {
     if (where.firstName) whereParams.firstName = where.firstName;
     if (where.lastName) whereParams.lastName = where.lastName;
     if (where.email) whereParams.email = where.email;
+    if (where.googleId) whereParams.googleId = where.googleId;
     if (where.isAdmin) whereParams.isAdmin = where.isAdmin;
 
     const user = await prisma.user.findFirst({
@@ -29,14 +30,11 @@ export class UserRepository implements UserRepositoryInterface {
 
     if (!user) return null;
 
-    if (where.password) {
-      console.log('where.password', where.password);
+    if (where.password && user.password) {
       const isPasswordValid = await Password.compare(
         where.password,
         user.password
       );
-      console.log('isPasswordValid', isPasswordValid);
-      console.log('user.password', user.password);
       if (!isPasswordValid) return null;
     }
 
@@ -44,25 +42,30 @@ export class UserRepository implements UserRepositoryInterface {
   }
 
   async create(data: CreateUser): Promise<void> {
-    const password = await Password.crypt(data.password);
     const birthDate = new Date(data.birthDate);
+    const userData = {
+      ...data,
+      birthDate,
+    };
+
+    if (data.password) {
+      userData.password = await Password.crypt(data.password);
+    }
+
     await prisma.user.create({
-      data: {
-        ...data,
-        password,
-        birthDate,
-      },
+      data: userData,
     });
   }
 
   async update(id: number, data: UpdateUser): Promise<void> {
+    const updateData = { ...data };
     if (data.password) {
-      data.password = await Password.crypt(data.password);
+      updateData.password = await Password.crypt(data.password);
     }
 
     await prisma.user.update({
       where: { id },
-      data,
+      data: updateData,
     });
   }
 
@@ -83,6 +86,8 @@ export class UserRepository implements UserRepositoryInterface {
     data.isAdmin = entity.isAdmin;
     data.createdAt = entity.createdAt;
     data.updatedAt = entity.updatedAt;
+    data.picture = entity.picture || undefined;
+    data.googleId = entity.googleId || undefined;
     return data;
   }
 }

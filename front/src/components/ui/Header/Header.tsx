@@ -13,8 +13,13 @@ export const Header = () => {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [isAuthOpen, setIsAuthOpen] = useState(false);
   const [isDropdownOpen, setIsDropdownOpen] = useState(false);
-  const { user, isAuthenticated, logout, hasAuthenticatedDashboard, isAdmin } =
-    useAuth();
+  const {
+    user,
+    isAuthenticated,
+    logout,
+    hasAuthenticatedDashboard,
+    isUserAdmin,
+  } = useAuth();
   const dropdownRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
@@ -69,7 +74,7 @@ export const Header = () => {
                 <UserDropdown
                   userName={user?.fullName() || ''}
                   onLogout={logout}
-                  isAdmin={isAdmin()}
+                  isAdmin={isUserAdmin()}
                 />
               )}
             </AnimatePresence>

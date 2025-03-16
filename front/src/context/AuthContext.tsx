@@ -20,6 +20,7 @@ export const AuthContext = createContext<{
   hasAuthenticatedDashboard: () => boolean;
   isUserAdmin: () => boolean;
   login: (email: string, password: string) => Promise<void>;
+  loginWithToken: (token: string) => Promise<void>;
   adminLogin: (email: string, password: string) => Promise<void>;
   logout: () => Promise<void>;
   loading: boolean;
@@ -32,6 +33,7 @@ export const AuthContext = createContext<{
   hasAuthenticatedDashboard: () => false,
   isUserAdmin: () => false,
   login: async () => {},
+  loginWithToken: async () => {},
   adminLogin: async () => {},
   logout: async () => {},
   loading: false,
@@ -63,6 +65,13 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
         router.push('/dashboard');
       })
       .finally(() => setLoading(false));
+  };
+
+  const loginWithToken = async (token: string): Promise<void> => {
+    setLoading(true);
+    Cookies.set(TOKEN_KEY, token);
+    await getCurrentUser();
+    setLoading(false);
   };
 
   const adminLogin = async (email: string, password: string): Promise<void> => {
@@ -133,6 +142,7 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
         hasAuthenticatedDashboard,
         isUserAdmin,
         login,
+        loginWithToken,
         adminLogin,
         logout,
         loading,

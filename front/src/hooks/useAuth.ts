@@ -8,13 +8,5 @@ export const useAuth = () => {
     throw new Error('useAuth must be used within an AuthProvider');
   }
 
-  return {
-    ...context,
-    isAdmin: () => {
-      return context.user?.isAdmin ?? false;
-    },
-    hasAuthenticatedDashboard: () => {
-      return context.user?.isAdmin ?? false;
-    },
-  };
+  return context;
 };
