@@ -3,6 +3,7 @@
 import { useState, useEffect } from 'react';
 import { dashboardContent } from '@/content/dashboardContent';
 import { FaChevronDown } from 'react-icons/fa';
+import { userService, User } from '@/services/userService';
 
 export const AccountDetails = () => {
   const [formData, setFormData] = useState({
@@ -10,15 +11,81 @@ export const AccountDetails = () => {
     firstName: '',
     lastName: '',
     email: '',
-    city: '',
+    gender: '',
   });
   const [isSelectOpen, setIsSelectOpen] = useState(false);
   const [isDeletePopupOpen, setIsDeletePopupOpen] = useState(false);
   const [deleteInput, setDeleteInput] = useState('');
+  const [currentUser, setCurrentUser] = useState<User | null>(null);
+  const [isLoading, setIsLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+
+  useEffect(() => {
+    const fetchUserData = async () => {
+      try {
+        const userData = await userService.getCurrentUser();
+        console.log('Données utilisateur reçues:', userData); // Debug
+        setCurrentUser(userData);
+        setFormData({
+          civility:
+            userData.gender === 'MALE'
+              ? 'M'
+              : userData.gender === 'FEMALE'
+                ? 'MME'
+                : '',
+          firstName: userData.firstName,
+          lastName: userData.lastName,
+          email: userData.email,
+          gender: userData.gender,
+        });
+      } catch (err) {
+        if (err instanceof Error) {
+          setError(
+            err.message === 'No authentication token found'
+              ? 'Veuillez vous connecter pour accéder à cette page'
+              : 'Erreur lors du chargement des données utilisateur'
+          );
+        } else {
+          setError('Erreur lors du chargement des données utilisateur');
+        }
+        console.error('Erreur:', err);
+      } finally {
+        setIsLoading(false);
+      }
+    };
+
+    fetchUserData();
+  }, []);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    // Logique de mise à jour du compte
+    if (!currentUser) return;
+
+    setIsLoading(true);
+    setError(null);
+
+    try {
+      await userService.updateUser(currentUser.id, {
+        firstName: formData.firstName,
+        lastName: formData.lastName,
+        email: formData.email,
+        gender:
+          formData.civility === 'M'
+            ? 'MALE'
+            : formData.civility === 'MME'
+              ? 'FEMALE'
+              : 'OTHER',
+      });
+      // Recharger les données utilisateur après la mise à jour
+      const updatedUser = await userService.getCurrentUser();
+      setCurrentUser(updatedUser);
+      alert('Profil mis à jour avec succès !');
+    } catch (err) {
+      setError('Erreur lors de la mise à jour du profil');
+      console.error('Erreur:', err);
+    } finally {
+      setIsLoading(false);
+    }
   };
 
   const handleDeleteAccount = async () => {
@@ -26,8 +93,17 @@ export const AccountDetails = () => {
   };
 
   const confirmDeleteAccount = async () => {
+    if (!currentUser) return;
+
     if (deleteInput.toLowerCase() === 'supprimer') {
-      console.log('Compte supprimé !');
+      try {
+        await userService.deleteUser(currentUser.id);
+        // Rediriger vers la page de connexion ou déconnecter l'utilisateur
+        window.location.href = '/login';
+      } catch (err) {
+        setError('Erreur lors de la suppression du compte');
+        console.error('Erreur:', err);
+      }
       setIsDeletePopupOpen(false);
       setDeleteInput('');
     } else {
@@ -42,11 +118,32 @@ export const AccountDetails = () => {
     } else {
       document.body.style.overflow = 'auto';
     }
-    // Nettoyage au démontage du composant
     return () => {
       document.body.style.overflow = 'auto';
     };
   }, [isDeletePopupOpen]);
+
+  if (isLoading) {
+    return <div className="text-center p-4">Chargement...</div>;
+  }
+
+  if (error) {
+    return (
+      <div className="max-w-2xl mx-auto">
+        <div className="p-4 bg-red-100 text-red-700 rounded">{error}</div>
+      </div>
+    );
+  }
+
+  if (!currentUser) {
+    return (
+      <div className="max-w-2xl mx-auto">
+        <div className="p-4 bg-yellow-100 text-yellow-700 rounded">
+          Aucune donnée utilisateur disponible
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="max-w-2xl mx-auto bg-white p-6 shadow-sm">
@@ -113,9 +210,14 @@ export const AccountDetails = () => {
         <div className="flex flex-col space-y-4">
           <button
             type="submit"
-            className="w-full px-6 py-3 border-2 placeholder:text-black border-[#242E61]/40 focus:border-[#242E61] bg-[#242E61] text-white placeholder-gray-300 outline-none transition-all hover:bg-[#1a2347]"
+            disabled={isLoading}
+            className={`w-full px-6 py-3 border-2 placeholder:text-black border-[#242E61]/40 focus:border-[#242E61] bg-[#242E61] text-white placeholder-gray-300 outline-none transition-all hover:bg-[#1a2347] ${
+              isLoading ? 'opacity-50 cursor-not-allowed' : ''
+            }`}
           >
-            {dashboardContent.accountSection.buttons.save}
+            {isLoading
+              ? 'Mise à jour...'
+              : dashboardContent.accountSection.buttons.save}
           </button>
 
           <button className="w-full px-6 py-3 border-2 placeholder:text-black border-[#242E61]/40 focus:border-[#242E61] bg-white text-[#242E61] placeholder-gray-300 outline-none transition-all hover:bg-[#1a2347] hover:text-white">
