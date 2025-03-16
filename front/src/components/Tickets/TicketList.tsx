@@ -2,14 +2,7 @@
 
 import { useState, useEffect } from 'react';
 import { ticketService, Ticket } from '@/services/ticketService';
-import {
-  FaCheck,
-  FaTimes,
-  FaEye,
-  FaEdit,
-  FaTrash,
-  FaFilter,
-} from 'react-icons/fa';
+import { FaCheck, FaTimes, FaEye, FaFilter } from 'react-icons/fa';
 import { IoMdClose } from 'react-icons/io';
 
 export const TicketList = () => {
@@ -20,7 +13,7 @@ export const TicketList = () => {
   const [selectedTicket, setSelectedTicket] = useState<Ticket | null>(null);
   const [showModal, setShowModal] = useState(false);
   const [filters, setFilters] = useState({
-    status: 'all', // 'all', 'available', 'used'
+    status: 'all',
     session: 'all',
     searchCode: '',
   });
@@ -89,75 +82,6 @@ export const TicketList = () => {
     setShowModal(true);
   };
 
-  const TicketModal = () => {
-    if (!selectedTicket) return null;
-
-    return (
-      <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-        <div className="bg-white p-6 max-w-lg w-full mx-4 ">
-          <div className="flex justify-between items-center mb-4">
-            <h2 className="text-xl font-bold text-gray-800">
-              Détails du Ticket
-            </h2>
-            <button
-              onClick={() => setShowModal(false)}
-              className="text-gray-500 hover:text-gray-700"
-            >
-              <IoMdClose size={24} />
-            </button>
-          </div>
-
-          <div className="space-y-4">
-            <div>
-              <h3 className="font-semibold text-gray-700">Code</h3>
-              <p className="text-gray-600">{selectedTicket.code}</p>
-            </div>
-
-            <div>
-              <h3 className="font-semibold text-gray-700">Gain</h3>
-              <p className="text-gray-600">
-                {selectedTicket.gain?.name || 'Non attribué'}
-              </p>
-            </div>
-
-            <div>
-              <h3 className="font-semibold text-gray-700">Session</h3>
-              <p className="text-gray-600">
-                {selectedTicket.session?.name || 'N/A'}
-              </p>
-            </div>
-
-            <div>
-              <h3 className="font-semibold text-gray-700">Statut</h3>
-              <p className="text-gray-600">
-                {!selectedTicket.used ? 'Disponible' : 'Utilisé'}
-              </p>
-            </div>
-
-            {selectedTicket.used && selectedTicket.user && (
-              <div>
-                <h3 className="font-semibold text-gray-700">Utilisé par</h3>
-                <p className="text-gray-600">
-                  {selectedTicket.user.firstName} {selectedTicket.user.lastName}
-                </p>
-                <p className="text-gray-500 text-sm">
-                  {selectedTicket.user.email}
-                </p>
-              </div>
-            )}
-
-            <div>
-              <h3 className="font-semibold text-gray-700">Créé le</h3>
-              <p className="text-gray-600">
-                {formatDate(selectedTicket.createdAt)}
-              </p>
-            </div>
-          </div>
-        </div>
-      </div>
-    );
-  };
-
   if (isLoading) {
     return (
       <div className="flex justify-center items-center min-h-[400px]">
@@ -168,7 +92,7 @@ export const TicketList = () => {
 
   if (error) {
     return (
-      <div className="bg-red-100 text-red-700 p-4 ">{error}</div>
+      <div className="bg-red-100 text-red-700 p-4 rounded-lg">{error}</div>
     );
   }
 
@@ -178,12 +102,19 @@ export const TicketList = () => {
 
   return (
     <div className="container mx-auto px-4 py-8">
+      <div className="mb-6">
+        <h1 className="text-2xl font-bold text-[#242E61]">Liste des Tickets</h1>
+        <p className="text-gray-600 mt-2">
+          Gérez tous les tickets générés pour le jeu concours.
+        </p>
+      </div>
+
       <div className="mb-6 flex flex-wrap gap-4">
         <div className="flex items-center space-x-2 flex-1">
           <input
             type="text"
             placeholder="Rechercher par code..."
-            className="border px-3 py-2 w-full max-w-md"
+            className="border rounded-md px-3 py-2 w-full max-w-md"
             value={filters.searchCode}
             onChange={(e) =>
               setFilters((prev) => ({ ...prev, searchCode: e.target.value }))
@@ -194,7 +125,7 @@ export const TicketList = () => {
         <div className="flex items-center space-x-2">
           <FaFilter className="text-gray-500" />
           <select
-            className="border  px-3 py-2"
+            className="border rounded-md px-3 py-2"
             value={filters.status}
             onChange={(e) =>
               setFilters((prev) => ({ ...prev, status: e.target.value }))
@@ -209,7 +140,7 @@ export const TicketList = () => {
         <div className="flex items-center space-x-2">
           <FaFilter className="text-gray-500" />
           <select
-            className="border px-3 py-2"
+            className="border rounded-md px-3 py-2"
             value={filters.session}
             onChange={(e) =>
               setFilters((prev) => ({ ...prev, session: e.target.value }))
@@ -225,7 +156,7 @@ export const TicketList = () => {
         </div>
       </div>
 
-      <div className="bg-white shadow-lg overflow-hidden">
+      <div className="bg-white shadow-lg rounded-lg overflow-hidden">
         <div className="overflow-x-auto">
           <table className="min-w-full divide-y divide-gray-200">
             <thead className="bg-[#242E61] text-white">
@@ -293,7 +224,72 @@ export const TicketList = () => {
           </table>
         </div>
       </div>
-      {showModal && <TicketModal />}
+
+      {showModal && selectedTicket && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+          <div className="bg-white rounded-lg p-6 max-w-lg w-full mx-4">
+            <div className="flex justify-between items-center mb-4">
+              <h2 className="text-xl font-bold text-gray-800">
+                Détails du Ticket
+              </h2>
+              <button
+                onClick={() => setShowModal(false)}
+                className="text-gray-500 hover:text-gray-700"
+              >
+                <IoMdClose size={24} />
+              </button>
+            </div>
+
+            <div className="space-y-4">
+              <div>
+                <h3 className="font-semibold text-gray-700">Code</h3>
+                <p className="text-gray-600">{selectedTicket.code}</p>
+              </div>
+
+              <div>
+                <h3 className="font-semibold text-gray-700">Gain</h3>
+                <p className="text-gray-600">
+                  {selectedTicket.gain?.name || 'Non attribué'}
+                </p>
+              </div>
+
+              <div>
+                <h3 className="font-semibold text-gray-700">Session</h3>
+                <p className="text-gray-600">
+                  {selectedTicket.session?.name || 'N/A'}
+                </p>
+              </div>
+
+              <div>
+                <h3 className="font-semibold text-gray-700">Statut</h3>
+                <p className="text-gray-600">
+                  {!selectedTicket.used ? 'Disponible' : 'Plus disponible'}
+                </p>
+              </div>
+
+              {selectedTicket.used && selectedTicket.user && (
+                <div>
+                  <h3 className="font-semibold text-gray-700">Utilisé par</h3>
+                  <p className="text-gray-600">
+                    {selectedTicket.user.firstName}{' '}
+                    {selectedTicket.user.lastName}
+                  </p>
+                  <p className="text-gray-500 text-sm">
+                    {selectedTicket.user.email}
+                  </p>
+                </div>
+              )}
+
+              <div>
+                <h3 className="font-semibold text-gray-700">Créé le</h3>
+                <p className="text-gray-600">
+                  {formatDate(selectedTicket.createdAt)}
+                </p>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 };
