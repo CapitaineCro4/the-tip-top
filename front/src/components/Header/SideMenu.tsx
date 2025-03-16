@@ -60,16 +60,11 @@ export const SideMenu = ({ onClose }: SideMenuProps) => {
             </li>
             <li>
               <Link
-                href="/#how-to-participate"
+                href="/comment-jouer"
                 className="block text-sm md:text-xl p-2 hover:bg-[#16803C] hover:text-white/80 transition-all duration-300"
-                onClick={(e) => {
-                  e.preventDefault();
-                  onClose();
-                  const element = document.getElementById('how-to-participate');
-                  element?.scrollIntoView({ behavior: 'smooth' });
-                }}
+                onClick={onClose}
               >
-                Comment participer
+                Comment jouer
               </Link>
             </li>
 

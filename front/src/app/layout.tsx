@@ -1,9 +1,9 @@
 import type { Metadata } from 'next';
 import { Montserrat } from 'next/font/google';
 import './globals.css';
-import { Header } from '@/components/ui/Header/Header';
-import { Footer } from '@/components/ui/Footer/Footer';
-import { CookieConsent } from '@/components/ui/CookieConsent/CookieConsent';
+import { Header } from '@/components/Header/Header';
+import { Footer } from '@/components/Footer/Footer';
+import { CookieConsent } from '@/components/CookieConsent/CookieConsent';
 import { AuthProvider } from '@/context/AuthContext';
 import Script from 'next/script';
 

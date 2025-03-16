@@ -1,5 +1,5 @@
 export const dashboardContent = {
-  title: 'Tableau de bord',
+  title: 'espace client',
   ticketSection: {
     title: 'Veuillez rentrer le code de votre ticket',
     subtitle: 'pour tenter votre chance de gagner',

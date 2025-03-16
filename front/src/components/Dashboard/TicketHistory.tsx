@@ -38,7 +38,7 @@ export const TicketHistory = () => {
   }, [userGames]);
 
   return (
-    <div className="bg-white p-6 rounded-lg shadow-sm">
+    <div className="bg-white p-6  shadow-sm">
       <h2 className="text-xl font-semibold mb-6">
         {dashboardContent.ticketHistory.title}
       </h2>

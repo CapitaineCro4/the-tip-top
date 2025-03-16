@@ -78,7 +78,7 @@ const FAQSection = ({ category, questions }: FAQItem) => {
         {questions.map((item, index) => (
           <div
             key={index}
-            className="border border-gray-200 rounded-lg overflow-hidden"
+            className="border border-gray-200 overflow-hidden"
           >
             <button
               className="w-full px-6 py-4 text-left bg-white hover:bg-gray-50 flex justify-between items-center"

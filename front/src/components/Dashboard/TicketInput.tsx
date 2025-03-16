@@ -62,14 +62,15 @@ export const TicketInput = () => {
             value={ticketCode}
             onChange={(e) => setTicketCode(e.target.value.toUpperCase())}
             placeholder={dashboardContent.ticketSection.placeholder}
-            className="w-full px-4 py-2 border focus:ring-2 focus:ring-[#242E61] font-mono focus:border-transparent"
+            className="w-full px-6 py-3 border-2 placeholder:text-black border-[#242E61]/40 focus:border-[#242E61] bg-white/60 text-black placeholder-gray-300 outline-none transition-all font-mono"
             required
+            maxLength={10}
           />
         </div>
 
         <button
           type="submit"
-          className="w-full bg-[#242E61] text-white py-2 hover:bg-[#1a2347] transition-colors relative overflow-hidden"
+          className="w-full bg-[#242E61] text-white px-6 py-3 hover:bg-[#1a2347] transition-colors relative overflow-hidden"
         >
           <span className="relative z-10">
             {dashboardContent.ticketSection.buttonText}

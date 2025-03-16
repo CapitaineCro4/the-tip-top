@@ -1,7 +1,7 @@
 'use client';
 
-import { DashboardLayout } from '@/components/ui/Dashboard/DashboardLayout';
-import { AccountDetails } from '@/components/ui/Dashboard/AccountDetails';
+import { DashboardLayout } from '@/components/Dashboard/DashboardLayout';
+import { AccountDetails } from '@/components/Dashboard/AccountDetails';
 
 export default function ComptePage() {
   return (
@@ -9,4 +9,4 @@ export default function ComptePage() {
       <AccountDetails />
     </DashboardLayout>
   );
-} 
+}

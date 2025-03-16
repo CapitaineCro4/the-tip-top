@@ -30,9 +30,7 @@ export default function AuthCallback() {
   return (
     <div className="flex items-center justify-center min-h-screen">
       <div className="text-center justify-center flex flex-col items-center">
-        <div
-          className="animate-spin rounded-full h-32 w-32 border-8 border-t-transparent border-[#242E61]"
-        ></div>
+        <div className="animate-spin rounded-full h-32 w-32 border-8 border-t-transparent border-[#242E61]"></div>
         <h2 className="mt-6 text-xl font-semibold text-[#242E61]">
           Authentification en cours...
         </h2>

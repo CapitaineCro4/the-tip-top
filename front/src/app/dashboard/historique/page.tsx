@@ -1,7 +1,7 @@
 'use client';
 
-import { DashboardLayout } from '@/components/ui/Dashboard/DashboardLayout';
-import { TicketHistory } from '@/components/ui/Dashboard/TicketHistory';
+import { DashboardLayout } from '@/components/Dashboard/DashboardLayout';
+import { TicketHistory } from '@/components/Dashboard/TicketHistory';
 
 export default function HistoriquePage() {
   return (
@@ -9,4 +9,4 @@ export default function HistoriquePage() {
       <TicketHistory />
     </DashboardLayout>
   );
-} 
+}

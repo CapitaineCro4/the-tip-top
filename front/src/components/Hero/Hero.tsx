@@ -4,7 +4,7 @@ import Image from 'next/image';
 import { heroContent } from '@/content/heroContent';
 import { useState } from 'react';
 import { AnimatePresence } from 'motion/react';
-import { AuthForm } from './Auth/AuthForm';
+import { AuthForm } from '../Auth/AuthForm';
 
 const Hero: React.FC<{ imageSrc: string }> = ({ imageSrc }) => {
   const { title, subtitle, description, buttonText, contestDates, alt } =

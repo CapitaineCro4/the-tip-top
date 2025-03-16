@@ -1,6 +1,6 @@
 import { render } from '@testing-library/react';
 import { screen, fireEvent } from '@testing-library/dom';
-import Hero from '../Hero';
+import Hero from '../Hero/Hero';
 import { heroContent } from '@/content/heroContent';
 
 // Mock the AuthForm component
@@ -45,7 +45,6 @@ describe('Hero Component', () => {
   });
 
   it('opens auth form when participate button is clicked', () => {
-
     expect(screen.queryByTestId('mock-auth-form')).not.toBeInTheDocument();
 
     const participateButton = screen.getByText(heroContent.buttonText);
@@ -62,7 +61,7 @@ describe('Hero Component', () => {
     expect(authForm).toBeInTheDocument();
 
     fireEvent.click(authForm);
-    
+
     expect(screen.queryByTestId('mock-auth-form')).not.toBeInTheDocument();
   });
 });
