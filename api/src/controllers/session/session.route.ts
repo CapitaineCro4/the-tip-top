@@ -18,7 +18,7 @@ const ticketService = new TicketService(ticketRepository);
 const gainRepository = new GainRepository();
 const gainService = new GainService(gainRepository);
 
-const TICKET_QUANTITY_PER_SESSION = 1000;
+const TICKET_QUANTITY_PER_SESSION = 4;
 
 router.use(passport.authenticate('jwt', { session: false }));
 
@@ -61,7 +61,7 @@ router.post('/', async (req, res) => {
     const gains = await gainService.findAll();
 
     const totalRecords = ticketsQuantity || TICKET_QUANTITY_PER_SESSION;
-    const batchSize = 1000;
+    const batchSize = 4;
     const totalBatches = Math.ceil(totalRecords / batchSize);
 
     console.info(

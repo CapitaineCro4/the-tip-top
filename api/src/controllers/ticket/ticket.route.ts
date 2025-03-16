@@ -10,6 +10,11 @@ const ticketService = new TicketService(ticketRepository);
 
 router.use(passport.authenticate('jwt', { session: false }));
 
+router.get('/all', async (req, res) => {
+  const tickets = await ticketService.findAll();
+  res.status(200).json(tickets);
+});
+
 router.get('/', async (req, res) => {
   const tickets = await ticketService.findAll();
   const validatedTickets = tickets.filter((ticket) => ticket.used === false);
