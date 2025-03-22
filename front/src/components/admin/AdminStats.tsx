@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useCallback } from 'react';
 import { FaUser, FaMars, FaVenus } from 'react-icons/fa';
 import { TiTicket } from 'react-icons/ti';
 import { ticketService, Ticket } from '@/services/ticketService';
@@ -37,62 +37,28 @@ export default function AdminStats({ usersCount }: AdminStatsProps) {
     loadTickets();
   }, []);
 
-  useEffect(() => {
-    if (tickets.length > 0) {
-      const stats = calculateSessionStats();
-      setSessionStats(stats);
-      const gStats = calculateGenderStats();
-      setGenderStats(gStats);
-    }
-  }, [tickets]);
-
-  const loadTickets = async () => {
-    try {
-      setIsLoading(true);
-      const data = await ticketService.getAllTickets();
-      setTickets(data);
-    } catch (err) {
-      setError('Erreur lors du chargement des tickets');
-      console.error('Erreur:', err);
-    } finally {
-      setIsLoading(false);
-    }
-  };
-
-  const calculateGenderStats = (): GenderStats => {
+  const calculateGenderStats = useCallback((): GenderStats => {
     const stats = {
       male: 0,
       female: 0,
       total: 0,
     };
 
-    console.log('Tickets pour calcul genre:', tickets);
-
     tickets.forEach((ticket) => {
-      console.log('Vérification ticket:', {
-        id: ticket.id,
-        used: ticket.used,
-        user: ticket.user,
-        gender: ticket.user?.gender,
-      });
-
       if (ticket.used && ticket.user?.gender) {
         stats.total++;
         if (ticket.user.gender === 'MALE') {
-          console.log('Homme trouvé:', ticket.user);
           stats.male++;
         } else if (ticket.user.gender === 'FEMALE') {
-          console.log('Femme trouvée:', ticket.user);
           stats.female++;
         }
       }
     });
 
-    console.log('Statistiques calculées:', stats);
     return stats;
-  };
+  }, [tickets]);
 
-  const calculateSessionStats = (): SessionStats[] => {
+  const calculateSessionStats = useCallback((): SessionStats[] => {
     const sessionMap = new Map<string, SessionStats>();
 
     tickets.forEach((ticket) => {
@@ -117,6 +83,28 @@ export default function AdminStats({ usersCount }: AdminStatsProps) {
     });
 
     return Array.from(sessionMap.values());
+  }, [tickets]);
+
+  useEffect(() => {
+    if (tickets.length > 0) {
+      const stats = calculateSessionStats();
+      setSessionStats(stats);
+      const gStats = calculateGenderStats();
+      setGenderStats(gStats);
+    }
+  }, [tickets, calculateSessionStats, calculateGenderStats]);
+
+  const loadTickets = async () => {
+    try {
+      setIsLoading(true);
+      const data = await ticketService.getAllTickets();
+      setTickets(data);
+    } catch (err) {
+      setError('Erreur lors du chargement des tickets');
+      console.error('Erreur:', err);
+    } finally {
+      setIsLoading(false);
+    }
   };
 
   if (isLoading) {

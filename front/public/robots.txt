@@ -1,5 +1,13 @@
 User-agent: *
 Allow: /
+Allow: /conditions-utilisation
+Allow: /mentions-legales
+Allow: /politique-de-confidentialite
+Allow: /comment-jouer
+Allow: /contact
+Allow: /faq
+Allow: /plan-du-site
+
 Sitemap: http://dsp5-archi-f24a-15m-g4.fr/sitemap.xml
 
 

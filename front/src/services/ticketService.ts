@@ -1,5 +1,31 @@
 import { apis } from '@/network/axios';
 
+interface RawTicket {
+  id: number;
+  code: string;
+  used: boolean;
+  totalQuantityGain: number;
+  gainId: number;
+  sessionId: number;
+  createdAt: string;
+  updatedAt: string;
+  userId?: number;
+  userGender?: 'MALE' | 'FEMALE';
+  userEmail?: string;
+  userFirstName?: string;
+  userLastName?: string;
+  user?: Ticket['user'];
+  userInfo?: Ticket['user'];
+  utilisateur?: Ticket['user'];
+  gain?: Ticket['gain'];
+  session?: {
+    id: number;
+    name: string;
+    startDate: string;
+    endDate: string;
+  };
+}
+
 export interface Ticket {
   id: number;
   code: string;
@@ -41,10 +67,10 @@ export const ticketService = {
       });
 
       // Vérifions la structure d'un ticket utilisé
-      const usedTickets = response.data.filter((t: any) => t.used);
+      const usedTickets = response.data.filter((t: RawTicket) => t.used);
       console.log('Tickets utilisés:', usedTickets);
 
-      const mappedTickets = response.data.map((ticket: any) => {
+      const mappedTickets = response.data.map((ticket: RawTicket) => {
         // Log détaillé de chaque ticket
         if (ticket.used) {
           console.log("Structure détaillée d'un ticket utilisé:", {
@@ -87,7 +113,7 @@ export const ticketService = {
       console.log('Premier ticket mappé:', mappedTickets[0]);
       console.log(
         'Exemple de ticket utilisé mappé:',
-        mappedTickets.find((t) => t.used)
+        mappedTickets.find((t: Ticket) => t.used)
       );
 
       return mappedTickets;

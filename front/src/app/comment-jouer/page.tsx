@@ -3,7 +3,7 @@
 import { useState } from 'react';
 import { FiChevronDown, FiChevronUp } from 'react-icons/fi';
 import { motion, AnimatePresence } from 'motion/react';
-
+import Link from 'next/link';
 interface HowToPlaySection {
   title: string;
   content: string[];
@@ -111,15 +111,15 @@ export default function HowToPlayPage() {
         {/* Call to Action */}
         <div className="mt-12 text-center">
           <p className="text-lg text-gray-600 mb-6">
-            N'attendez plus pour tenter votre chance et participer à notre grand
-            jeu concours !
+            N&apos;attendez plus pour tenter votre chance et participer à notre
+            grand jeu concours !
           </p>
-          <a
-            href="/#products"
+          <Link
+              href="/#products"
             className="inline-block bg-[#16803C] text-white px-8 py-3 rounded-md hover:bg-[#147033] transition-colors duration-300"
           >
             Découvrir nos produits
-          </a>
+          </Link>
         </div>
       </div>
     </div>

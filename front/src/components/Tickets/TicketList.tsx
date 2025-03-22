@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { ticketService, Ticket } from '@/services/ticketService';
 import { FaCheck, FaTimes, FaEye, FaFilter } from 'react-icons/fa';
 import { IoMdClose } from 'react-icons/io';
@@ -22,25 +22,7 @@ export const TicketList = () => {
     loadTickets();
   }, []);
 
-  useEffect(() => {
-    applyFilters();
-  }, [tickets, filters]);
-
-  const loadTickets = async () => {
-    try {
-      setIsLoading(true);
-      const data = await ticketService.getAllTickets();
-      setTickets(data);
-      setFilteredTickets(data);
-    } catch (err) {
-      setError('Erreur lors du chargement des tickets');
-      console.error('Erreur:', err);
-    } finally {
-      setIsLoading(false);
-    }
-  };
-
-  const applyFilters = () => {
+  const applyFilters = useCallback(() => {
     let filtered = [...tickets];
 
     // Filtre par code
@@ -65,6 +47,24 @@ export const TicketList = () => {
     }
 
     setFilteredTickets(filtered);
+  }, [tickets, filters]);
+
+  useEffect(() => {
+    applyFilters();
+  }, [applyFilters]);
+
+  const loadTickets = async () => {
+    try {
+      setIsLoading(true);
+      const data = await ticketService.getAllTickets();
+      setTickets(data);
+      setFilteredTickets(data);
+    } catch (err) {
+      setError('Erreur lors du chargement des tickets');
+      console.error('Erreur:', err);
+    } finally {
+      setIsLoading(false);
+    }
   };
 
   const formatDate = (date: Date) => {

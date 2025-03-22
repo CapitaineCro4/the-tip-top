@@ -53,7 +53,7 @@ const faqData: FAQItem[] = [
     category: 'JEU CONCOURS',
     questions: [
       {
-        question: 'Comment participer au jeu concours ?',
+        question: 'Comment participer à notre jeu concours Thé Tip Top ?',
         answer:
           "Pour participer, il vous suffit d'effectuer un achat d'un montant minimum de 49€ dans l'une de nos boutiques. Votre ticket de caisse comportera un code unique vous permettant de participer au tirage au sort.",
       },
@@ -76,10 +76,7 @@ const FAQSection = ({ category, questions }: FAQItem) => {
       </h2>
       <div className="space-y-4">
         {questions.map((item, index) => (
-          <div
-            key={index}
-            className="border border-gray-200 overflow-hidden"
-          >
+          <div key={index} className="border border-gray-200 overflow-hidden">
             <button
               className="w-full px-6 py-4 text-left bg-white hover:bg-gray-50 flex justify-between items-center"
               onClick={() => setOpenIndex(openIndex === index ? null : index)}

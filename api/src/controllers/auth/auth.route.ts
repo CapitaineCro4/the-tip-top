@@ -132,7 +132,8 @@ router.get(
       res.redirect(
         `${process.env.NEXT_PUBLIC_FRONTEND_URL}/auth/callback?token=${token}`
       );
-    } catch (error) {
+    } catch (error: unknown) {
+      console.error("Erreur lors de l'authentification Google:", error);
       res.redirect(
         `${process.env.NEXT_PUBLIC_FRONTEND_URL}/login?error=auth_failed`
       );
