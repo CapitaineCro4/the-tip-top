@@ -1,5 +1,5 @@
 # Utiliser une image Node.js officielle comme base
-FROM --platform=linux/amd64 node:18-alpine as builder
+FROM node:18-alpine as builder
 
 # Définir le répertoire de travail dans le conteneur
 WORKDIR /app
@@ -8,7 +8,7 @@ WORKDIR /app
 COPY package.json yarn.lock ./
 
 # Installer les dépendances
-RUN yarn install --frozen-lockfile --network-timeout 100000
+RUN yarn install
 
 # Copier le reste des fichiers source
 COPY . .
