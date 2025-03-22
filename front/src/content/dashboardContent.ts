@@ -19,8 +19,8 @@ export const dashboardContent = {
       civility: {
         label: 'Civilité',
         options: [
-          { value: 'mr', label: 'Monsieur' },
-          { value: 'mme', label: 'Madame' },
+          { value: 'M', label: 'Homme' },
+          { value: 'MME', label: 'Femme' },
         ],
         placeholder: 'Sélectionnez',
       },
@@ -35,6 +35,18 @@ export const dashboardContent = {
       email: {
         label: 'Email',
         placeholder: 'votre@email.com',
+      },
+      birthDate: {
+        label: 'Date de naissance',
+        placeholder: 'JJ/MM/AAAA',
+      },
+      password: {
+        label: 'Nouveau mot de passe',
+        placeholder: 'Laissez vide pour ne pas modifier',
+      },
+      confirmPassword: {
+        label: 'Confirmer le mot de passe',
+        placeholder: 'Laissez vide pour ne pas modifier',
       },
       city: {
         label: 'Ville',

@@ -84,7 +84,6 @@ export const LoginForm = ({ onClose }: { onClose: () => void }) => {
 
   return (
     <div>
-      <h2 className="text-2xl font-bold mb-4 text-center">Connexion</h2>
       <p className="text-center text-sm mb-4">
         Veuillez vous connecter pour accéder à votre espace.
       </p>

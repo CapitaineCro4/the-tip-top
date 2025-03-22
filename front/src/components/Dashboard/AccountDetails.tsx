@@ -5,6 +5,15 @@ import { dashboardContent } from '@/content/dashboardContent';
 import { FaChevronDown } from 'react-icons/fa';
 import { userService, User } from '@/services/userService';
 
+interface UpdateUserData {
+  firstName: string;
+  lastName: string;
+  email: string;
+  gender: string;
+  birthDate: string;
+  password?: string;
+}
+
 export const AccountDetails = () => {
   const [formData, setFormData] = useState({
     civility: '',
@@ -12,6 +21,9 @@ export const AccountDetails = () => {
     lastName: '',
     email: '',
     gender: '',
+    birthDate: '',
+    password: '',
+    confirmPassword: '',
   });
   const [isSelectOpen, setIsSelectOpen] = useState(false);
   const [isDeletePopupOpen, setIsDeletePopupOpen] = useState(false);
@@ -24,7 +36,7 @@ export const AccountDetails = () => {
     const fetchUserData = async () => {
       try {
         const userData = await userService.getCurrentUser();
-        console.log('Données utilisateur reçues:', userData); // Debug
+        console.log('Données utilisateur reçues:', userData);
         setCurrentUser(userData);
         setFormData({
           civility:
@@ -37,6 +49,11 @@ export const AccountDetails = () => {
           lastName: userData.lastName,
           email: userData.email,
           gender: userData.gender,
+          birthDate: userData.birthDate
+            ? new Date(userData.birthDate).toISOString().split('T')[0]
+            : '',
+          password: '',
+          confirmPassword: '',
         });
       } catch (err) {
         if (err instanceof Error) {
@@ -61,11 +78,16 @@ export const AccountDetails = () => {
     e.preventDefault();
     if (!currentUser) return;
 
+    if (formData.password && formData.password !== formData.confirmPassword) {
+      setError('Les mots de passe ne correspondent pas');
+      return;
+    }
+
     setIsLoading(true);
     setError(null);
 
     try {
-      await userService.updateUser(currentUser.id, {
+      const updateData: UpdateUserData = {
         firstName: formData.firstName,
         lastName: formData.lastName,
         email: formData.email,
@@ -74,11 +96,18 @@ export const AccountDetails = () => {
             ? 'MALE'
             : formData.civility === 'MME'
               ? 'FEMALE'
-              : 'OTHER',
-      });
-      // Recharger les données utilisateur après la mise à jour
+              : '',
+        birthDate: formData.birthDate,
+      };
+
+      if (formData.password) {
+        updateData.password = formData.password;
+      }
+
+      await userService.updateUser(currentUser.id, updateData);
       const updatedUser = await userService.getCurrentUser();
       setCurrentUser(updatedUser);
+      setFormData((prev) => ({ ...prev, password: '', confirmPassword: '' }));
       alert('Profil mis à jour avec succès !');
     } catch (err) {
       setError('Erreur lors de la mise à jour du profil');
@@ -111,7 +140,6 @@ export const AccountDetails = () => {
     }
   };
 
-  // Désactiver le scroll quand la popup est ouverte
   useEffect(() => {
     if (isDeletePopupOpen) {
       document.body.style.overflow = 'hidden';
@@ -193,16 +221,34 @@ export const AccountDetails = () => {
                 <label className="block text-sm font-medium text-gray-700 mb-1">
                   {field.label}
                 </label>
-                <input
-                  type={key === 'email' ? 'email' : 'text'}
-                  value={formData[key as keyof typeof formData]}
-                  onChange={(e) =>
-                    setFormData({ ...formData, [key]: e.target.value })
-                  }
-                  placeholder={field.placeholder}
-                  className="w-full px-6 py-3 border-2 placeholder:text-black border-[#242E61]/40 focus:border-[#242E61] bg-white/60 text-black placeholder-gray-300 outline-none transition-all"
-                  aria-label={field.label}
-                />
+                {key === 'birthDate' ? (
+                  <input
+                    type="date"
+                    value={formData[key as keyof typeof formData]}
+                    onChange={(e) =>
+                      setFormData({ ...formData, [key]: e.target.value })
+                    }
+                    className="w-full px-6 py-3 border-2 placeholder:text-black border-[#242E61]/40 focus:border-[#242E61] bg-white/60 text-black placeholder-gray-300 outline-none transition-all"
+                    aria-label={field.label}
+                  />
+                ) : (
+                  <input
+                    type={
+                      key.includes('password')
+                        ? 'password'
+                        : key === 'email'
+                          ? 'email'
+                          : 'text'
+                    }
+                    value={formData[key as keyof typeof formData]}
+                    onChange={(e) =>
+                      setFormData({ ...formData, [key]: e.target.value })
+                    }
+                    placeholder={field.placeholder}
+                    className="w-full px-6 py-3 border-2 placeholder:text-black border-[#242E61]/40 focus:border-[#242E61] bg-white/60 text-black placeholder-gray-300 outline-none transition-all"
+                    aria-label={field.label}
+                  />
+                )}
               </div>
             ))}
         </div>

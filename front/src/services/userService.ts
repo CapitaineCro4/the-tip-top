@@ -34,7 +34,7 @@ export const userService = {
         firstName: response.data.firstName || '',
         lastName: response.data.lastName || '',
         email: response.data.email || '',
-        gender: response.data.gender || 'OTHER',
+        gender: response.data.gender || 'MALE' || 'FEMALE',
         birthDate: new Date(response.data.birthDate || Date.now()),
         isAdmin: response.data.isAdmin || false,
         isEmploye: response.data.isEmploye || false,

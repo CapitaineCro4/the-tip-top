@@ -30,10 +30,10 @@ const howToPlayData: HowToPlaySection[] = [
     title: '3. Les lots à gagner',
     content: [
       "1 an de thé d'une valeur de 360€",
-      "6 mois de thé d'une valeur de 180€",
-      "3 mois de thé d'une valeur de 90€",
+      'Des boîtes de thé signature',
+      'Des boîtes de thé détox',
       "Des coffrets découverte d'une valeur de 39€",
-      "Des boîtes de thé d'une valeur de 25€",
+      "Des coffrets découverte d'une valeur de 69€",
     ],
   },
   {
@@ -115,8 +115,8 @@ export default function HowToPlayPage() {
             grand jeu concours !
           </p>
           <Link
-              href="/#products"
-            className="inline-block bg-[#16803C] text-white px-8 py-3 rounded-md hover:bg-[#147033] transition-colors duration-300"
+            href="/#products"
+            className="w-full bg-[#242E61] text-white  px-6 py-3 border-2 border-transparent hover:bg-[#16803C] transition-all duration-300 flex items-center justify-center"
           >
             Découvrir nos produits
           </Link>

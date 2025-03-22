@@ -19,6 +19,7 @@ export const Header = () => {
     logout,
     hasAuthenticatedDashboard,
     isUserAdmin,
+    isUserEmploye,
   } = useAuth();
   const dropdownRef = useRef<HTMLDivElement>(null);
 
@@ -75,6 +76,7 @@ export const Header = () => {
                   userName={user?.fullName() || ''}
                   onLogout={logout}
                   isAdmin={isUserAdmin()}
+                  isEmploye={isUserEmploye()}
                 />
               )}
             </AnimatePresence>

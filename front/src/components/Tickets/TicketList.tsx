@@ -16,7 +16,10 @@ export const TicketList = () => {
     status: 'all',
     session: 'all',
     searchCode: '',
+    deliveryStatus: 'all',
   });
+  const [currentPage, setCurrentPage] = useState(1);
+  const [itemsPerPage, setItemsPerPage] = useState(10);
 
   useEffect(() => {
     loadTickets();
@@ -46,6 +49,15 @@ export const TicketList = () => {
       );
     }
 
+    // Filtre par statut de remise
+    if (filters.deliveryStatus !== 'all') {
+      filtered = filtered.filter((ticket) =>
+        filters.deliveryStatus === 'delivered'
+          ? ticket.isDelivered
+          : !ticket.isDelivered
+      );
+    }
+
     setFilteredTickets(filtered);
   }, [tickets, filters]);
 
@@ -57,6 +69,11 @@ export const TicketList = () => {
     try {
       setIsLoading(true);
       const data = await ticketService.getAllTickets();
+      console.log('Tickets chargés:', data);
+      console.log(
+        'Tickets utilisés:',
+        data.filter((ticket) => ticket.used)
+      );
       setTickets(data);
       setFilteredTickets(data);
     } catch (err) {
@@ -78,8 +95,27 @@ export const TicketList = () => {
   };
 
   const handleViewTicket = (ticket: Ticket) => {
+    console.log('Ticket sélectionné:', ticket);
+    console.log('Données utilisateur:', ticket.user);
     setSelectedTicket(ticket);
     setShowModal(true);
+  };
+
+  const handleDeliveryStatus = async (
+    ticketId: number,
+    isDelivered: boolean
+  ) => {
+    try {
+      await ticketService.updateDeliveryStatus(ticketId, isDelivered);
+      const updatedTickets = await ticketService.getAllTickets();
+      setTickets(updatedTickets);
+      setSelectedTicket(null);
+    } catch (error) {
+      console.error(
+        'Erreur lors de la mise à jour du statut de remise:',
+        error
+      );
+    }
   };
 
   if (isLoading) {
@@ -104,9 +140,6 @@ export const TicketList = () => {
     <div className="container mx-auto px-4 py-8">
       <div className="mb-6">
         <h1 className="text-2xl font-bold text-[#242E61]">Liste des Tickets</h1>
-        <p className="text-gray-600 mt-2">
-          Gérez tous les tickets générés pour le jeu concours.
-        </p>
       </div>
 
       <div className="mb-6 flex flex-wrap gap-4">
@@ -114,7 +147,7 @@ export const TicketList = () => {
           <input
             type="text"
             placeholder="Rechercher par code..."
-            className="border rounded-md px-3 py-2 w-full max-w-md"
+            className="w-full px-6 py-3 border-2 border-[#242E61]/20 placeholder:text-black  focus:border-[#242E61] bg-white/60 text-black placeholder-gray-300 outline-none transition-all max-w-md"
             value={filters.searchCode}
             onChange={(e) =>
               setFilters((prev) => ({ ...prev, searchCode: e.target.value }))
@@ -123,40 +156,64 @@ export const TicketList = () => {
         </div>
 
         <div className="flex items-center space-x-2">
-          <FaFilter className="text-gray-500" />
-          <select
-            className="border rounded-md px-3 py-2"
-            value={filters.status}
-            onChange={(e) =>
-              setFilters((prev) => ({ ...prev, status: e.target.value }))
-            }
-          >
-            <option value="all">Tous les statuts</option>
-            <option value="available">Disponibles</option>
-            <option value="used">Utilisés</option>
-          </select>
+          <div className="relative w-full max-w-md">
+            <FaFilter className="text-gray-500 absolute left-3 top-1/2 transform -translate-y-1/2" />
+            <select
+              className="w-full px-6 py-3 pl-10 border-2 border-[#242E61]/20 placeholder:text-black focus:border-[#242E61] bg-white/60 text-black placeholder-gray-300 outline-none transition-all appearance-none"
+              value={filters.status}
+              onChange={(e) =>
+                setFilters((prev) => ({ ...prev, status: e.target.value }))
+              }
+            >
+              <option value="all">Tous les statuts</option>
+              <option value="available">Disponibles</option>
+              <option value="used">Utilisés</option>
+            </select>
+          </div>
         </div>
 
         <div className="flex items-center space-x-2">
-          <FaFilter className="text-gray-500" />
-          <select
-            className="border rounded-md px-3 py-2"
-            value={filters.session}
-            onChange={(e) =>
-              setFilters((prev) => ({ ...prev, session: e.target.value }))
-            }
-          >
-            <option value="all">Toutes les sessions</option>
-            {uniqueSessions.map((session) => (
-              <option key={session} value={session}>
-                {session}
-              </option>
-            ))}
-          </select>
+          <div className="relative w-full max-w-md">
+            <FaFilter className="text-gray-500 absolute left-3 top-1/2 transform -translate-y-1/2" />
+            <select
+              className="w-full px-6 py-3 pl-10 border-2 border-[#242E61]/20 placeholder:text-black focus:border-[#242E61] bg-white/60 text-black placeholder-gray-300 outline-none transition-all appearance-none"
+              value={filters.session}
+              onChange={(e) =>
+                setFilters((prev) => ({ ...prev, session: e.target.value }))
+              }
+            >
+              <option value="all">Toutes les sessions</option>
+              {uniqueSessions.map((session) => (
+                <option key={session} value={session}>
+                  {session}
+                </option>
+              ))}
+            </select>
+          </div>
+        </div>
+
+        <div className="flex items-center space-x-2">
+          <div className="relative w-full max-w-md">
+            <FaFilter className="text-gray-500 absolute left-3 top-1/2 transform -translate-y-1/2" />
+            <select
+              className="w-full px-6 py-3 pl-10 border-2 border-[#242E61]/20 placeholder:text-black focus:border-[#242E61] bg-white/60 text-black placeholder-gray-300 outline-none transition-all appearance-none"
+              value={filters.deliveryStatus}
+              onChange={(e) =>
+                setFilters((prev) => ({
+                  ...prev,
+                  deliveryStatus: e.target.value,
+                }))
+              }
+            >
+              <option value="all">Tous les statuts de remise</option>
+              <option value="delivered">Gains remis</option>
+              <option value="not_delivered">Gains non remis</option>
+            </select>
+          </div>
         </div>
       </div>
 
-      <div className="bg-white shadow-lg rounded-lg overflow-hidden">
+      <div className="bg-white shadow-lg  overflow-hidden">
         <div className="overflow-x-auto">
           <table className="min-w-full divide-y divide-gray-200">
             <thead className="bg-[#242E61] text-white">
@@ -174,6 +231,9 @@ export const TicketList = () => {
                   Statut
                 </th>
                 <th className="px-6 py-4 text-left text-sm font-semibold">
+                  Remise
+                </th>
+                <th className="px-6 py-4 text-left text-sm font-semibold">
                   Créé le
                 </th>
                 <th className="px-6 py-4 text-left text-sm font-semibold">
@@ -182,52 +242,128 @@ export const TicketList = () => {
               </tr>
             </thead>
             <tbody className="divide-y divide-gray-200">
-              {filteredTickets.map((ticket) => (
-                <tr key={ticket.id} className="hover:bg-gray-50">
-                  <td className="px-6 py-4 text-sm text-gray-900 font-medium">
-                    {ticket.code}
-                  </td>
-                  <td className="px-6 py-4 text-sm text-gray-900">
-                    {ticket.session?.name || 'N/A'}
-                  </td>
-                  <td className="px-6 py-4 text-sm text-gray-900">
-                    {ticket.gain?.name || 'Non attribué'}
-                  </td>
-                  <td className="px-6 py-4 text-sm">
-                    {!ticket.used ? (
-                      <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-green-100 text-green-800">
-                        <FaCheck className="mr-1" /> Disponible
-                      </span>
-                    ) : (
-                      <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-red-100 text-red-800">
-                        <FaTimes className="mr-1" /> Plus disponible
-                      </span>
-                    )}
-                  </td>
-                  <td className="px-6 py-4 text-sm text-gray-900">
-                    {formatDate(ticket.createdAt)}
-                  </td>
-                  <td className="px-6 py-4 text-sm text-gray-900">
-                    <div className="flex space-x-3">
-                      <button
-                        className="text-blue-600 hover:text-blue-800"
-                        title="Voir les détails"
-                        onClick={() => handleViewTicket(ticket)}
-                      >
-                        <FaEye />
-                      </button>
-                    </div>
-                  </td>
-                </tr>
-              ))}
+              {filteredTickets
+                .slice(
+                  (currentPage - 1) * itemsPerPage,
+                  currentPage * itemsPerPage
+                )
+                .map((ticket) => (
+                  <tr key={ticket.id} className="hover:bg-gray-50">
+                    <td className="px-6 py-4 text-sm text-gray-900 font-medium">
+                      {ticket.code}
+                    </td>
+                    <td className="px-6 py-4 text-sm text-gray-900">
+                      {ticket.session?.name || 'N/A'}
+                    </td>
+                    <td className="px-6 py-4 text-sm text-gray-900">
+                      {ticket.gain?.name || 'Non attribué'}
+                    </td>
+                    <td className="px-6 py-4 text-sm">
+                      {!ticket.used ? (
+                        <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-green-100 text-green-800">
+                          <FaCheck className="mr-1" /> Disponible
+                        </span>
+                      ) : (
+                        <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-red-100 text-red-800">
+                          <FaTimes className="mr-1" /> Plus disponible
+                        </span>
+                      )}
+                    </td>
+                    <td className="px-6 py-4 text-sm">
+                      {ticket.used &&
+                        (ticket.isDelivered ? (
+                          <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-green-100 text-green-800">
+                            <FaCheck className="mr-1" /> Remis
+                          </span>
+                        ) : (
+                          <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-yellow-100 text-yellow-800">
+                            <FaTimes className="mr-1" /> Non remis
+                          </span>
+                        ))}
+                    </td>
+                    <td className="px-6 py-4 text-sm text-gray-900">
+                      {formatDate(ticket.createdAt)}
+                    </td>
+                    <td className="px-6 py-4 text-sm text-gray-900">
+                      <div className="flex space-x-3">
+                        <button
+                          className="text-[#242E61] hover:text-[#242E61]"
+                          title="Voir les détails"
+                          onClick={() => handleViewTicket(ticket)}
+                        >
+                          <FaEye />
+                        </button>
+                      </div>
+                    </td>
+                  </tr>
+                ))}
             </tbody>
           </table>
         </div>
       </div>
 
+      <div className="mt-4 flex items-center justify-between">
+        <div className="flex items-center space-x-2">
+          <span className="text-sm text-gray-700">Afficher</span>
+          <select
+            className="px-2 py-1 border-2 border-[#242E61]/20 placeholder:text-black  focus:border-[#242E61] text-sm"
+            value={itemsPerPage}
+            onChange={(e) => {
+              setItemsPerPage(Number(e.target.value));
+              setCurrentPage(1);
+            }}
+          >
+            <option value={5}>5</option>
+            <option value={10}>10</option>
+            <option value={20}>20</option>
+            <option value={50}>50</option>
+            <option value={100}>100</option>
+          </select>
+          <span className="text-sm text-gray-700">par page</span>
+        </div>
+
+        <div className="flex items-center space-x-2">
+          <button
+            onClick={() => setCurrentPage((prev) => Math.max(prev - 1, 1))}
+            disabled={currentPage === 1}
+            className={`px-3 py-1  ${
+              currentPage === 1
+                ? 'bg-gray-200 text-gray-500 cursor-not-allowed'
+                : 'bg-[#242E61] text-white hover:bg-[#242E61]/90'
+            }`}
+          >
+            Précédent
+          </button>
+          <span className="text-sm text-gray-700">
+            Page {currentPage} sur{' '}
+            {Math.ceil(filteredTickets.length / itemsPerPage)}
+          </span>
+          <button
+            onClick={() =>
+              setCurrentPage((prev) =>
+                Math.min(
+                  prev + 1,
+                  Math.ceil(filteredTickets.length / itemsPerPage)
+                )
+              )
+            }
+            disabled={
+              currentPage === Math.ceil(filteredTickets.length / itemsPerPage)
+            }
+            className={`px-3 py-1  ${
+              currentPage === Math.ceil(filteredTickets.length / itemsPerPage)
+                ? 'bg-gray-200 text-gray-500 cursor-not-allowed'
+                : 'bg-[#242E61] text-white hover:bg-[#242E61]/90'
+            }`}
+          >
+            Suivant
+          </button>
+        </div>
+      </div>
+
       {showModal && selectedTicket && (
         <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-          <div className="bg-white rounded-lg p-6 max-w-lg w-full mx-4">
+          <div className="bg-white p-6 max-w-lg w-full mx-4">
             <div className="flex justify-between items-center mb-4">
               <h2 className="text-xl font-bold text-gray-800">
                 Détails du Ticket
@@ -276,6 +412,51 @@ export const TicketList = () => {
                   </p>
                   <p className="text-gray-500 text-sm">
                     {selectedTicket.user.email}
+                  </p>
+                </div>
+              )}
+
+              {selectedTicket.used && (
+                <div>
+                  <h3 className="font-semibold text-gray-700">
+                    Statut de remise
+                  </h3>
+                  <div className="flex items-center justify-between">
+                    <p className="text-gray-600">
+                      {selectedTicket.isDelivered
+                        ? 'Gain remis au client'
+                        : 'Gain non remis'}
+                    </p>
+                    {!selectedTicket.isDelivered && (
+                      <button
+                        onClick={() =>
+                          handleDeliveryStatus(
+                            selectedTicket.id,
+                            !selectedTicket.isDelivered
+                          )
+                        }
+                        className={`px-4 py-2 rounded ${
+                          selectedTicket.isDelivered
+                            ? 'bg-red-500 hover:bg-red-600'
+                            : 'bg-green-500 hover:bg-green-600'
+                        } text-white`}
+                      >
+                        {selectedTicket.isDelivered
+                          ? 'Marquer comme non remis'
+                          : 'Marquer comme remis'}
+                      </button>
+                    )}
+                  </div>
+                </div>
+              )}
+
+              {selectedTicket?.isDelivered && selectedTicket.deliveredAt && (
+                <div className="mt-4 p-4 bg-green-50 rounded-lg">
+                  <p className="text-green-700 font-medium">
+                    Gain remis le{' '}
+                    {new Date(selectedTicket.deliveredAt).toLocaleString(
+                      'fr-FR'
+                    )}
                   </p>
                 </div>
               )}

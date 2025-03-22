@@ -83,7 +83,7 @@ async function main() {
       name: 'Coffret découverte 69€',
       value: 69,
       probability: 4,
-    }
+    },
   ];
 
   for (const gain of gains) {

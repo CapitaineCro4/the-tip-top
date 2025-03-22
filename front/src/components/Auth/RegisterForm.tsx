@@ -12,8 +12,8 @@ export const RegisterForm = ({ onClose }: { onClose: () => void }) => {
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
   const [passwordErrors, setPasswordErrors] = useState<string[]>([]);
-  const [passwordSuggestions, setPasswordSuggestions] = useState<string[]>([]);
   const [matchError, setMatchError] = useState<string>('');
+  const [genderError, setGenderError] = useState<string>('');
   const formRef = useRef<HTMLFormElement>(null);
 
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
@@ -23,14 +23,19 @@ export const RegisterForm = ({ onClose }: { onClose: () => void }) => {
 
     // Réinitialiser les erreurs
     setPasswordErrors([]);
-    setPasswordSuggestions([]);
     setMatchError('');
+    setGenderError('');
+
+    // Validation du genre
+    if (!data.gender) {
+      setGenderError('Veuillez sélectionner votre genre');
+      return;
+    }
 
     // Validation du mot de passe
     const passwordValidation = validatePassword(data.password as string);
     if (!passwordValidation.isValid) {
       setPasswordErrors(passwordValidation.errors);
-      setPasswordSuggestions(passwordValidation.suggestions);
       return;
     }
 
@@ -71,13 +76,12 @@ export const RegisterForm = ({ onClose }: { onClose: () => void }) => {
     setShowPassword(false);
     setShowConfirmPassword(false);
     setPasswordErrors([]);
-    setPasswordSuggestions([]);
     setMatchError('');
+    setGenderError('');
   };
 
   return (
     <div>
-      <h2 className="text-2xl font-bold mb-4 text-center">Inscription</h2>
       <p className="text-center text-sm mb-4">
         Veuillez vous inscrire pour accéder à votre espace.
       </p>
@@ -93,6 +97,7 @@ export const RegisterForm = ({ onClose }: { onClose: () => void }) => {
             placeholder="Prénom *"
             className="w-full px-6 py-3 border-2 placeholder:text-black border-transparent focus:border-white bg-white/60 text-black placeholder-gray-300 outline-none transition-all"
             name="firstName"
+            required
           />
         </div>
         <div>
@@ -101,6 +106,7 @@ export const RegisterForm = ({ onClose }: { onClose: () => void }) => {
             placeholder="Nom *"
             className="w-full px-6 py-3 border-2 placeholder:text-black border-transparent focus:border-white bg-white/60 text-black placeholder-gray-300 outline-none transition-all"
             name="lastName"
+            required
           />
         </div>
         <div>
@@ -109,37 +115,49 @@ export const RegisterForm = ({ onClose }: { onClose: () => void }) => {
             placeholder="Adresse email *"
             className="w-full px-6 py-3 border-2 placeholder:text-black border-transparent focus:border-white bg-white/60 text-black placeholder-gray-300 outline-none transition-all"
             name="email"
+            required
           />
         </div>
-        <div className="flex items-center space-x-6">
-          <span className="text-white">Genre *</span>
-          <label className="inline-flex items-center">
+        <div className="flex items-center space-x-4">
+          <label className="inline-flex items-center border border-transparent w-full bg-white/60 px-6 py-3">
+            <span className="mr-2 text-black">Homme</span>
             <input
               type="radio"
-              value="masculin"
-              className="form-radio text-green-700 border-2 border-white focus:ring-0 focus:ring-offset-0"
+              value="MALE"
+              className="form-radio text-green-700 border-2 border-gray-300 focus:ring-0 focus:ring-offset-0"
               name="gender"
+              required
             />
-            <span className="ml-2">Masculin</span>
           </label>
-          <label className="inline-flex items-center">
+          <label className="inline-flex items-center border border-transparent w-full bg-white/60 px-6 py-3">
+            <span className="mr-2 text-black">Femme</span>
             <input
               type="radio"
-              value="feminin"
-              className="form-radio text-green-700 border-2 border-white focus:ring-0 focus:ring-offset-0"
+              value="FEMALE"
+              className="form-radio text-green-700 border-2 border-gray-300 focus:ring-0 focus:ring-offset-0"
               name="gender"
+              required
             />
-            <span className="ml-2">Féminin</span>
           </label>
         </div>
+        {genderError && (
+          <div className="text-white text-xs bg-[#242E61] px-6 py-3">
+            <p>{genderError}</p>
+          </div>
+        )}
         <div>
           <input
             type="date"
             min="1900-01-01"
-            max={new Date().toISOString().split('T')[0]}
-            placeholder="Année de naissance *"
+            max={
+              new Date(new Date().setFullYear(new Date().getFullYear() - 12))
+                .toISOString()
+                .split('T')[0]
+            }
+            placeholder="Date de naissance *"
             className="w-full px-6 py-3 border-2 placeholder:text-black border-transparent focus:border-white bg-white/60 text-black placeholder-gray-300 outline-none transition-all"
             name="birthDate"
+            required
           />
         </div>
         <div className="space-y-2">
@@ -153,22 +171,15 @@ export const RegisterForm = ({ onClose }: { onClose: () => void }) => {
             <button
               type="button"
               onClick={() => setShowPassword(!showPassword)}
-              className="absolute right-2 top-1/2 -translate-y-1/2 text-gray-500"
+              className="absolute right-5 top-1/2 -translate-y-1/2 text-gray-500"
             >
               {showPassword ? <FiEyeOff size={20} /> : <FiEye size={20} />}
             </button>
           </div>
           {passwordErrors.length > 0 && (
-            <div className="text-red-500 text-sm">
+            <div className="text-white text-xs bg-[#c72828] px-6 py-3 ">
               {passwordErrors.map((error, index) => (
                 <p key={index}>{error}</p>
-              ))}
-            </div>
-          )}
-          {passwordSuggestions.length > 0 && (
-            <div className="text-yellow-400 text-sm">
-              {passwordSuggestions.map((suggestion, index) => (
-                <p key={index}>{suggestion}</p>
               ))}
             </div>
           )}
@@ -184,7 +195,7 @@ export const RegisterForm = ({ onClose }: { onClose: () => void }) => {
             <button
               type="button"
               onClick={() => setShowConfirmPassword(!showConfirmPassword)}
-              className="absolute right-2 top-1/2 -translate-y-1/2 text-gray-500"
+              className="absolute right-5 top-1/2 -translate-y-1/2 text-gray-500"
             >
               {showConfirmPassword ? (
                 <FiEyeOff size={20} />
@@ -194,10 +205,18 @@ export const RegisterForm = ({ onClose }: { onClose: () => void }) => {
             </button>
           </div>
           {matchError && (
-            <div className="text-red-500 text-sm">
+            <div className="text-white text-xs bg-[#242E61] px-6 py-3 ">
               <p>{matchError}</p>
             </div>
           )}
+
+          <div className="text-white text-xs bg-[#242E61] px-6 py-3 ">
+            <p>
+              Le mot de passe doit contenir au moins 8 caractères et contenir
+              des chiffres, des lettres majuscules et minuscules et des
+              caractères spéciaux.
+            </p>
+          </div>
         </div>
         <button
           type="submit"

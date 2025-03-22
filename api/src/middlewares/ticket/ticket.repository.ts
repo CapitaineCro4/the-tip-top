@@ -15,6 +15,7 @@ type TicketEntity = Prisma.TicketGetPayload<{
   include: {
     gain: true;
     session: true;
+    user: true;
   };
 }>;
 
@@ -30,6 +31,7 @@ export class TicketRepository implements TicketRepositoryInterface {
       include: {
         gain: true,
         session: true,
+        user: true,
       },
     });
     return tickets.map(TicketRepository.presenter);
@@ -55,6 +57,7 @@ export class TicketRepository implements TicketRepositoryInterface {
       include: {
         gain: true,
         session: true,
+        user: true,
       },
     });
     return Ticket ? TicketRepository.presenter(Ticket) : null;
@@ -110,8 +113,17 @@ export class TicketRepository implements TicketRepositoryInterface {
     data.code = entity.code;
     data.used = entity.used;
     data.totalQuantityGain = entity.totalQuantityGain;
+    data.isDelivered = entity.isDelivered;
+    data.deliveredAt = entity.deliveredAt || undefined;
     data.gain = GainRepository.presenter(entity.gain);
     data.session = SessionRepository.presenterWithoutTickets(entity.session);
+    data.user = entity.user
+      ? {
+          ...entity.user,
+          picture: entity.user.picture || undefined,
+          googleId: entity.user.googleId || undefined,
+        }
+      : undefined;
     data.createdAt = entity.createdAt;
     data.updatedAt = entity.updatedAt;
     return data;
@@ -123,6 +135,8 @@ export class TicketRepository implements TicketRepositoryInterface {
     data.code = entity.code;
     data.used = entity.used;
     data.totalQuantityGain = entity.totalQuantityGain;
+    data.isDelivered = entity.isDelivered;
+    data.deliveredAt = entity.deliveredAt || undefined;
     data.gain = GainRepository.presenter(entity.gain);
     data.createdAt = entity.createdAt;
     data.updatedAt = entity.updatedAt;

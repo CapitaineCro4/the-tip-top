@@ -49,7 +49,7 @@ export const AuthForm = ({ isOpen, onClose }: AuthFormProps) => {
               </button>
             </div>
 
-            <div className="mt-4">
+            <div className="mt-2 md:mt-0">
               <div className="flex justify-center mb-4">
                 <button
                   onClick={() => setIsLogin(true)}
@@ -73,7 +73,7 @@ export const AuthForm = ({ isOpen, onClose }: AuthFormProps) => {
                 </button>
               </div>
 
-              <div className="max-w-[400px] mx-auto">
+              <div className="max-w-[500px] mx-auto">
                 {isLogin ? (
                   <LoginForm onClose={handleClose} />
                 ) : (

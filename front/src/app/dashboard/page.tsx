@@ -13,7 +13,7 @@ export default function DashboardPage() {
     <DashboardLayout>
       <div className="p-6">
         <h1 className="text-2xl font-bold mb-8">
-          Bonjour, {user?.firstName} bienvenue sur votre{' '}
+          {user?.firstName}, bienvenue sur votre{' '}
           {dashboardContent.title}
         </h1>
         <TicketInput />

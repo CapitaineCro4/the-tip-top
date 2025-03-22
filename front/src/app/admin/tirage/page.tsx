@@ -77,7 +77,7 @@ export default function TiragePage() {
   }
 
   return (
-    <div className="p-4 md:p-8 max-w-4xl mx-auto">
+    <div className="p-4 md:p-8 mx-auto">
       {showConfetti && (
         <ReactConfetti
           width={windowSize.width}
@@ -96,7 +96,7 @@ export default function TiragePage() {
         </p>
       </div>
 
-      <div className="bg-white p-6 rounded-lg shadow-sm">
+      <div className="bg-white p-6  shadow-sm">
         <div className="mb-6">
           <p className="text-gray-600">
             Nombre total de participants : {users.length}
@@ -104,7 +104,7 @@ export default function TiragePage() {
         </div>
 
         {winner && (
-          <div className="mb-8 p-6 bg-primary/5 rounded-lg text-center">
+          <div className="mb-8 p-6 bg-primary/5  text-center">
             <h2 className="text-xl font-semibold text-gray-900 mb-2">
               🎉 Gagnant(e) 🎉
             </h2>
@@ -119,7 +119,7 @@ export default function TiragePage() {
           <button
             onClick={handleDraw}
             disabled={users.length === 0}
-            className="px-8 py-3 bg-primary text-white rounded-md hover:bg-primary-dark focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary disabled:opacity-50 disabled:cursor-not-allowed text-lg font-medium"
+            className="w-max-w-4xl bg-[#242E61] text-white  px-6 py-3 border-2 border-transparent hover:bg-[#16803C] transition-all duration-300 flex items-center justify-center"
           >
             Lancer le tirage
           </button>

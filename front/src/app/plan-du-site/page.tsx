@@ -42,15 +42,7 @@ const sitemapData: SitemapSection[] = [
         href: '/politique-confidentialite',
       },
     ],
-  },
-  {
-    title: 'Espace Client',
-    links: [
-      { name: 'Mon compte', href: '/dashboard' },
-      { name: 'Historique des tickets', href: '/dashboard/historique' },
-      { name: 'Détails du compte', href: '/dashboard/compte' },
-    ],
-  },
+  }
 ];
 
 export default function SitemapPage() {

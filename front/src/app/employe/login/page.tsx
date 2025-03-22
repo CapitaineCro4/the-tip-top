@@ -32,9 +32,9 @@ export default function EmployeLoginPage () {
 
   return (
     <div className="min-h-screen flex items-center justify-center bg-gray-100">
-      <div className="bg-white p-8 rounded-lg shadow-md w-full max-w-md">
+      <div className="bg-white p-8 shadow-md w-full max-w-md">
         <h2 className="text-2xl font-bold mb-4 text-center text-gray-800">
-          Connexion Employé
+          Connexion
         </h2>
         <p className="text-center text-sm mb-4 text-gray-600">
           Veuillez vous connecter pour accéder à l&apos;espace employé.
@@ -47,7 +47,7 @@ export default function EmployeLoginPage () {
             <input
               type="email"
               placeholder="Adresse email *"
-              className="w-full px-4 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-green-500"
+              className="w-full px-6 py-3 border-2 border-[#242E61]/20 placeholder:text-black  focus:border-[#242E61] bg-white/60 text-black placeholder-gray-300 outline-none transition-all"
               name="email"
               required
             />
@@ -56,7 +56,7 @@ export default function EmployeLoginPage () {
             <input
               type={showPassword ? 'text' : 'password'}
               placeholder="Mot de passe *"
-              className="w-full px-4 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-green-500"
+              className="w-full px-6 py-3 border-2 border-[#242E61]/20 placeholder:text-black  focus:border-[#242E61] bg-white/60 text-black placeholder-gray-300 outline-none transition-all"
               name="password"
               required
             />
@@ -70,7 +70,7 @@ export default function EmployeLoginPage () {
           </div>
           <button
             type="submit"
-            className="w-full bg-green-600 text-white py-2 rounded-md hover:bg-green-700 transition-colors"
+            className="w-full bg-[#242E61] text-white  px-6 py-3 border-2 border-transparent hover:bg-[#16803C] transition-all duration-300 flex items-center justify-center"
           >
             SE CONNECTER
           </button>

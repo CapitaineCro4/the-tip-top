@@ -10,6 +10,7 @@ interface RawTicket {
   createdAt: string;
   updatedAt: string;
   userId?: number;
+  isDelivered?: boolean;
   userGender?: 'MALE' | 'FEMALE';
   userEmail?: string;
   userFirstName?: string;
@@ -31,10 +32,13 @@ export interface Ticket {
   code: string;
   used: boolean;
   totalQuantityGain: number;
+  isDelivered: boolean;
+  deliveredAt?: Date;
   gainId: number;
   sessionId: number;
   createdAt: Date;
   updatedAt: Date;
+  userId?: number;
   gain?: {
     id: number;
     name: string;
@@ -76,6 +80,7 @@ export const ticketService = {
           console.log("Structure détaillée d'un ticket utilisé:", {
             ticket,
             userId: ticket.userId,
+            isDelivered: ticket.isDelivered,
             user: ticket.user,
             userInfo: ticket.userInfo,
             utilisateur: ticket.utilisateur,
@@ -86,6 +91,7 @@ export const ticketService = {
           ...ticket,
           createdAt: new Date(ticket.createdAt),
           updatedAt: new Date(ticket.updatedAt),
+          isDelivered: ticket.isDelivered || false,
           session: ticket.session
             ? {
                 ...ticket.session,
@@ -145,5 +151,16 @@ export const ticketService = {
 
   deleteTicket: async (id: number): Promise<void> => {
     await apis.tiptop.delete(`/tickets/${id}`);
+  },
+
+  updateDeliveryStatus: async (
+    ticketId: number,
+    isDelivered: boolean
+  ): Promise<Ticket> => {
+    const response = await apis.tiptop.put(`/tickets/${ticketId}`, {
+      isDelivered,
+      deliveredAt: isDelivered ? new Date() : undefined,
+    });
+    return response.data;
   },
 };

@@ -32,7 +32,7 @@ export const footerContent = {
     },
   ],
   socialMedia: {
-    facebook: 'https://facebook.com',
-    instagram: 'https://instagram.com',
+    facebook: 'https://facebook.com/thetiptopco',
+    instagram: 'https://www.instagram.com/thetiptopco',
   },
 };

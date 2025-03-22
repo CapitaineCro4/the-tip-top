@@ -26,7 +26,7 @@ export default function AdminPage() {
 
   function fetchUsers() {
     getUsers().then((users) => {
-      setAppUsers(users.filter((user) => !user.isAdmin));
+      setAppUsers(users.filter((user) => !user.isAdmin && !user.isEmploye));
     });
   }
 
@@ -42,12 +42,12 @@ export default function AdminPage() {
     <div className="p-4 md:p-8 max-w-7xl mx-auto">
       <div className="mb-8">
         <h1 className="text-xl md:text-2xl font-semibold text-gray-900">
-          Bonjour, Admin bienvenue sur votre Tableau de bord
+          {user?.firstName}, bienvenue sur votre tableau de bord
         </h1>
       </div>
 
       <div className="space-y-6">
-        <AdminStats usersCount={appUsers.length} ticketsCount={0} />
+        <AdminStats usersCount={appUsers.length} users={appUsers} />
         <CreateSession />
       </div>
     </div>

@@ -2,7 +2,6 @@
 
 import { useState, useContext } from 'react';
 import { dashboardContent } from '@/content/dashboardContent';
-import { TicketGenerator } from './TicketGenerator';
 import { createGame } from '@/network/api-routes/Game';
 import { AuthContext } from '@/context/AuthContext';
 import { Gain } from '@/domain/gain/GainType';
@@ -97,8 +96,6 @@ export const TicketInput = () => {
           </p>
         )}
       </form>
-
-      <TicketGenerator />
     </div>
   );
 };
