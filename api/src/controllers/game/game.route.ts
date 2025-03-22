@@ -51,6 +51,7 @@ router.post('/', async (req, res) => {
     });
     await ticketService.update(ticket.id, {
       used: true,
+      userId: data.userId,
     });
     res
       .status(201)

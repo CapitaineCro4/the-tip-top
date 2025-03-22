@@ -16,6 +16,7 @@ async function main() {
       gender: 'MALE',
       birthDate: new Date('2000-01-01'),
       isAdmin: false,
+      isEmploye: false,
     },
     {
       email: 'joe@gmail.com',
@@ -25,6 +26,7 @@ async function main() {
       gender: 'MALE',
       birthDate: new Date('2002-03-25'),
       isAdmin: false,
+      isEmploye: false,
     },
     {
       email: 'admin@thetiptop.com',
@@ -34,6 +36,17 @@ async function main() {
       gender: 'MALE',
       birthDate: new Date('2000-01-01'),
       isAdmin: true,
+      isEmploye: false,
+    },
+    {
+      email: 'employe@thetiptop.com',
+      firstName: 'Employe',
+      lastName: 'Employe',
+      password: adminPassword,
+      gender: 'MALE',
+      birthDate: new Date('2000-01-01'),
+      isAdmin: false,
+      isEmploye: true,
     },
   ];
 
@@ -70,7 +83,7 @@ async function main() {
       name: 'Coffret découverte 69€',
       value: 69,
       probability: 4,
-    }
+    },
   ];
 
   for (const gain of gains) {

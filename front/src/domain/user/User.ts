@@ -8,6 +8,7 @@ class _UserGet implements User {
   readonly gender: string;
   readonly birthDate: string;
   readonly isAdmin: boolean;
+  readonly isEmploye: boolean;
   readonly createdAt: string;
   readonly updatedAt: string;
 
@@ -19,6 +20,7 @@ class _UserGet implements User {
     this.gender = user.gender;
     this.birthDate = user.birthDate;
     this.isAdmin = user.isAdmin;
+    this.isEmploye = user.isEmploye;
     this.createdAt = user.createdAt;
     this.updatedAt = user.updatedAt;
   }

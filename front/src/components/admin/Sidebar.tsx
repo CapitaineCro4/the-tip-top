@@ -15,7 +15,7 @@ const navItems = [
     icon: FaUsers,
   },
   {
-    label: 'Historique des tickets',
+    label: 'Liste des tickets',
     href: '/admin/tickets',
     icon: TiTicket,
   },

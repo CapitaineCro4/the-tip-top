@@ -1,8 +1,8 @@
 'use client';
 
 import { dashboardContent } from '@/content/dashboardContent';
-import { DashboardLayout } from '@/components/ui/Dashboard/DashboardLayout';
-import { TicketInput } from '@/components/ui/Dashboard/TicketInput';
+import { DashboardLayout } from '@/components/Dashboard/DashboardLayout';
+import { TicketInput } from '@/components/Dashboard/TicketInput';
 import { AuthContext } from '@/context/AuthContext';
 import { useContext } from 'react';
 
@@ -13,7 +13,8 @@ export default function DashboardPage() {
     <DashboardLayout>
       <div className="p-6">
         <h1 className="text-2xl font-bold mb-8">
-          Bonjour, {user?.firstName} bienvenue sur votre {dashboardContent.title}
+          {user?.firstName}, bienvenue sur votre{' '}
+          {dashboardContent.title}
         </h1>
         <TicketInput />
       </div>

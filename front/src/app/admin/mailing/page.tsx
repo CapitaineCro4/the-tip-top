@@ -89,7 +89,7 @@ export default function MailingPage() {
   }
 
   return (
-    <div className="p-4 md:p-8 max-w-4xl mx-auto">
+    <div className="p-4  mx-auto">
       <div className="mb-8">
         <h1 className="text-2xl font-semibold text-gray-900">
           Envoyer un mail aux clients
@@ -100,7 +100,7 @@ export default function MailingPage() {
       </div>
 
       <form onSubmit={handleSubmit} className="space-y-6">
-        <div className="bg-white p-6 rounded-lg shadow-sm">
+        <div className="bg-white p-6  shadow-sm">
           <h2 className="text-lg font-medium mb-4">
             Sélectionner les destinataires
           </h2>
@@ -115,7 +115,7 @@ export default function MailingPage() {
                 : 'Sélectionner tout'}
             </button>
           </div>
-          <div className="max-h-48 overflow-y-auto border rounded-md p-2">
+          <div className="max-h-48 overflow-y-auto border-2 border-[#242E61]/20 p-2">
             {users.map((user) => (
               <label
                 key={user.id}
@@ -133,7 +133,7 @@ export default function MailingPage() {
                       );
                     }
                   }}
-                  className="h-4 w-4 text-primary border-gray-300 rounded focus:ring-primary"
+                  className="h-4 w-4 text-primary border-gray-300 focus:ring-primary"
                 />
                 <span className="ml-3 text-sm text-gray-700">
                   {user.firstName} {user.lastName} ({user.email})
@@ -143,8 +143,8 @@ export default function MailingPage() {
           </div>
         </div>
 
-        <div className="bg-white p-6 rounded-lg shadow-sm">
-          <h2 className="text-lg font-medium mb-4">Composer le message</h2>
+        <div className="bg-white p-6  shadow-sm">
+          <h2 className="text-lg font-medium mb-4">Rédiger le mail</h2>
           <div className="space-y-4">
             <div>
               <label
@@ -160,7 +160,7 @@ export default function MailingPage() {
                 onChange={(e) =>
                   setEmailData({ ...emailData, subject: e.target.value })
                 }
-                className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-primary focus:ring-primary sm:text-sm"
+                className="w-full px-6 py-3 border-2 border-[#242E61]/20 placeholder:text-black  focus:border-[#242E61] bg-white/60 text-black placeholder-gray-300 outline-none transition-all mt-1"
                 required
               />
             </div>
@@ -178,7 +178,7 @@ export default function MailingPage() {
                 onChange={(e) =>
                   setEmailData({ ...emailData, content: e.target.value })
                 }
-                className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-primary focus:ring-primary sm:text-sm"
+                className="w-full px-6 py-3 border-2 border-[#242E61]/20 placeholder:text-black  focus:border-[#242E61] bg-white/60 text-black placeholder-gray-300 outline-none transition-all mt-1"
                 required
               />
             </div>
@@ -194,7 +194,7 @@ export default function MailingPage() {
               !emailData.subject ||
               !emailData.content
             }
-            className="px-6 py-2 bg-primary text-white rounded-md hover:bg-primary-dark focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary disabled:opacity-50 disabled:cursor-not-allowed"
+            className="w-max-w-4xl bg-[#242E61] text-white  px-6 py-3 border-2 border-transparent hover:bg-[#16803C] transition-all duration-300 flex items-center justify-center focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary disabled:opacity-50 disabled:cursor-not-allowed"
           >
             {isSending ? 'Envoi en cours...' : 'Envoyer'}
           </button>

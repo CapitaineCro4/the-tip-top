@@ -46,6 +46,10 @@ services:
       - DATABASE_URL=$DATABASE_URL
       - API_PORT=$API_PORT
       - JWT_SECRET=$JWT_SECRET
+      - GOOGLE_CLIENT_ID=$GOOGLE_CLIENT_ID
+      - GOOGLE_CLIENT_SECRET=$GOOGLE_CLIENT_SECRET
+      - GOOGLE_CALLBACK_URL=$GOOGLE_CALLBACK_URL
+      - FRONTEND_URL=$FRONTEND_URL
     volumes:
       - ./api:/usr/src/app/api
       - /usr/src/app/api/node_modules

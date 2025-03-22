@@ -27,6 +27,17 @@ export function adminLogin(email: string, password: string): Promise<string> {
     });
 }
 
+export function employeLogin(email: string, password: string): Promise<string> {
+  return apis.tiptop
+    .post('/auth/employe/login', {
+      email,
+      password,
+    })
+    .then(async (response): Promise<string> => {
+      return Promise.resolve(response.data.token);
+    });
+}
+
 export function register(data: CreateUser): Promise<void> {
   return apis.tiptop.post('/auth/register', data);
 }

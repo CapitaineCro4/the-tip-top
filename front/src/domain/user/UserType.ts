@@ -6,6 +6,7 @@ export type User = {
   gender: string;
   birthDate: string;
   isAdmin: boolean;
+  isEmploye: boolean;
   createdAt: string;
   updatedAt: string;
 

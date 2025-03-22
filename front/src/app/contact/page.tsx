@@ -78,7 +78,7 @@ export default function ContactPage() {
           </div>
 
           {/* Additional Information */}
-          <div className="bg-gray-50 p-8 rounded-lg">
+          <div className="bg-gray-50 p-8 ">
             <h2 className="text-2xl font-bold text-gray-800 mb-6">
               À propos de nous
             </h2>
