@@ -6,6 +6,7 @@ export interface User {
   gender: string;
   birthDate: Date;
   isAdmin: boolean;
+  isEmploye: boolean;
   createdAt: Date;
   updatedAt: Date;
 }

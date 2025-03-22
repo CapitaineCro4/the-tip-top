@@ -10,6 +10,7 @@ export interface User {
   picture?: string;
   googleId?: string;
   isAdmin: boolean;
+  isEmploye: boolean;
 }
 
 export interface UpdateUserData {
@@ -36,6 +37,7 @@ export const userService = {
         gender: response.data.gender || 'OTHER',
         birthDate: new Date(response.data.birthDate || Date.now()),
         isAdmin: response.data.isAdmin || false,
+        isEmploye: response.data.isEmploye || false,
         picture: response.data.picture,
         googleId: response.data.googleId,
       };

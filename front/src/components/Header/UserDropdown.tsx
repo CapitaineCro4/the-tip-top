@@ -8,12 +8,14 @@ interface UserDropdownProps {
   userName: string;
   onLogout: () => void;
   isAdmin?: boolean;
+  isEmploye?: boolean;
 }
 
 export const UserDropdown = ({
   userName,
   onLogout,
   isAdmin,
+  isEmploye,
 }: UserDropdownProps) => {
   return (
     <motion.div
@@ -38,6 +40,16 @@ export const UserDropdown = ({
           >
             <FiSettings className="w-4 h-4" />
             Administration
+          </Link>
+        )}
+
+        {isEmploye && (
+          <Link
+            href="/employe"
+            className="w-full px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 flex items-center gap-2"
+          >
+            <FiSettings className="w-4 h-4" />
+            Employé
           </Link>
         )}
 

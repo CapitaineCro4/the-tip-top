@@ -21,6 +21,7 @@ export class UserRepository implements UserRepositoryInterface {
     if (where.email) whereParams.email = where.email;
     if (where.googleId) whereParams.googleId = where.googleId;
     if (where.isAdmin) whereParams.isAdmin = where.isAdmin;
+    if (where.isEmploye) whereParams.isEmploye = where.isEmploye;
 
     const user = await prisma.user.findFirst({
       where: {
@@ -84,6 +85,7 @@ export class UserRepository implements UserRepositoryInterface {
     data.gender = entity.gender;
     data.birthDate = entity.birthDate;
     data.isAdmin = entity.isAdmin;
+    data.isEmploye = entity.isEmploye;
     data.createdAt = entity.createdAt;
     data.updatedAt = entity.updatedAt;
     data.picture = entity.picture || undefined;

@@ -21,6 +21,7 @@ model User {
   updatedAt     DateTime    @updatedAt
   games         Game[]
   isAdmin       Boolean     @default(false)
+  isEmploye     Boolean     @default(false)
 }
 
 // Table Jeux Concours (définition générale)

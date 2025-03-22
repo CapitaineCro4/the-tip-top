@@ -5,6 +5,7 @@ import {
   getMe,
   login as loginApi,
   adminLogin as adminLoginApi,
+  employeLogin as employeLoginApi,
   getMeGames,
 } from '@/network/api-routes/Authentication';
 import { User } from '@/domain/user/UserType';
@@ -19,9 +20,11 @@ export const AuthContext = createContext<{
   isAuthenticated: () => boolean;
   hasAuthenticatedDashboard: () => boolean;
   isUserAdmin: () => boolean;
+  isUserEmploye: () => boolean;
   login: (email: string, password: string) => Promise<void>;
   loginWithToken: (token: string) => Promise<void>;
   adminLogin: (email: string, password: string) => Promise<void>;
+  employeLogin: (email: string, password: string) => Promise<void>;
   logout: () => Promise<void>;
   loading: boolean;
   userGames: Game[];
@@ -32,9 +35,11 @@ export const AuthContext = createContext<{
   isAuthenticated: () => false,
   hasAuthenticatedDashboard: () => false,
   isUserAdmin: () => false,
+  isUserEmploye: () => false,
   login: async () => {},
   loginWithToken: async () => {},
   adminLogin: async () => {},
+  employeLogin: async () => {},
   logout: async () => {},
   loading: false,
   userGames: [],
@@ -88,6 +93,20 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
       .finally(() => setLoading(false));
   };
 
+  const employeLogin = async (email: string, password: string): Promise<void> => {
+    setLoading(true);
+
+    return employeLoginApi(email, password)
+      .then(async (token) => {
+        Cookies.set(TOKEN_KEY, token);
+      })
+      .then(getCurrentUser)
+      .then(() => {
+        router.push('/employe');
+      })
+      .finally(() => setLoading(false));
+  };
+
   const logout = async (): Promise<void> => {
     return Promise.resolve().then(() => {
       setLoading(true);
@@ -125,6 +144,10 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
     return !!user?.isAdmin;
   }, [user]);
 
+  const isUserEmploye = useCallback(() => {
+    return !!user?.isEmploye;
+  }, [user]);
+
   const hasAuthenticatedDashboard = useCallback(() => {
     return (
       isAuthenticated() &&
@@ -141,9 +164,11 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
         isAuthenticated,
         hasAuthenticatedDashboard,
         isUserAdmin,
+        isUserEmploye,
         login,
         loginWithToken,
         adminLogin,
+        employeLogin,
         logout,
         loading,
         userGames,

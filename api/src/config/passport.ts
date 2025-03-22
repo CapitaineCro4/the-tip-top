@@ -64,6 +64,27 @@ export const configure = (app: Express): void => {
   );
 
   passport.use(
+    'employe/login',
+    new LocalStrategy(
+      { usernameField: 'email', passwordField: 'password' },
+      async (email, password, done) => {
+        try {
+          const user = await userService.findOneBy({
+            email,
+            password,
+            isEmploye: true,
+          });
+          return done(undefined, user);
+        } catch {
+          return done(undefined, false, {
+            message: 'Invalid email or password',
+          });
+        }
+      }
+    )
+  );
+
+  passport.use(
     'google',
     new GoogleStrategy(
       {
@@ -102,6 +123,7 @@ export const configure = (app: Express): void => {
               gender: 'UNKNOWN',
               birthDate: new Date(),
               isAdmin: false,
+              isEmploye: false,
             };
 
             await userService.create(userData);

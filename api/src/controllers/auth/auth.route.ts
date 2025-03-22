@@ -113,6 +113,39 @@ router.post('/admin/login', async (req, res) => {
   }
 });
 
+router.post('/employe/login', async (req, res) => {
+  try {
+    passport.authenticate(
+      'employe/login',
+      { session: false },
+      async (
+        err: Error | null,
+        user: User | false,
+        info: { message: string }
+      ) => {
+        if (err) {
+          return res.status(500).json({ message: err });
+        }
+
+        if (!user) {
+          return res.status(404).json({ message: info.message });
+        }
+
+        const token = jwt.sign({ id: user.id }, passportConfig.JWT_SECRET, {
+          expiresIn: '7d',
+        });
+        res.status(201).json({ token });
+      }
+    )(req, res);
+  } catch (error) {
+    if (error instanceof HttpError) {
+      res.status(400).json({ message: error.message, target: error.target });
+    } else {
+      res.status(500).json({ message: 'Internal server error' });
+    }
+  }
+});
+
 router.get(
   '/google',
   passport.authenticate('google', { scope: ['profile', 'email'] })

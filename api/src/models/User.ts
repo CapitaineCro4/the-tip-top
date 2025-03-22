@@ -5,6 +5,7 @@ export class User {
   email!: string;
   gender!: string;
   isAdmin!: boolean;
+  isEmploye!: boolean;
   birthDate!: Date;
   picture?: string;
   googleId?: string;
@@ -22,6 +23,7 @@ export type CreateUser = {
   gender: string;
   birthDate: Date;
   isAdmin: boolean;
+  isEmploye: boolean;
 };
 
 export type UpdateUser = {
@@ -33,6 +35,7 @@ export type UpdateUser = {
   picture?: string;
   gender?: string;
   isAdmin?: boolean;
+  isEmploye?: boolean;
 };
 
 export type WhereParams = {
@@ -43,4 +46,5 @@ export type WhereParams = {
   password?: string;
   googleId?: string;
   isAdmin?: boolean;
+  isEmploye?: boolean;
 };
