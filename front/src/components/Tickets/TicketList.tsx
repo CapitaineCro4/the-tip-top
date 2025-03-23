@@ -69,11 +69,6 @@ export const TicketList = () => {
     try {
       setIsLoading(true);
       const data = await ticketService.getAllTickets();
-      console.log('Tickets chargés:', data);
-      console.log(
-        'Tickets utilisés:',
-        data.filter((ticket) => ticket.used)
-      );
       setTickets(data);
       setFilteredTickets(data);
     } catch (err) {
@@ -95,8 +90,6 @@ export const TicketList = () => {
   };
 
   const handleViewTicket = (ticket: Ticket) => {
-    console.log('Ticket sélectionné:', ticket);
-    console.log('Données utilisateur:', ticket.user);
     setSelectedTicket(ticket);
     setShowModal(true);
   };

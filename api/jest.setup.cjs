@@ -1,12 +1,13 @@
+/* eslint-env node */
 /* global process */
 const dotenv = require('dotenv');
 const path = require('path');
 
 // Charger d'abord le .env à la racine
-dotenv.config({ path: path.resolve(__dirname, '../.env') });
+dotenv.config({ path: path.resolve(process.cwd(), '../.env') });
 
 // Puis charger le .env dans le dossier api (s'il existe)
-dotenv.config({ path: path.resolve(__dirname, '.env') });
+dotenv.config({ path: path.resolve(process.cwd(), '.env') });
 
 // S'assurer que les variables d'environnement requises sont définies
 const requiredEnvVars = [

@@ -105,7 +105,6 @@ export const AccountDetails = () => {
     const fetchUserData = async () => {
       try {
         const userData = await userService.getCurrentUser();
-        console.log('Données utilisateur reçues:', userData);
         setCurrentUser(userData);
         setFormData({
           civility:

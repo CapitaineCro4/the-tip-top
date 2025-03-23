@@ -2,7 +2,7 @@
 
 import { motion } from 'motion/react';
 import { FiX } from 'react-icons/fi';
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { RegisterForm } from './RegisterForm';
 import { LoginForm } from './LoginForm';
 
@@ -13,6 +13,20 @@ interface AuthFormProps {
 
 export const AuthForm = ({ isOpen, onClose }: AuthFormProps) => {
   const [isLogin, setIsLogin] = useState(true);
+
+  useEffect(() => {
+    if (isOpen) {
+      // Désactiver le scroll quand la modal est ouverte
+      document.body.style.overflow = 'hidden';
+    } else {
+      // Réactiver le scroll quand la modal est fermée
+      document.body.style.overflow = 'auto';
+    }
+    // Nettoyer l'effet quand le composant est démonté
+    return () => {
+      document.body.style.overflow = 'auto';
+    };
+  }, [isOpen]);
 
   const handleClose = () => {
     onClose();

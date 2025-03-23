@@ -3,6 +3,7 @@
   "version": "1.0.0",
   "author": "Frani",
   "main": "src/server.js",
+  "type": "module",
   "license": "MIT",
   "prisma": {
     "seed": "ts-node prisma/seed.ts"
@@ -32,21 +33,10 @@
     "prisma:generate": "prisma generate",
     "prisma:migrate": "prisma migrate dev --name init",
     "prisma:seed": "prisma db seed",
-    "test": "jest",
-    "test:e2e": "jest --config jest.config.cjs --testRegex \".e2e-spec.ts$\""
-  },
-  "jest": {
-    "moduleFileExtensions": [
-      "js",
-      "json",
-      "ts"
-    ],
-    "rootDir": ".",
-    "testEnvironment": "node",
-    "testRegex": ".spec.ts$",
-    "transform": {
-      "^.+\\.(t|j)s$": "ts-jest"
-    }
+    "test": "jest --config jest.config.mjs",
+    "test:watch": "jest --config jest.config.mjs --watch",
+    "test:e2e": "jest --config jest.config.mjs \"**/*.e2e-spec.ts\"",
+    "test:functional": "jest --config jest.config.mjs \"**/*.functional-spec.ts\""
   },
   "devDependencies": {
     "@babel/core": "^7.26.10",

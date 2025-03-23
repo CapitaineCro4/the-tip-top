@@ -33,8 +33,6 @@ router.put('/:id', async (req, res) => {
   const id = parseInt(req.params.id);
   const data = req.body as UpdateUser;
   try {
-    console.log('Updating user with ID:', id);
-    console.log('Update data:', data);
     await userService.update(id, data);
     res.status(201).json({ message: 'User updated successfully' });
   } catch (error) {

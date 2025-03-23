@@ -10,16 +10,21 @@ dotenv.config({ path: path.resolve(__dirname, '../.env') });
 /** @type {import('ts-jest').JestConfigWithTsJest} */
 const config = {
     preset: 'ts-jest',
-    moduleFileExtensions: ['js', 'json', 'ts', 'mjs'],
-    rootDir: '.',
     testEnvironment: 'node',
-    testRegex: '.e2e-spec.ts$',
+    moduleFileExtensions: ['js', 'json', 'ts'],
+    rootDir: '.',
+    testMatch: [
+        '**/__tests__/**/*.e2e-spec.ts'
+    ],
     transform: {
-        '^.+\\.(t|j)s$': 'ts-jest',
-        '^.+\\.mjs$': 'babel-jest'
+        '^.+\\.(t|j)s$': 'ts-jest'
     },
-    setupFiles: ['<rootDir>/jest.setup.mjs'],
-    extensionsToTreatAsEsm: ['.ts']
+    collectCoverageFrom: [
+        'src/**/*.ts',
+        '!src/**/*.spec.ts'
+    ],
+    coverageDirectory: 'coverage',
+    setupFilesAfterEnv: ['./jest.setup.ts']
 };
 
 export default config; 
