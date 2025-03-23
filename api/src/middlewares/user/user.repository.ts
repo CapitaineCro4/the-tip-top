@@ -63,6 +63,9 @@ export class UserRepository implements UserRepositoryInterface {
     if (data.password) {
       updateData.password = await Password.crypt(data.password);
     }
+    if (data.birthDate) {
+      updateData.birthDate = new Date(data.birthDate);
+    }
 
     await prisma.user.update({
       where: { id },

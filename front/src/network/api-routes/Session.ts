@@ -28,7 +28,8 @@ export function getSessions(): Promise<Session[]> {
 export function createSession(data: CreateSession): Promise<string> {
   return apis.tiptop
     .post('/sessions', data)
-    .then((response: AxiosResponse): Promise<string> =>
-      Promise.resolve(response.data)
+    .then(
+      (response: AxiosResponse): Promise<string> =>
+        Promise.resolve(response.data)
     );
 }

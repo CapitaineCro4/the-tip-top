@@ -40,11 +40,11 @@ app.get('/', (req: Request, res: Response) => {
   res.json({
     message:
       "Bienvenue sur l'API du site du jeu concours Thé tip top, pour plus d'informations veuillez consulter la documentation sur le site",
-    documentation: 'https://dsp5-archi-f24a-15m-g4.fr/api',
+    documentation: 'https://dsp5-archi-f24a-15m-g4.fr/docs',
   });
 });
 
-app.use('/api', router);
+app.use('/', router);
 
 // Ne démarrer le serveur que si ce fichier est exécuté directement
 const isMainModule =
