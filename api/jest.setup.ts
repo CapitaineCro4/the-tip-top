@@ -2,8 +2,8 @@
 import dotenv from 'dotenv';
 import path from 'path';
 
-// Charger le fichier .env
-dotenv.config({ path: path.resolve(process.cwd(), '.env') });
+// Charger le fichier .env.test pour les tests
+dotenv.config({ path: path.resolve(process.cwd(), '.env.test') });
 
 // Configuration globale pour les tests
 jest.setTimeout(30000); // 30 secondes
