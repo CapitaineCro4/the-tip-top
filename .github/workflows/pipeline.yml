@@ -328,10 +328,8 @@ jobs:
 
       - name: Request manual approval
         uses: trstringer/manual-approval@v1
-        env:
-          GITHUB_TOKEN: ${{ secrets.TOKEN_GITHUB }}
         with:
-          secret: ${{ secrets.TOKEN_GITHUB }}
+          secret: ${{ secrets.GITHUB_TOKEN }}
           approvers: CapitaineCro4
           minimum-approvals: 1
           issue-title: "Déploiement en production - Approbation requise"
