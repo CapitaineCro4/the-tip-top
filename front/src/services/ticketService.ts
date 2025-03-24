@@ -62,13 +62,7 @@ export interface Ticket {
 export const ticketService = {
   getAllTickets: async (): Promise<Ticket[]> => {
     try {
-      console.log('Récupération de tous les tickets...'); // Debug
       const response = await apis.tiptop.get('/tickets/all');
-      console.log('Structure complète de la réponse:', {
-        status: response.status,
-        headers: response.headers,
-        data: response.data,
-      });
 
       // Vérifions la structure d'un ticket utilisé
       const usedTickets = response.data.filter((t: RawTicket) => t.used);

@@ -24,7 +24,7 @@ describe('AppController (e2e)', () => {
 
   describe('Users Routes', () => {
     it('/users (GET) - devrait requérir une authentification', async () => {
-      const response = await request(app).get('/api/users');
+      const response = await request(app).get('/users');
       expect(response.status).toBe(401);
     });
   });

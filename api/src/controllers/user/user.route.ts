@@ -36,6 +36,7 @@ router.put('/:id', async (req, res) => {
     await userService.update(id, data);
     res.status(201).json({ message: 'User updated successfully' });
   } catch (error) {
+    console.error('Error updating user:', error);
     if (error instanceof HttpError) {
       res.status(400).json({ message: error.message, target: error.target });
     } else {

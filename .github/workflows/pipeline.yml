@@ -21,6 +21,8 @@ permissions:
   contents: write
   pages: write
   id-token: write
+  issues: write # Permission pour créer et gérer les issues
+  pull-requests: write # Permission pour interagir avec les pull requests
 
 jobs:
   # Job pour la construction (build) des applications
@@ -326,12 +328,24 @@ jobs:
 
       - name: Request manual approval
         uses: trstringer/manual-approval@v1
+        env:
+          GITHUB_TOKEN: ${{ secrets.TOKEN_GITHUB }}
         with:
-          secret: ${{ github.token }}
+          secret: ${{ secrets.TOKEN_GITHUB }}
           approvers: CapitaineCro4
           minimum-approvals: 1
-          issue-title: "Manual approval required for production deployment"
-          issue-body: "Please approve to deploy to production."
+          issue-title: "Déploiement en production - Approbation requise"
+          issue-body: |
+            Un déploiement en production a été demandé.
+
+            **Détails :**
+            - Branch: ${{ github.ref_name }}
+            - Commit: ${{ github.sha }}
+            - Initiateur: ${{ github.actor }}
+
+            Pour approuver, commentez avec l'un des mots suivants : "approved", "approve", "lgtm", "yes"
+            Pour refuser, commentez avec : "denied", "deny", "no"
+          timeout-minutes: 60
 
       - name: Deploy to Production
         if: success()

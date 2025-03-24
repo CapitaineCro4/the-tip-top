@@ -34,6 +34,7 @@ export type UpdateUser = {
   googleId?: string;
   picture?: string;
   gender?: string;
+  birthDate?: Date | string;
   isAdmin?: boolean;
   isEmploye?: boolean;
 };

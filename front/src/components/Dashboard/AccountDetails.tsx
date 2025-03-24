@@ -4,6 +4,7 @@ import { useState, useEffect } from 'react';
 import { dashboardContent } from '@/content/dashboardContent';
 import { FaChevronDown } from 'react-icons/fa';
 import { userService, User } from '@/services/userService';
+import { IoMdCheckmarkCircle } from 'react-icons/io';
 
 interface UpdateUserData {
   firstName: string;
@@ -13,6 +14,72 @@ interface UpdateUserData {
   birthDate: string;
   password?: string;
 }
+
+interface NotificationProps {
+  message: string;
+  changedFields: string[];
+  onClose: () => void;
+}
+
+const Notification = ({
+  message,
+  changedFields,
+  onClose,
+}: NotificationProps) => {
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      onClose();
+    }, 5000);
+
+    return () => clearTimeout(timer);
+  }, [onClose]);
+
+  const getDetailedMessage = (field: string) => {
+    switch (field) {
+      case 'Prénom':
+        return 'Votre prénom a été mis à jour';
+      case 'Nom':
+        return 'Votre nom a été mis à jour';
+      case 'Email':
+        return 'Votre adresse email a été mise à jour';
+      case 'Civilité':
+        return 'Votre civilité a été mise à jour';
+      case 'Date de naissance':
+        return 'Votre date de naissance a été mise à jour';
+      case 'Mot de passe':
+        return 'Votre mot de passe a été mis à jour';
+      default:
+        return `${field} a été mis à jour`;
+    }
+  };
+
+  return (
+    <div className="fixed inset-0 z-50 flex items-center justify-center">
+      <div className="absolute inset-0 bg-black/30 backdrop-blur-sm" />
+      <div className="relative bg-white p-6 shadow-xl max-w-md w-full mx-4 animate-slide-in">
+        <div className="flex items-center space-x-4">
+          <div className="flex-shrink-0">
+            <IoMdCheckmarkCircle className="h-8 w-8 text-green-400" />
+          </div>
+          <div className="flex-1">
+            <h3 className="text-lg font-semibold text-gray-900 mb-2">
+              {message}
+            </h3>
+            {changedFields.length > 0 && (
+              <div className="space-y-2">
+                {changedFields.map((field) => (
+                  <p key={field} className="text-sm text-gray-600">
+                    {getDetailedMessage(field)}
+                  </p>
+                ))}
+              </div>
+            )}
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+};
 
 export const AccountDetails = () => {
   const [formData, setFormData] = useState({
@@ -31,12 +98,13 @@ export const AccountDetails = () => {
   const [currentUser, setCurrentUser] = useState<User | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [showNotification, setShowNotification] = useState(false);
+  const [changedFields, setChangedFields] = useState<string[]>([]);
 
   useEffect(() => {
     const fetchUserData = async () => {
       try {
         const userData = await userService.getCurrentUser();
-        console.log('Données utilisateur reçues:', userData);
         setCurrentUser(userData);
         setFormData({
           civility:
@@ -100,6 +168,22 @@ export const AccountDetails = () => {
         birthDate: formData.birthDate,
       };
 
+      // Détecter les champs modifiés
+      const modifiedFields: string[] = [];
+      if (updateData.firstName !== currentUser.firstName)
+        modifiedFields.push('Prénom');
+      if (updateData.lastName !== currentUser.lastName)
+        modifiedFields.push('Nom');
+      if (updateData.email !== currentUser.email) modifiedFields.push('Email');
+      if (updateData.gender !== currentUser.gender)
+        modifiedFields.push('Civilité');
+      if (
+        updateData.birthDate !==
+        new Date(currentUser.birthDate).toISOString().split('T')[0]
+      )
+        modifiedFields.push('Date de naissance');
+      if (formData.password) modifiedFields.push('Mot de passe');
+
       if (formData.password) {
         updateData.password = formData.password;
       }
@@ -108,7 +192,9 @@ export const AccountDetails = () => {
       const updatedUser = await userService.getCurrentUser();
       setCurrentUser(updatedUser);
       setFormData((prev) => ({ ...prev, password: '', confirmPassword: '' }));
-      alert('Profil mis à jour avec succès !');
+
+      setChangedFields(modifiedFields);
+      setShowNotification(true);
     } catch (err) {
       setError('Erreur lors de la mise à jour du profil');
       console.error('Erreur:', err);
@@ -158,7 +244,7 @@ export const AccountDetails = () => {
   if (error) {
     return (
       <div className="max-w-2xl mx-auto">
-        <div className="p-4 bg-red-100 text-red-700 rounded">{error}</div>
+        <div className="p-4 bg-red-100 text-red-700 ">{error}</div>
       </div>
     );
   }
@@ -166,7 +252,7 @@ export const AccountDetails = () => {
   if (!currentUser) {
     return (
       <div className="max-w-2xl mx-auto">
-        <div className="p-4 bg-yellow-100 text-yellow-700 rounded">
+        <div className="p-4 bg-yellow-100 text-yellow-700">
           Aucune donnée utilisateur disponible
         </div>
       </div>
@@ -174,7 +260,14 @@ export const AccountDetails = () => {
   }
 
   return (
-    <div className="max-w-2xl mx-auto bg-white p-6 shadow-sm">
+    <div className="max-w-2xl mx-auto bg-white p-6 shadow-sm relative">
+      {showNotification && (
+        <Notification
+          message="Modifications enregistrées avec succès !"
+          changedFields={changedFields}
+          onClose={() => setShowNotification(false)}
+        />
+      )}
       <h2 className="text-xl font-semibold mb-6">
         {dashboardContent.accountSection.title}
       </h2>
@@ -266,9 +359,6 @@ export const AccountDetails = () => {
               : dashboardContent.accountSection.buttons.save}
           </button>
 
-          <button className="w-full px-6 py-3 border-2 placeholder:text-black border-[#242E61]/40 focus:border-[#242E61] bg-white text-[#242E61] placeholder-gray-300 outline-none transition-all hover:bg-[#1a2347] hover:text-white">
-            {dashboardContent.accountSection.buttons.changePassword}
-          </button>
 
           <button
             type="button"

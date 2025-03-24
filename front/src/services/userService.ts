@@ -19,6 +19,11 @@ export interface UpdateUserData {
   email?: string;
   gender?: string;
   password?: string;
+  googleId?: string;
+  picture?: string;
+  birthDate?: string | Date;
+  isAdmin?: boolean;
+  isEmploye?: boolean;
 }
 
 export const userService = {

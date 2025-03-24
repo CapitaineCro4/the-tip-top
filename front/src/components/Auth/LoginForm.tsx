@@ -84,7 +84,10 @@ export const LoginForm = ({ onClose }: { onClose: () => void }) => {
 
   return (
     <div>
-      <p className="text-center text-sm mb-4">
+      <h2 className="text-center text-2xl font-bold mb-4 mt-6">
+        Connexion à votre compte
+      </h2>
+      <p className="text-center text-sm mb-4 mt-6">
         Veuillez vous connecter pour accéder à votre espace.
       </p>
 
@@ -154,7 +157,7 @@ export const LoginForm = ({ onClose }: { onClose: () => void }) => {
         <hr className="w-1/3 border-gray-300 ml-2" />
       </div>
       <div className="flex justify-center mt-4 space-x-4">
-        <button className="bg-white text-[#3b5998] px-6 py-3 flex items-center w-[200px] text-center justify-center border-2 border-transparent hover:bg-gray-200 transition-all duration-300">
+        <button className="bg-white text-[#3b5998] px-6 py-3 flex items-center w-full text-center justify-center border-2 border-transparent hover:bg-gray-200 transition-all duration-300">
           <span className="mr-2">
             <FaFacebook />
           </span>
@@ -162,7 +165,7 @@ export const LoginForm = ({ onClose }: { onClose: () => void }) => {
         </button>
         <a
           href={googleAuthUrl}
-          className="bg-white text-[#231F20] px-6 py-3 flex items-center w-[200px] text-center justify-center border-2 border-transparent hover:bg-gray-200 transition-all duration-300"
+          className="bg-white text-[#231F20] px-6 py-3 flex items-center w-full text-center justify-center border-2 border-transparent hover:bg-gray-200 transition-all duration-300"
         >
           <span className="mr-2">
             <FcGoogle />
