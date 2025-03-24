@@ -285,7 +285,7 @@ jobs:
         run: |
           sshpass -p "$VPS_PASSWORD" ssh -o StrictHostKeyChecking=no $VPS_USER@$VPS_HOST << 'EOF'
               echo "Deploying to dev..."
-              cd /root/the-tip-top-app
+              cd /root/the-tip-top
               git fetch origin develop
               git reset --hard origin/develop || { echo "Git reset failed"; exit 1; }
               docker rm -f pushgateway prometheus grafana postgres_db api front backup || true
@@ -303,7 +303,7 @@ jobs:
         run: |
           sshpass -p "$VPS_PASSWORD" ssh -o StrictHostKeyChecking=no $VPS_USER@$VPS_HOST << 'EOF'
             echo "Deploying to preprod..."
-            cd /root/the-tip-top-app
+            cd /root/the-tip-top
             git pull origin preprod || { echo "Git pull failed"; exit 1; }
             docker rm -f pushgateway prometheus grafana postgres_db api front backup || true
             docker-compose down || { echo "Docker-compose down failed"; exit 1; }
@@ -328,10 +328,8 @@ jobs:
 
       - name: Request manual approval
         uses: trstringer/manual-approval@v1
-        env:
-          GITHUB_TOKEN: ${{ secrets.TOKEN_GITHUB }}
         with:
-          secret: ${{ secrets.TOKEN_GITHUB }}
+          secret: ${{ secrets.GITHUB_TOKEN }}
           approvers: CapitaineCro4
           minimum-approvals: 1
           issue-title: "Déploiement en production - Approbation requise"
@@ -356,7 +354,7 @@ jobs:
         run: |
           sshpass -p "$VPS_PASSWORD" ssh -o StrictHostKeyChecking=no $VPS_USER@$VPS_HOST << 'EOF'
             echo "Deploying to production..."
-            cd /root/the-tip-top-app
+            cd /root/the-tip-top
             git pull origin main || { echo "Git pull failed"; exit 1; }
             docker rm -f pushgateway prometheus grafana postgres_db api front backup || true
             docker-compose down || { echo "Docker-compose down failed"; exit 1; }
