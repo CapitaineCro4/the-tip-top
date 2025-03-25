@@ -352,15 +352,27 @@ jobs:
           VPS_USER: "root"
           VPS_PASSWORD: ${{ secrets.VPS_PASSWORD }}
         run: |
-          sshpass -p "$VPS_PASSWORD" ssh -o StrictHostKeyChecking=no $VPS_USER@$VPS_HOST << 'EOF'
-            echo "Deploying to production..."
-            cd /root/the-tip-top
-            git pull origin main || { echo "Git pull failed"; exit 1; }
-            docker rm -f pushgateway prometheus grafana postgres_db api front backup || true
-            docker-compose down || { echo "Docker-compose down failed"; exit 1; }
-            docker-compose up --build -d || { echo "Docker-compose up failed"; exit 1; }
-            echo "Deployment to production finished!"
-          EOF
+            sshpass -p "$VPS_PASSWORD" ssh -o StrictHostKeyChecking=no $VPS_USER@$VPS_HOST << 'EOF'
+              echo "Deploying to production..."
+              cd /root/the-tip-top
+              git pull origin main || { echo "Git pull failed"; exit 1; }
+              
+              # Créer le fichier .env
+              echo "API_PORT=3002" > .env
+              echo "DATABASE_URL=postgresql://admin:admin@postgres_db:5432/mydatabase?schema=public" >> .env
+              echo "JWT_SECRET=secret" >> .env
+              echo "FRONT_PORT=3000" >> .env
+              echo "NEXT_PUBLIC_API_URL=http://dsp5-archi-f24a-15m-g4.fr/api" >> .env
+              echo "GOOGLE_CLIENT_ID=${{ secrets.GOOGLE_CLIENT_ID }}" >> .env
+              echo "GOOGLE_CLIENT_SECRET=${{ secrets.GOOGLE_CLIENT_SECRET }}" >> .env
+              echo "GOOGLE_CALLBACK_URL=http://dsp5-archi-f24a-15m-g4.fr/auth/google/callback" >> .env
+              echo "FRONTEND_URL=http://dsp5-archi-f24a-15m-g4.fr" >> .env
+              
+              docker rm -f pushgateway prometheus grafana postgres_db api front backup || true
+              docker-compose down || { echo "Docker-compose down failed"; exit 1; }
+              docker-compose up --build -d || { echo "Docker-compose up failed"; exit 1; }
+              echo "Deployment to production finished!"
+            EOF
 
   # Job pour la publication des rapports de test
   coverage-test-visualization-page:
