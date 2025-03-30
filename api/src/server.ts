@@ -44,7 +44,7 @@ app.get('/', (req: Request, res: Response) => {
   });
 });
 
-app.use('/', router);
+app.use('/api', router);
 
 // Ne démarrer le serveur que si ce fichier est exécuté directement
 const isMainModule =
