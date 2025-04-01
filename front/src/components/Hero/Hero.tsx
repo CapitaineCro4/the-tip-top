@@ -55,7 +55,7 @@ const Hero: React.FC<{ imageSrc: string }> = ({ imageSrc }) => {
           <button
             id="participate-btn"
             onClick={() => setIsAuthOpen(true)}
-            className="bg-white text-green-700 py-2 px-6 hover:scale-105 transition-all duration-300 hover:bg-gray-200"
+            className="h-12 bg-white text-[#16803C] py-2 px-6 rounded-md font-medium hover:bg-gray-100 transition-colors"
           >
             {buttonText}
           </button>

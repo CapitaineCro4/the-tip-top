@@ -53,6 +53,11 @@ services:
       - FACEBOOK_CLIENT_SECRET=$FACEBOOK_CLIENT_SECRET
       - FACEBOOK_CALLBACK_URL=$FACEBOOK_CALLBACK_URL
       - FRONTEND_URL=$FRONTEND_URL
+      - SMTP_HOST=$SMTP_HOST
+      - SMTP_PORT=$SMTP_PORT
+      - SMTP_USER=$SMTP_USER
+      - SMTP_PASS=$SMTP_PASS
+      - SMTP_FROM=$SMTP_FROM
     volumes:
       - ./api:/usr/src/app/api
       - /usr/src/app/api/node_modules
