@@ -1,4 +1,9 @@
-import { Session, CreateSession, WhereParams, UpdateSession } from '../../models/Session';
+import {
+  Session,
+  CreateSession,
+  WhereParams,
+  UpdateSession,
+} from '../../models/Session';
 
 export interface SessionRepositoryInterface {
   findAll(): Promise<Session[]>;

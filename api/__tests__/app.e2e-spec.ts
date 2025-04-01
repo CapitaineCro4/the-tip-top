@@ -39,5 +39,4 @@ describe('AppController (e2e)', () => {
       expect(response.body).toEqual({ status: 'ok' });
     });
   });
-
 });

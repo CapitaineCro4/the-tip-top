@@ -5,11 +5,7 @@ import tsPlugin from '@typescript-eslint/eslint-plugin';
 export default [
   js.configs.recommended,
   {
-    ignores: [
-      'node_modules/**',
-      'dist/**',
-      'build/**'
-    ],
+    ignores: ['node_modules/**', 'dist/**', 'build/**'],
     files: ['**/*.ts'],
     languageOptions: {
       parser: tsParser,
@@ -29,4 +25,4 @@ export default [
       ...tsPlugin.configs.recommended.rules,
     },
   },
-]; 
+];

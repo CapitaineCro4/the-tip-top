@@ -49,4 +49,4 @@ export class ResetTokenService {
       where: { token },
     });
   }
-} 
+}
