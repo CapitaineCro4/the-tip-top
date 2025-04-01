@@ -78,7 +78,7 @@ services:
       - NEXT_PUBLIC_API_URL=$NEXT_PUBLIC_API_URL
       - NEXT_PUBLIC_FRONTEND_URL=$NEXT_PUBLIC_FRONTEND_URL
     env_file:
-      - ./front/.env.local
+      - ./front/.env.production
     volumes:
       - ./front:/app
       - /app/node_modules
