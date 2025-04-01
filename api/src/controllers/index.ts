@@ -1,6 +1,6 @@
 import express from 'express';
 import { GainRoutes } from './gain/gain.route';
-import { UserRoutes } from './user/user.route';
+import UserRoutes from './user/user.route';
 import { SessionRoutes } from './session/session.route';
 import { TicketRoutes } from './ticket/ticket.route';
 import { GameRoutes } from './game/game.route';

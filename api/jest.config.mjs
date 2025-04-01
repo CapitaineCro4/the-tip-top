@@ -5,7 +5,7 @@ import { resolve } from 'path';
 config({ path: resolve(process.cwd(), '.env.test') });
 
 /** @type {import('ts-jest').JestConfigWithTsJest} */
-const config = {
+const jestConfig = {
     preset: 'ts-jest',
     testEnvironment: 'node',
     roots: ['<rootDir>/src', '<rootDir>/__tests__'],
@@ -19,4 +19,4 @@ const config = {
     setupFiles: ['<rootDir>/jest.setup.ts'],
 };
 
-export default config; 
+export default jestConfig; 
