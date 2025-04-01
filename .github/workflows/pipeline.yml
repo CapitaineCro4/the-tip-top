@@ -363,9 +363,18 @@ jobs:
               echo "JWT_SECRET=secret" >> .env
               echo "FRONT_PORT=3000" >> .env
               echo "NEXT_PUBLIC_API_URL=http://dsp5-archi-f24a-15m-g4.fr/api" >> .env
+              echo "NEXT_PUBLIC_FRONTEND_URL=http://dsp5-archi-f24a-15m-g4.fr" >> .env
               echo "GOOGLE_CLIENT_ID=${{ secrets.GOOGLE_CLIENT_ID }}" >> .env
               echo "GOOGLE_CLIENT_SECRET=${{ secrets.GOOGLE_CLIENT_SECRET }}" >> .env
-              echo "GOOGLE_CALLBACK_URL=http://dsp5-archi-f24a-15m-g4.fr/auth/google/callback" >> .env
+              echo "GOOGLE_CALLBACK_URL=https://dsp5-archi-f24a-15m-g4.fr/api/auth/google/callback" >> .env
+              echo "FACEBOOK_CLIENT_ID=${{ secrets.FACEBOOK_CLIENT_ID }}" >> .env
+              echo "FACEBOOK_CLIENT_SECRET=${{ secrets.FACEBOOK_CLIENT_SECRET }}" >> .env
+              echo "FACEBOOK_CALLBACK_URL=https://dsp5-archi-f24a-15m-g4.fr/api/auth/facebook/callback" >> .env
+              echo "SMTP_HOST=${{ secrets.SMTP_HOST }}" >> .env
+              echo "SMTP_PORT=${{ secrets.SMTP_PORT }}" >> .env
+              echo "SMTP_USER=${{ secrets.SMTP_USER }}" >> .env
+              echo "SMTP_PASS=${{ secrets.SMTP_PASS }}" >> .env
+              echo "SMTP_FROM=${{ secrets.SMTP_FROM }}" >> .env
               echo "FRONTEND_URL=http://dsp5-archi-f24a-15m-g4.fr" >> .env
               
               docker rm -f pushgateway prometheus grafana postgres_db api front backup || true
