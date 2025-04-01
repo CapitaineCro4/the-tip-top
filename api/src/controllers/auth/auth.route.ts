@@ -174,4 +174,32 @@ router.get(
   }
 );
 
+router.get(
+  '/facebook',
+  passport.authenticate('facebook', { scope: ['email', 'public_profile'] })
+);
+
+router.get(
+  '/facebook/callback',
+  passport.authenticate('facebook', { session: false }),
+  async (req, res) => {
+    try {
+      const user = req.user as User;
+      const token = jwt.sign({ id: user.id }, passportConfig.JWT_SECRET, {
+        expiresIn: '7d',
+      });
+
+      // Rediriger vers le frontend avec le token
+      res.redirect(
+        `${process.env.NEXT_PUBLIC_FRONTEND_URL}/auth/callback?token=${token}`
+      );
+    } catch (error: unknown) {
+      console.error("Erreur lors de l'authentification Facebook:", error);
+      res.redirect(
+        `${process.env.NEXT_PUBLIC_FRONTEND_URL}/login?error=auth_failed`
+      );
+    }
+  }
+);
+
 export { router as AuthRoutes };

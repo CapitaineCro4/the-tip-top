@@ -2,8 +2,9 @@
 const nextConfig = {
     env: {
         NEXT_PUBLIC_API_URL: process.env.NEXT_PUBLIC_API_URL,
+        NEXT_PUBLIC_FRONTEND_URL: process.env.NEXT_PUBLIC_FRONTEND_URL,
     },
-    // Autres configurations si nécessaires
+
 };
 
 module.exports = nextConfig; 

@@ -21,7 +21,7 @@ const ProductCarousel: React.FC = () => {
           </svg>
         </div>
 
-        <h2 className="text-2xl md:text-3xl font-bold text-center mb-8 z-10 mt-32 md:mt-40 md:mb-20">
+        <h2 className="text-white  text-2xl md:text-3xl font-bold text-center mb-8 z-10 mt-32 md:mt-40 md:mb-20">
           Découvrez les merveilles à remporter
         </h2>
       </div>
@@ -66,7 +66,7 @@ const ProductCarousel: React.FC = () => {
           className="flex flex-col items-center justify-center max-w-4xl md:mt-1 px-4"
           id="how-to-participate"
         >
-          <Image src={teaLogo} alt="lot" width={180} height={180} />
+          <Image src={teaLogo} alt="lot" width={180} height={180} unoptimized />
 
           <h2 className="text-2xl md:text-3xl font-bold text-center mb-8 z-10  md:mb-6 text-white">
             Comment participer ?

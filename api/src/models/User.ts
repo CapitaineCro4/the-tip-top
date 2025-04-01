@@ -9,6 +9,7 @@ export class User {
   birthDate!: Date;
   picture?: string;
   googleId?: string;
+  facebookId?: string;
   createdAt!: Date;
   updatedAt!: Date;
 }
@@ -19,6 +20,7 @@ export type CreateUser = {
   email: string;
   password?: string;
   googleId?: string;
+  facebookId?: string;
   picture?: string;
   gender: string;
   birthDate: Date;
@@ -32,6 +34,7 @@ export type UpdateUser = {
   email?: string;
   password?: string;
   googleId?: string;
+  facebookId?: string;
   picture?: string;
   gender?: string;
   birthDate?: Date | string;
@@ -46,6 +49,7 @@ export type WhereParams = {
   email?: string;
   password?: string;
   googleId?: string;
+  facebookId?: string;
   isAdmin?: boolean;
   isEmploye?: boolean;
 };

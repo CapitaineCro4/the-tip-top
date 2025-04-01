@@ -1,26 +1,26 @@
-FROM node:18-alpine AS builder
+FROM node:18-alpine AS development
 
 WORKDIR /app
 
+# Copie des fichiers de dépendances
 COPY package.json yarn.lock ./
 
+# Installation des dépendances (y compris les devDependencies)
 RUN yarn install --frozen-lockfile
 
+# Copie de tout le code source
 COPY . .
 
-RUN yarn build
+# Copie du fichier .env pour le développement
+COPY .env.local ./.env.local
 
-FROM node:18-alpine AS production
+# Définit l'environnement comme développement
+ENV NODE_ENV=development
+ENV WATCHPACK_POLLING=true
+ENV CHOKIDAR_USEPOLLING=true
 
-WORKDIR /app
-
-COPY --from=builder /app/.next ./.next
-COPY --from=builder /app/node_modules ./node_modules
-COPY --from=builder /app/package.json ./package.json
-COPY --from=builder /app/public ./public
-
-ENV NODE_ENV=production
-
+# Expose le port (par défaut 3000 pour Next.js)
 EXPOSE 3000
 
-CMD ["yarn", "start"]
+# Démarre l'application en mode développement (avec rechargement à chaud)
+CMD ["yarn", "dev"]

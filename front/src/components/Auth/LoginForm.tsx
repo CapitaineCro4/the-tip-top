@@ -81,6 +81,7 @@ export const LoginForm = ({ onClose }: { onClose: () => void }) => {
   };
 
   const googleAuthUrl = `${process.env.NEXT_PUBLIC_API_URL}/auth/google`;
+  const facebookAuthUrl = `${process.env.NEXT_PUBLIC_API_URL}/auth/facebook`;
 
   return (
     <div>
@@ -157,12 +158,15 @@ export const LoginForm = ({ onClose }: { onClose: () => void }) => {
         <hr className="w-1/3 border-gray-300 ml-2" />
       </div>
       <div className="flex justify-center mt-4 space-x-4">
-        <button className="bg-white text-[#3b5998] px-6 py-3 flex items-center w-full text-center justify-center border-2 border-transparent hover:bg-gray-200 transition-all duration-300">
+        <a
+          href={facebookAuthUrl}
+          className="bg-white text-[#3b5998] px-6 py-3 flex items-center w-full text-center justify-center border-2 border-transparent hover:bg-gray-200 transition-all duration-300"
+        >
           <span className="mr-2">
             <FaFacebook />
           </span>
           <span className="text-[#231F20]">FACEBOOK</span>
-        </button>
+        </a>
         <a
           href={googleAuthUrl}
           className="bg-white text-[#231F20] px-6 py-3 flex items-center w-full text-center justify-center border-2 border-transparent hover:bg-gray-200 transition-all duration-300"
