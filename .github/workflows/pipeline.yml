@@ -13,7 +13,7 @@ on:
       - main
   schedule:
     - cron: "0 0 * * 0" # Backup hebdomadaire le dimanche à minuit UTC
-  workflow_dispatch: # Déclenchement manuel pour restore ou autres
+  workflow_dispatch: # Déclenchement manuel
 
 permissions:
   contents: write
@@ -130,7 +130,7 @@ jobs:
             front/coverage/
             api/coverage/
 
-  # Job 3 : Docker (Construction et push des images Docker)
+  # Job 3 : Docker (Construction et push des images Docker vers Docker Hub)
   docker:
     needs: test
     runs-on: ubuntu-latest
@@ -144,11 +144,15 @@ jobs:
           name: build-artifacts
           path: artifacts
 
+      - name: Debug Artifact Structure
+        run: |
+          ls -R artifacts || echo "Artifacts directory is empty"
+
       - name: Restore Artifacts
         run: |
           mkdir -p front/.next api/dist
-          cp -r artifacts/front/* front/.next/
-          cp -r artifacts/api/* api/dist/
+          cp -r artifacts/front/.next/* front/.next/ || echo "No files in artifacts/front/.next"
+          cp -r artifacts/api/dist/* api/dist/ || echo "No files in artifacts/api/dist"
 
       - name: Login to Docker Hub
         uses: docker/login-action@v3
@@ -172,15 +176,26 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v4
 
+      - name: Download Build Artifacts
+        uses: actions/download-artifact@v4
+        with:
+          name: build-artifacts
+          path: artifacts
+
+      - name: Restore Artifacts
+        run: |
+          mkdir -p front/.next api/dist
+          cp -r artifacts/front/.next/* front/.next/ || echo "No files in artifacts/front/.next"
+          cp -r artifacts/api/dist/* api/dist/ || echo "No files in artifacts/api/dist"
+
       - name: Install sshpass
         run: sudo apt-get update && sudo apt-get install -y sshpass
 
       - name: Deploy to Dev
         run: |
+          sshpass -p "$VPS_PASSWORD" scp -r -o StrictHostKeyChecking=no ./* $VPS_USER@$VPS_HOST:/root/the-tip-top/
           sshpass -p "$VPS_PASSWORD" ssh -o StrictHostKeyChecking=no $VPS_USER@$VPS_HOST << 'EOF'
             cd /root/the-tip-top
-            git fetch origin develop
-            git reset --hard origin/develop
             docker-compose down
             docker-compose up --build -d
           EOF
@@ -194,14 +209,26 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v4
 
+      - name: Download Build Artifacts
+        uses: actions/download-artifact@v4
+        with:
+          name: build-artifacts
+          path: artifacts
+
+      - name: Restore Artifacts
+        run: |
+          mkdir -p front/.next api/dist
+          cp -r artifacts/front/.next/* front/.next/ || echo "No files in artifacts/front/.next"
+          cp -r artifacts/api/dist/* api/dist/ || echo "No files in artifacts/api/dist"
+
       - name: Install sshpass
         run: sudo apt-get update && sudo apt-get install -y sshpass
 
       - name: Deploy to Preprod
         run: |
+          sshpass -p "$VPS_PASSWORD" scp -r -o StrictHostKeyChecking=no ./* $VPS_USER@$VPS_HOST:/root/the-tip-top/
           sshpass -p "$VPS_PASSWORD" ssh -o StrictHostKeyChecking=no $VPS_USER@$VPS_HOST << 'EOF'
             cd /root/the-tip-top
-            git pull origin preprod
             docker-compose down
             docker-compose up --build -d
           EOF
@@ -218,6 +245,18 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v4
 
+      - name: Download Build Artifacts
+        uses: actions/download-artifact@v4
+        with:
+          name: build-artifacts
+          path: artifacts
+
+      - name: Restore Artifacts
+        run: |
+          mkdir -p front/.next api/dist
+          cp -r artifacts/front/.next/* front/.next/ || echo "No files in artifacts/front/.next"
+          cp -r artifacts/api/dist/* api/dist/ || echo "No files in artifacts/api/dist"
+
       - name: Install sshpass
         run: sudo apt-get update && sudo apt-get install -y sshpass
 
@@ -230,9 +269,9 @@ jobs:
 
       - name: Deploy to Production
         run: |
+          sshpass -p "$VPS_PASSWORD" scp -r -o StrictHostKeyChecking=no ./* $VPS_USER@$VPS_HOST:/root/the-tip-top/
           sshpass -p "$VPS_PASSWORD" ssh -o StrictHostKeyChecking=no $VPS_USER@$VPS_HOST << 'EOF'
             cd /root/the-tip-top
-            git pull origin main
             echo "API_PORT=3002" > .env
             echo "DATABASE_URL=postgresql://admin:admin@postgres_db:5432/mydatabase?schema=public" >> .env
             echo "JWT_SECRET=secret" >> .env
@@ -305,10 +344,22 @@ jobs:
   # Job 8 : Restore (Redéploiement automatique)
   restore:
     runs-on: ubuntu-latest
-    if: github.event_name == 'workflow_dispatch' # Déclenchement manuel
+    if: github.event_name == 'workflow_dispatch'
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
+
+      - name: Download Build Artifacts
+        uses: actions/download-artifact@v4
+        with:
+          name: build-artifacts
+          path: artifacts
+
+      - name: Restore Artifacts
+        run: |
+          mkdir -p front/.next api/dist
+          cp -r artifacts/front/.next/* front/.next/ || echo "No files in artifacts/front/.next"
+          cp -r artifacts/api/dist/* api/dist/ || echo "No files in artifacts/api/dist"
 
       - name: Install sshpass
         run: sudo apt-get update && sudo apt-get install -y sshpass
@@ -365,21 +416,14 @@ jobs:
           tar -xzf "${{ steps.download_backup.outputs.backup_name }}"
           ls -l db_backup.sql
 
-      - name: Restore Database on VPS
+      - name: Restore Database and Redeploy
         run: |
-          sshpass -p "$VPS_PASSWORD" scp -o StrictHostKeyChecking=no db_backup.sql $VPS_USER@$VPS_HOST:/tmp/
-          sshpass -p "$VPS_PASSWORD" ssh -o StrictHostKeyChecking=no $VPS_USER@$VPS_HOST << 'EOF'
-            docker exec -i postgres_db psql -U admin -d mydatabase < /tmp/db_backup.sql
-            rm -f /tmp/db_backup.sql
-          EOF
-
-      - name: Redeploy Docker Images
-        run: |
+          sshpass -p "$VPS_PASSWORD" scp -r -o StrictHostKeyChecking=no ./* $VPS_USER@$VPS_HOST:/root/the-tip-top/
           sshpass -p "$VPS_PASSWORD" ssh -o StrictHostKeyChecking=no $VPS_USER@$VPS_HOST << 'EOF'
             cd /root/the-tip-top
-            git pull origin main || echo "Git pull échoué, mais on continue"
+            docker exec -i postgres_db psql -U admin -d mydatabase < db_backup.sql
             docker-compose down
-            docker-compose up -d
+            docker-compose up --build -d
             echo "Redéploiement terminé !"
           EOF
 
