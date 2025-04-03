@@ -122,6 +122,7 @@ export class TicketRepository implements TicketRepositoryInterface {
           ...entity.user,
           picture: entity.user.picture || undefined,
           googleId: entity.user.googleId || undefined,
+          facebookId: entity.user.facebookId || undefined,
         }
       : undefined;
     data.createdAt = entity.createdAt;

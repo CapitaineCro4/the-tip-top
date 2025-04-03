@@ -49,7 +49,15 @@ services:
       - GOOGLE_CLIENT_ID=$GOOGLE_CLIENT_ID
       - GOOGLE_CLIENT_SECRET=$GOOGLE_CLIENT_SECRET
       - GOOGLE_CALLBACK_URL=$GOOGLE_CALLBACK_URL
+      - FACEBOOK_CLIENT_ID=$FACEBOOK_CLIENT_ID
+      - FACEBOOK_CLIENT_SECRET=$FACEBOOK_CLIENT_SECRET
+      - FACEBOOK_CALLBACK_URL=$FACEBOOK_CALLBACK_URL
       - FRONTEND_URL=$FRONTEND_URL
+      - SMTP_HOST=$SMTP_HOST
+      - SMTP_PORT=$SMTP_PORT
+      - SMTP_USER=$SMTP_USER
+      - SMTP_PASS=$SMTP_PASS
+      - SMTP_FROM=$SMTP_FROM
     volumes:
       - ./api:/usr/src/app/api
       - /usr/src/app/api/node_modules
@@ -63,13 +71,20 @@ services:
       - "3000:3000"
     depends_on:
       - api
+    environment:
+      - WATCHPACK_POLLING=true
+      - CHOKIDAR_USEPOLLING=true
+      - NODE_ENV=development
+      - NEXT_PUBLIC_API_URL=$NEXT_PUBLIC_API_URL
+      - NEXT_PUBLIC_FRONTEND_URL=$NEXT_PUBLIC_FRONTEND_URL
+    env_file:
+      - ./front/.env.production
     volumes:
       - ./front:/app
       - /app/node_modules
       - /app/.next
-    environment:
-      - WATCHPACK_POLLING=true
-      - NEXT_PUBLIC_API_URL=$NEXT_PUBLIC_API_URL
+    tty: true
+    stdin_open: true
 
   prometheus:
     image: prom/prometheus:latest

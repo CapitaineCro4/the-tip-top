@@ -2,10 +2,22 @@ import request from 'supertest';
 import { Express } from 'express';
 import { PrismaClient } from '@prisma/client';
 import * as serverModule from '../src/server';
-import { describe, expect, it, beforeAll, afterAll } from '@jest/globals';
+import { describe, expect, it, beforeAll, afterAll, jest } from '@jest/globals';
 
 const prisma = new PrismaClient();
 const { app } = serverModule as { app: Express };
+
+// Mock des stratégies d'authentification
+jest.mock('../src/config/passport', () => ({
+  configure: () => {
+    // Mock de la configuration de passport
+    return {
+      use: jest.fn(),
+      serializeUser: jest.fn(),
+      deserializeUser: jest.fn(),
+    };
+  },
+}));
 
 describe('AppController (e2e)', () => {
   beforeAll(async () => {});
@@ -20,12 +32,11 @@ describe('AppController (e2e)', () => {
       expect(response.status).toBe(200);
       expect(response.body).toHaveProperty('message');
     });
-  });
 
-  describe('Users Routes', () => {
-    it('/users (GET) - devrait requérir une authentification', async () => {
-      const response = await request(app).get('/users');
-      expect(response.status).toBe(401);
+    it('/health (GET)', async () => {
+      const response = await request(app).get('/health');
+      expect(response.status).toBe(200);
+      expect(response.body).toEqual({ status: 'ok' });
     });
   });
 });

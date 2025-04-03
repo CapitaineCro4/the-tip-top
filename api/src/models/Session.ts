@@ -1,4 +1,4 @@
-import { Ticket } from "./Ticket";
+import { Ticket } from './Ticket';
 
 export class Session {
   id!: number;
@@ -16,7 +16,7 @@ export type CreateSession = {
   startDate: Date;
   endDate: Date;
   claimEndDate: Date;
-}
+};
 
 export type WhereParams = {
   id?: number;
@@ -26,5 +26,5 @@ export type WhereParams = {
   claimEndDate?: Date;
   createdAt?: Date;
   updatedAt?: Date;
-}
-export type UpdateSession = Partial<CreateSession>
+};
+export type UpdateSession = Partial<CreateSession>;

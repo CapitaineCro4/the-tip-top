@@ -1,11 +1,12 @@
-import express from 'express';
 import passport from 'passport';
 import { UserService } from '../../services/user.service';
 import { UserRepository } from '../../middlewares/user/user.repository';
 import { UpdateUser } from '../../models/User';
 import { HttpError } from '../../utils/HttpError';
+import { Router } from 'express';
+import { authenticateJWT } from '../../middlewares/auth';
 
-const router = express.Router();
+const router = Router();
 const userRepository = new UserRepository();
 const userService = new UserService(userRepository);
 
@@ -59,4 +60,10 @@ router.delete('/:id', async (req, res) => {
   }
 });
 
-export { router as UserRoutes };
+// Route protégée par authentification
+router.get('/users', authenticateJWT, async (req, res) => {
+  const users = await userService.findAll();
+  res.status(200).json(users);
+});
+
+export default router;

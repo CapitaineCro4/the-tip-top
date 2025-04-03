@@ -20,6 +20,7 @@ export class UserRepository implements UserRepositoryInterface {
     if (where.lastName) whereParams.lastName = where.lastName;
     if (where.email) whereParams.email = where.email;
     if (where.googleId) whereParams.googleId = where.googleId;
+    if (where.facebookId) whereParams.facebookId = where.facebookId;
     if (where.isAdmin) whereParams.isAdmin = where.isAdmin;
     if (where.isEmploye) whereParams.isEmploye = where.isEmploye;
 
@@ -93,6 +94,7 @@ export class UserRepository implements UserRepositoryInterface {
     data.updatedAt = entity.updatedAt;
     data.picture = entity.picture || undefined;
     data.googleId = entity.googleId || undefined;
+    data.facebookId = entity.facebookId || undefined;
     return data;
   }
 }

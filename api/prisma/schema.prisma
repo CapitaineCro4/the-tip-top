@@ -14,6 +14,7 @@ model User {
   email         String      @unique
   password      String?     // Rendu optionnel pour Google Auth
   googleId      String?     @unique
+  facebookId    String?     @unique
   picture       String?
   gender        String     // Pour stats
   birthDate     DateTime   // Pour stats
@@ -23,6 +24,7 @@ model User {
   tickets       Ticket[]
   isAdmin       Boolean     @default(false)
   isEmploye     Boolean     @default(false)
+  resetTokens   ResetToken[]
 }
 
 // Table Jeux Concours (définition générale)
@@ -76,4 +78,15 @@ model Gain {
   value         Float       // Ex. 0, 39, 69
   probability   Int         // Ex. 0, 100, 80
   tickets       Ticket[]
+}
+
+model ResetToken {
+  id        Int      @id @default(autoincrement())
+  token     String   @unique
+  expires   DateTime
+  userId    Int
+  user      User     @relation(fields: [userId], references: [id])
+  createdAt DateTime @default(now())
+
+  @@index([userId])
 }

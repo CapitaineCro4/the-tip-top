@@ -1,4 +1,4 @@
-import express from 'express';
+import express, { RequestHandler } from 'express';
 import { UserService } from '../../services/user.service';
 import { UserRepository } from '../../middlewares/user/user.repository';
 import { CreateUser, User } from '../../models/User';
@@ -8,6 +8,14 @@ import jwt from 'jsonwebtoken';
 import { passportConfig } from '../../config/passport';
 import { GameService } from '../../services/game.service';
 import { GameRepository } from '../../middlewares/game/game.repository';
+import { ResetTokenService } from '../../services/resetToken.service';
+import { EmailService } from '../../services/email.service';
+import { Password } from '../../utils/Password';
+import { validatePassword } from '../../utils/validation';
+import {
+  CALLBACK_FRONTEND_URL,
+  LOGIN_FRONTEND_URL,
+} from '../../shared/constantes';
 
 const router = express.Router();
 const userRepository = new UserRepository();
@@ -146,14 +154,43 @@ router.post('/employe/login', async (req, res) => {
   }
 });
 
-router.get(
-  '/google',
-  passport.authenticate('google', { scope: ['profile', 'email'] })
-);
+router.get('/google', (req, res, next) => {
+  console.log('Initiating Google auth...');
+  passport.authenticate('google', { scope: ['profile', 'email'] })(
+    req,
+    res,
+    next
+  );
+});
 
 router.get(
   '/google/callback',
   passport.authenticate('google', { session: false }),
+  async (req, res) => {
+    try {
+      console.log('Google auth successful, user:', req.user);
+      const user = req.user as User;
+      const token = jwt.sign({ id: user.id }, passportConfig.JWT_SECRET, {
+        expiresIn: '7d',
+      });
+
+      // Rediriger vers le frontend avec le token
+      res.redirect(`${CALLBACK_FRONTEND_URL}?token=${token}`);
+    } catch (error: unknown) {
+      console.error("Erreur lors de l'authentification Google:", error);
+      res.redirect(`${LOGIN_FRONTEND_URL}?error=auth_failed`);
+    }
+  }
+);
+
+router.get(
+  '/facebook',
+  passport.authenticate('facebook', { scope: ['email', 'public_profile'] })
+);
+
+router.get(
+  '/facebook/callback',
+  passport.authenticate('facebook', { session: false }),
   async (req, res) => {
     try {
       const user = req.user as User;
@@ -162,16 +199,90 @@ router.get(
       });
 
       // Rediriger vers le frontend avec le token
-      res.redirect(
-        `${process.env.NEXT_PUBLIC_FRONTEND_URL}/auth/callback?token=${token}`
-      );
+      res.redirect(`${CALLBACK_FRONTEND_URL}?token=${token}`);
     } catch (error: unknown) {
-      console.error("Erreur lors de l'authentification Google:", error);
-      res.redirect(
-        `${process.env.NEXT_PUBLIC_FRONTEND_URL}/login?error=auth_failed`
-      );
+      console.error("Erreur lors de l'authentification Facebook:", error);
+      res.redirect(`${LOGIN_FRONTEND_URL}?error=auth_failed`);
     }
   }
 );
+
+router.post('/forgot-password', (async (
+  req: express.Request,
+  res: express.Response
+) => {
+  const { email } = req.body;
+
+  if (!email) {
+    return res.status(400).json({ message: "L'email est requis" });
+  }
+
+  ResetTokenService.createToken(email)
+    .then(async (token) => {
+      if (!token) {
+        return res.status(200).json({
+          message:
+            "Si l'email existe, un lien de réinitialisation a été envoyé",
+        });
+      }
+
+      await EmailService.sendResetPasswordEmail(email, token);
+
+      res.status(200).json({
+        message: "Si l'email existe, un lien de réinitialisation a été envoyé",
+      });
+    })
+    .catch((error) => {
+      console.error('Erreur lors de la demande de réinitialisation:', error);
+      res.status(500).json({ message: 'Une erreur est survenue' });
+    });
+}) as RequestHandler);
+
+router.post('/reset-password', (async (
+  req: express.Request,
+  res: express.Response
+) => {
+  const { token, password } = req.body;
+
+  if (!token || !password) {
+    return res.status(400).json({
+      message: 'Le token et le mot de passe sont requis',
+    });
+  }
+
+  ResetTokenService.validateToken(token)
+    .then(async (userId) => {
+      if (!userId) {
+        return res.status(400).json({
+          message: 'Token invalide ou expiré',
+        });
+      }
+
+      const passwordValidation = validatePassword(password);
+      if (!passwordValidation.isValid) {
+        return res.status(400).json({
+          message: 'Mot de passe invalide',
+          errors: passwordValidation.errors,
+        });
+      }
+
+      await userService.update(userId, {
+        password: await Password.crypt(password),
+      });
+
+      await ResetTokenService.deleteToken(token);
+
+      res.status(200).json({
+        message: 'Mot de passe mis à jour avec succès',
+      });
+    })
+    .catch((error) => {
+      console.error(
+        'Erreur lors de la réinitialisation du mot de passe:',
+        error
+      );
+      res.status(500).json({ message: 'Une erreur est survenue' });
+    });
+}) as RequestHandler);
 
 export { router as AuthRoutes };

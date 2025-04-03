@@ -5,6 +5,8 @@ import { FiX } from 'react-icons/fi';
 import { useState, useEffect } from 'react';
 import { RegisterForm } from './RegisterForm';
 import { LoginForm } from './LoginForm';
+import { ForgotPasswordForm } from './ForgotPasswordForm';
+import { useRouter, useSearchParams } from 'next/navigation';
 
 interface AuthFormProps {
   isOpen: boolean;
@@ -13,6 +15,10 @@ interface AuthFormProps {
 
 export const AuthForm = ({ isOpen, onClose }: AuthFormProps) => {
   const [isLogin, setIsLogin] = useState(true);
+  const [showForgotPassword, setShowForgotPassword] = useState(false);
+  const router = useRouter();
+  const searchParams = useSearchParams();
+  const resetSuccess = searchParams.get('reset');
 
   useEffect(() => {
     if (isOpen) {
@@ -28,8 +34,20 @@ export const AuthForm = ({ isOpen, onClose }: AuthFormProps) => {
     };
   }, [isOpen]);
 
+  useEffect(() => {
+    if (resetSuccess === 'success') {
+      onClose();
+      router.push('/reset-password-success');
+    }
+  }, [resetSuccess, onClose, router]);
+
   const handleClose = () => {
     onClose();
+    setShowForgotPassword(false);
+  };
+
+  const handleBackToLogin = () => {
+    setShowForgotPassword(false);
   };
 
   return (
@@ -64,32 +82,42 @@ export const AuthForm = ({ isOpen, onClose }: AuthFormProps) => {
             </div>
 
             <div className="mt-2 md:mt-0">
-              <div className="flex justify-center mb-4">
-                <button
-                  onClick={() => setIsLogin(true)}
-                  className={`px-4 py-2 ${
-                    isLogin
-                      ? 'border-b-2 border-white'
-                      : 'text-gray-300 hover:text-white'
-                  }`}
-                >
-                  Connexion
-                </button>
-                <button
-                  onClick={() => setIsLogin(false)}
-                  className={`px-4 py-2 ${
-                    !isLogin
-                      ? 'border-b-2 border-white'
-                      : 'text-gray-300 hover:text-white'
-                  }`}
-                >
-                  Inscription
-                </button>
-              </div>
+              {!showForgotPassword && (
+                <div className="flex justify-center mb-4">
+                  <button
+                    onClick={() => setIsLogin(true)}
+                    className={`px-4 py-2 ${
+                      isLogin
+                        ? 'border-b-2 border-white'
+                        : 'text-gray-300 hover:text-white'
+                    }`}
+                  >
+                    Connexion
+                  </button>
+                  <button
+                    onClick={() => setIsLogin(false)}
+                    className={`px-4 py-2 ${
+                      !isLogin
+                        ? 'border-b-2 border-white'
+                        : 'text-gray-300 hover:text-white'
+                    }`}
+                  >
+                    Inscription
+                  </button>
+                </div>
+              )}
 
               <div className="max-w-[500px] mx-auto">
-                {isLogin ? (
-                  <LoginForm onClose={handleClose} />
+                {showForgotPassword ? (
+                  <ForgotPasswordForm
+                    onClose={handleClose}
+                    onBackToLogin={handleBackToLogin}
+                  />
+                ) : isLogin ? (
+                  <LoginForm
+                    onClose={handleClose}
+                    onForgotPassword={() => setShowForgotPassword(true)}
+                  />
                 ) : (
                   <RegisterForm onClose={handleClose} />
                 )}

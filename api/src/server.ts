@@ -5,7 +5,7 @@ import bodyParser from 'body-parser';
 import cors from 'cors';
 import session from 'express-session';
 import * as passportConfig from './config/passport';
-import client from 'prom-client'; // Importe prom-client
+import client from 'prom-client';
 
 const app = express();
 const prisma = new PrismaClient();
@@ -27,6 +27,11 @@ app.use(
   })
 );
 
+// Health check endpoint
+app.get('/health', (req, res) => {
+  res.json({ status: 'ok' });
+});
+
 passportConfig.configure(app);
 
 // Endpoint pour exposer les métriques à Prometheus
@@ -44,7 +49,7 @@ app.get('/', (req: Request, res: Response) => {
   });
 });
 
-app.use('/', router);
+app.use('/api', router);
 
 // Ne démarrer le serveur que si ce fichier est exécuté directement
 const isMainModule =

@@ -1,30 +1,23 @@
-import dotenv from 'dotenv';
-import path from 'path';
-import { fileURLToPath } from 'url';
+import { config } from 'dotenv';
+import { resolve } from 'path';
+import process from 'node:process';
 
-const __filename = fileURLToPath(import.meta.url);
-const __dirname = path.dirname(__filename);
+// Charger les variables d'environnement de test
+config({ path: resolve(process.cwd(), '.env.test') });
 
-dotenv.config({ path: path.resolve(__dirname, '../.env') });
-
-/** @type {import('ts-jest').JestConfigWithTsJest} */
-const config = {
-    preset: 'ts-jest',
-    testEnvironment: 'node',
-    moduleFileExtensions: ['js', 'json', 'ts'],
-    rootDir: '.',
-    testMatch: [
-        '**/__tests__/**/*.e2e-spec.ts'
-    ],
-    transform: {
-        '^.+\\.(t|j)s$': 'ts-jest'
-    },
-    collectCoverageFrom: [
-        'src/**/*.ts',
-        '!src/**/*.spec.ts'
-    ],
-    coverageDirectory: 'coverage',
-    setupFilesAfterEnv: ['./jest.setup.ts']
+export default {
+  preset: 'ts-jest',
+  testEnvironment: 'node',
+  roots: ['<rootDir>/src', '<rootDir>/__tests__'],
+  testMatch: ['**/*.e2e-spec.ts'],
+  transform: {
+    '^.+\\.tsx?$': 'ts-jest',
+  },
+  moduleNameMapper: {
+    '^@/(.*)$': '<rootDir>/src/$1',
+  },
+  setupFiles: ['<rootDir>/jest.setup.ts'],
+  globals: {
+    'process.env': process.env,
+  },
 };
-
-export default config; 

@@ -7,9 +7,14 @@ import {
   Profile,
   VerifyCallback,
 } from 'passport-google-oauth20';
+import {
+  Strategy as FacebookStrategy,
+  Profile as FacebookProfile,
+} from 'passport-facebook';
 import { UserRepository } from '../middlewares/user/user.repository';
 import { UserService } from '../services/user.service';
 import { googleConfig } from './google';
+import { facebookConfig } from './facebook';
 
 const LocalStrategy = passportLocal.Strategy;
 const JWTStrategy = passportJWT.Strategy;
@@ -140,6 +145,69 @@ export const configure = (app: Express): void => {
           return done(null, user);
         } catch (error) {
           console.error('Google auth error:', error);
+          return done(error as Error);
+        }
+      }
+    )
+  );
+
+  passport.use(
+    'facebook',
+    new FacebookStrategy(
+      {
+        clientID: facebookConfig.clientID,
+        clientSecret: facebookConfig.clientSecret,
+        callbackURL: facebookConfig.callbackURL,
+        profileFields: facebookConfig.profileFields,
+      },
+      async (
+        accessToken: string,
+        refreshToken: string,
+        profile: FacebookProfile,
+        done: VerifyCallback
+      ) => {
+        try {
+          // D'abord, essayons de trouver l'utilisateur par facebookId
+          let user = await userService
+            .findOneBy({ facebookId: profile.id })
+            .catch(() => null);
+
+          if (!user) {
+            // Si pas trouvé par facebookId, essayons par email
+            const email = profile.emails?.[0]?.value;
+            if (email) {
+              user = await userService.findOneBy({ email }).catch(() => null);
+            }
+          }
+
+          if (!user) {
+            // Si l'utilisateur n'existe pas, créons-le
+            const userData = {
+              facebookId: profile.id,
+              email: profile.emails?.[0]?.value || '',
+              firstName: profile.name?.givenName || '',
+              lastName: profile.name?.familyName || '',
+              picture: profile.photos?.[0]?.value || '',
+              gender: 'UNKNOWN',
+              birthDate: new Date(),
+              isAdmin: false,
+              isEmploye: false,
+            };
+
+            await userService.create(userData);
+            user = await userService.findOneBy({ facebookId: profile.id });
+          } else if (!user.facebookId) {
+            // Si l'utilisateur existe mais n'a pas de facebookId, mettons à jour son profil
+            await userService.update(user.id, {
+              facebookId: profile.id,
+              picture: profile.photos?.[0]?.value || '',
+            });
+            user = await userService.findOneBy({ id: user.id });
+          }
+
+          return done(null, user);
+        } catch (error) {
+          console.error('Facebook auth error:', error);
           return done(error as Error);
         }
       }

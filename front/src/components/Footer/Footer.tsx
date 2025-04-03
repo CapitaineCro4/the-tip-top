@@ -64,8 +64,15 @@ export const Footer = () => {
           ))}
         </div>
 
+        {/* Barre isolée */}
+        <div className="py-4 my-4">
+          <p className="text-gray-300 text-sm text-center">
+            Ceci est un site fictif. Projet étudiant
+          </p>
+        </div>
+
         {/* Copyright */}
-        <div className="text-center border-t border-gray-700 pt-8">
+        <div className="text-center border-t border-[#313960] pt-8">
           <p className="text-gray-300 text-sm">{footerContent.copyright}</p>
         </div>
       </div>
