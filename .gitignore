@@ -11,3 +11,6 @@ front/node_modules
 **/.DS_Store
 
 .eslintcache
+
+.env.perso
+.env.prod

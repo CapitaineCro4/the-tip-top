@@ -12,6 +12,10 @@ import { ResetTokenService } from '../../services/resetToken.service';
 import { EmailService } from '../../services/email.service';
 import { Password } from '../../utils/Password';
 import { validatePassword } from '../../utils/validation';
+import {
+  CALLBACK_FRONTEND_URL,
+  LOGIN_FRONTEND_URL,
+} from '../../shared/constantes';
 
 const router = express.Router();
 const userRepository = new UserRepository();
@@ -150,30 +154,31 @@ router.post('/employe/login', async (req, res) => {
   }
 });
 
-router.get(
-  '/google',
-  passport.authenticate('google', { scope: ['profile', 'email'] })
-);
+router.get('/google', (req, res, next) => {
+  console.log('Initiating Google auth...');
+  passport.authenticate('google', { scope: ['profile', 'email'] })(
+    req,
+    res,
+    next
+  );
+});
 
 router.get(
   '/google/callback',
   passport.authenticate('google', { session: false }),
   async (req, res) => {
     try {
+      console.log('Google auth successful, user:', req.user);
       const user = req.user as User;
       const token = jwt.sign({ id: user.id }, passportConfig.JWT_SECRET, {
         expiresIn: '7d',
       });
 
       // Rediriger vers le frontend avec le token
-      res.redirect(
-        `${process.env.NEXT_PUBLIC_FRONTEND_URL}/auth/callback?token=${token}`
-      );
+      res.redirect(`${CALLBACK_FRONTEND_URL}?token=${token}`);
     } catch (error: unknown) {
       console.error("Erreur lors de l'authentification Google:", error);
-      res.redirect(
-        `${process.env.NEXT_PUBLIC_FRONTEND_URL}/login?error=auth_failed`
-      );
+      res.redirect(`${LOGIN_FRONTEND_URL}?error=auth_failed`);
     }
   }
 );
@@ -194,14 +199,10 @@ router.get(
       });
 
       // Rediriger vers le frontend avec le token
-      res.redirect(
-        `${process.env.NEXT_PUBLIC_FRONTEND_URL}/auth/callback?token=${token}`
-      );
+      res.redirect(`${CALLBACK_FRONTEND_URL}?token=${token}`);
     } catch (error: unknown) {
       console.error("Erreur lors de l'authentification Facebook:", error);
-      res.redirect(
-        `${process.env.NEXT_PUBLIC_FRONTEND_URL}/login?error=auth_failed`
-      );
+      res.redirect(`${LOGIN_FRONTEND_URL}?error=auth_failed`);
     }
   }
 );

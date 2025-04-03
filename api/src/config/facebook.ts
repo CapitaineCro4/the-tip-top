@@ -1,6 +1,12 @@
+import {
+  FACEBOOK_CALLBACK_URL,
+  FACEBOOK_CLIENT_ID,
+  FACEBOOK_CLIENT_SECRET,
+} from '../shared/constantes';
+
 export const facebookConfig = {
-  clientID: process.env.FACEBOOK_CLIENT_ID || '',
-  clientSecret: process.env.FACEBOOK_CLIENT_SECRET || '',
-  callbackURL: process.env.FACEBOOK_CALLBACK_URL || '',
+  clientID: FACEBOOK_CLIENT_ID,
+  clientSecret: FACEBOOK_CLIENT_SECRET,
+  callbackURL: FACEBOOK_CALLBACK_URL,
   profileFields: ['id', 'emails', 'name', 'picture.type(large)'],
 };
