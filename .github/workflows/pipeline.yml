@@ -10,8 +10,8 @@ on:
       - develop
       - main
   schedule:
-    - cron: "0 0 * * 0" # Tous les dimanches à minuit UTC
-  workflow_dispatch:
+    - cron: "0 0 * * *" # Tous les soirs à minuit UTC (backup pour main)
+  workflow_dispatch: # Permet de déclencher manuellement (pour main)
 
 permissions:
   contents: write
@@ -31,6 +31,7 @@ jobs:
         uses: actions/setup-node@v4
         with:
           node-version: "20"
+          cache: "yarn"
 
       - name: Install Front Dependencies
         working-directory: ./front
@@ -68,6 +69,7 @@ jobs:
         uses: actions/setup-node@v4
         with:
           node-version: "20"
+          cache: "yarn"
 
       - name: Install Front Dependencies
         working-directory: ./front
@@ -139,7 +141,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout code
-        uses: actions/checkout@v4
+        uses: actions/checkout@v3
 
       - name: Deploy to Develop
         env:
@@ -176,7 +178,7 @@ jobs:
       url: https://dsp5-archi-f24a-15m-g4.fr
     steps:
       - name: Checkout code
-        uses: actions/checkout@v4
+        uses: actions/checkout@v3
 
       - name: Deploy to Production
         env:

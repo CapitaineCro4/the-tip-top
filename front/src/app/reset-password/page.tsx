@@ -1,12 +1,13 @@
 'use client';
 
+import { Suspense } from 'react';
 import { useEffect, useState } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { useAuth } from '@/hooks/useAuth';
 import { LoadingScreen } from '@/components/LoadingScreen/LoadingScreen';
 import { ResetPasswordForm } from '@/components/Auth/ResetPasswordForm';
 
-export default function ResetPasswordPage() {
+function ResetPasswordContent() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const { isAuthenticated } = useAuth();
@@ -36,4 +37,12 @@ export default function ResetPasswordPage() {
   };
 
   return <ResetPasswordForm onBackToLogin={handleBackToLogin} />;
+}
+
+export default function ResetPasswordPage() {
+  return (
+    <Suspense fallback={<LoadingScreen />}>
+      <ResetPasswordContent />
+    </Suspense>
+  );
 }

@@ -1,11 +1,12 @@
 'use client';
 
+import { Suspense } from 'react';
 import { useEffect } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { useAuth } from '@/hooks/useAuth';
 import { LoadingScreen } from '@/components/LoadingScreen/LoadingScreen';
 
-export default function CallbackPage() {
+function CallbackContent() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const { login } = useAuth();
@@ -23,4 +24,12 @@ export default function CallbackPage() {
   }, [searchParams, router, login]);
 
   return <LoadingScreen />;
+}
+
+export default function CallbackPage() {
+  return (
+    <Suspense fallback={<LoadingScreen />}>
+      <CallbackContent />
+    </Suspense>
+  );
 }
