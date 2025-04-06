@@ -27,11 +27,13 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v4
 
-      - name: Setup Node.js
+      # Configuration et build du Front
+      - name: Setup Node.js for Front
         uses: actions/setup-node@v4
         with:
           node-version: "20"
           cache: "yarn"
+          cache-dependency-path: front/yarn.lock
 
       - name: Install Front Dependencies
         working-directory: ./front
@@ -40,6 +42,14 @@ jobs:
       - name: Build Front
         working-directory: ./front
         run: yarn build || { echo "Front build failed"; exit 1; }
+
+      # Configuration et build de l'API
+      - name: Setup Node.js for API
+        uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+          cache: "yarn"
+          cache-dependency-path: api/yarn.lock
 
       - name: Install API Dependencies
         working-directory: ./api
@@ -65,11 +75,12 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v4
 
-      - name: Setup Node.js
+      - name: Setup Node.js for Front
         uses: actions/setup-node@v4
         with:
           node-version: "20"
           cache: "yarn"
+          cache-dependency-path: front/yarn.lock
 
       - name: Install Front Dependencies
         working-directory: ./front
@@ -80,6 +91,13 @@ jobs:
         run: yarn test --coverage
         env:
           NODE_ENV: test
+
+      - name: Setup Node.js for API
+        uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+          cache: "yarn"
+          cache-dependency-path: api/yarn.lock
 
       - name: Install API Dependencies
         working-directory: ./api
