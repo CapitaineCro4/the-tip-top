@@ -180,31 +180,55 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v4
 
-      - name: Download Build Artifacts
-        uses: actions/download-artifact@v4
+      # Alternative : Refaire le build dans le job docker
+      - name: Setup Node.js for Front
+        uses: actions/setup-node@v4
         with:
-          name: build-artifacts
-          path: artifacts
+          node-version: "20"
+          cache: "yarn"
+          cache-dependency-path: front/yarn.lock
 
-      # Ajout d'une étape de débogage pour vérifier le contenu de artifacts
-      - name: Debug Downloaded Artifacts
-        run: |
-          echo "Listing contents of artifacts:"
-          ls -la artifacts || echo "artifacts directory not found"
-          echo "Listing contents of artifacts/front/.next:"
-          ls -la artifacts/front/.next || echo "artifacts/front/.next not found"
-          echo "Listing contents of artifacts/front/.next recursively:"
-          find artifacts/front/.next -type f || echo "No files found in artifacts/front/.next"
-          echo "Listing contents of artifacts/api/dist:"
-          ls -la artifacts/api/dist || echo "artifacts/api/dist not found"
-          echo "Listing contents of artifacts/api/dist recursively:"
-          find artifacts/api/dist -type f || echo "No files found in artifacts/api/dist"
+      - name: Install Front Dependencies
+        working-directory: ./front
+        run: yarn install --frozen-lockfile
 
-      - name: Restore Build Artifacts
-        run: |
-          mkdir -p front/.next api/dist
-          cp -r artifacts/front/.next/* front/.next/ || echo "No files found in artifacts/front/.next"
-          cp -r artifacts/api/dist/* api/dist/ || echo "No files found in artifacts/api/dist"
+      - name: Build Front
+        working-directory: ./front
+        env:
+          NEXT_PUBLIC_API_URL: "http://localhost:3002/api"
+          NEXT_PUBLIC_FRONTEND_URL: "http://localhost:3000"
+          GOOGLE_CLIENT_ID: ${{ secrets.GOOGLE_CLIENT_ID }}
+          GOOGLE_CLIENT_SECRET: ${{ secrets.GOOGLE_CLIENT_SECRET }}
+          FACEBOOK_CLIENT_ID: ${{ secrets.FACEBOOK_CLIENT_ID }}
+          FACEBOOK_CLIENT_SECRET: ${{ secrets.FACEBOOK_CLIENT_SECRET }}
+        run: yarn build || { echo "Front build failed"; exit 1; }
+
+      - name: Setup Node.js for API
+        uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+          cache: "yarn"
+          cache-dependency-path: api/yarn.lock
+
+      - name: Install API Dependencies
+        working-directory: ./api
+        run: yarn install --frozen-lockfile
+
+      - name: Build API
+        working-directory: ./api
+        env:
+          DATABASE_URL: "postgresql://admin:admin@postgres_db:5432/mydatabase?schema=public"
+          JWT_SECRET: "secret"
+          GOOGLE_CLIENT_ID: ${{ secrets.GOOGLE_CLIENT_ID }}
+          GOOGLE_CLIENT_SECRET: ${{ secrets.GOOGLE_CLIENT_SECRET }}
+          FACEBOOK_CLIENT_ID: ${{ secrets.FACEBOOK_CLIENT_ID }}
+          FACEBOOK_CLIENT_SECRET: ${{ secrets.FACEBOOK_CLIENT_SECRET }}
+          SMTP_HOST: ${{ secrets.SMTP_HOST }}
+          SMTP_PORT: ${{ secrets.SMTP_PORT }}
+          SMTP_USER: ${{ secrets.SMTP_USER }}
+          SMTP_PASS: ${{ secrets.SMTP_PASS }}
+          SMTP_FROM: ${{ secrets.SMTP_FROM }}
+        run: yarn build || { echo "API build failed"; exit 1; }
 
       - name: Login to Docker Hub
         uses: docker/login-action@v3
