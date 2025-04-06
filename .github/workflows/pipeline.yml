@@ -42,6 +42,14 @@ jobs:
         working-directory: ./front
         run: yarn build || { echo "Front build failed"; exit 1; }
 
+      # Ajout d'une étape de débogage pour vérifier le contenu de front/.next
+      - name: Debug Front Build Output
+        run: |
+          echo "Listing contents of front/.next:"
+          ls -la front/.next || echo "front/.next not found"
+          echo "Listing contents of front/.next recursively:"
+          find front/.next -type f || echo "No files found in front/.next"
+
       - name: Setup Node.js for API
         uses: actions/setup-node@v4
         with:
@@ -56,6 +64,14 @@ jobs:
       - name: Build API
         working-directory: ./api
         run: yarn build || { echo "API build failed"; exit 1; }
+
+      # Ajout d'une étape de débogage pour vérifier le contenu de api/dist
+      - name: Debug API Build Output
+        run: |
+          echo "Listing contents of api/dist:"
+          ls -la api/dist || echo "api/dist not found"
+          echo "Listing contents of api/dist recursively:"
+          find api/dist -type f || echo "No files found in api/dist"
 
       - name: Upload Build Artifacts
         uses: actions/upload-artifact@v4
@@ -129,11 +145,25 @@ jobs:
           name: build-artifacts
           path: artifacts
 
+      # Ajout d'une étape de débogage pour vérifier le contenu de artifacts
+      - name: Debug Downloaded Artifacts
+        run: |
+          echo "Listing contents of artifacts:"
+          ls -la artifacts || echo "artifacts directory not found"
+          echo "Listing contents of artifacts/front/.next:"
+          ls -la artifacts/front/.next || echo "artifacts/front/.next not found"
+          echo "Listing contents of artifacts/front/.next recursively:"
+          find artifacts/front/.next -type f || echo "No files found in artifacts/front/.next"
+          echo "Listing contents of artifacts/api/dist:"
+          ls -la artifacts/api/dist || echo "artifacts/api/dist not found"
+          echo "Listing contents of artifacts/api/dist recursively:"
+          find artifacts/api/dist -type f || echo "No files found in artifacts/api/dist"
+
       - name: Restore Build Artifacts
         run: |
           mkdir -p front/.next api/dist
-          cp -r artifacts/front/.next/* front/.next/
-          cp -r artifacts/api/dist/* api/dist/
+          cp -r artifacts/front/.next/* front/.next/ || echo "No files found in artifacts/front/.next"
+          cp -r artifacts/api/dist/* api/dist/ || echo "No files found in artifacts/api/dist"
 
       - name: Login to Docker Hub
         uses: docker/login-action@v3
@@ -214,7 +244,7 @@ jobs:
             echo "DATABASE_URL=postgresql://admin:admin@postgres_db-prod:5432/mydatabase?schema=public" >> .env
             echo "JWT_SECRET=${{ secrets.JWT_SECRET }}" >> .env
             echo "NEXT_PUBLIC_API_URL=https://dsp5-archi-f24a-15m-g4.fr/back" >> .env
-            echo "NEXT_PUBLIC_FRONTEND_URL=https://dsp5-archi-f24a-15m-g4.fr " >> .env
+            echo "NEXT_PUBLIC_FRONTEND_URL=https://dsp5-archi-f24a-15m-g4.fr" >> .env
             echo "GOOGLE_CLIENT_ID=${{ secrets.GOOGLE_CLIENT_ID }}" >> .env
             echo "GOOGLE_CLIENT_SECRET=${{ secrets.GOOGLE_CLIENT_SECRET }}" >> .env
             echo "FACEBOOK_CLIENT_ID=${{ secrets.FACEBOOK_CLIENT_ID }}" >> .env
