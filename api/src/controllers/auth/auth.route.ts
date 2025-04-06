@@ -170,6 +170,10 @@ router.get(
     try {
       console.log('Google auth successful, user:', req.user);
       const user = req.user as User;
+      if (!user) {
+        throw new Error('Utilisateur non trouvé après authentification Google');
+      }
+
       const token = jwt.sign({ id: user.id }, passportConfig.JWT_SECRET, {
         expiresIn: '7d',
       });

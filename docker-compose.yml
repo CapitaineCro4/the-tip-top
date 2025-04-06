@@ -1,72 +1,125 @@
 services:
   postgres_db:
     image: postgres:15-alpine
-    container_name: postgres_db-${ENV}
+    container_name: postgres_db
     environment:
       POSTGRES_USER: admin
       POSTGRES_PASSWORD: admin
       POSTGRES_DB: mydatabase
     volumes:
       - postgres_data:/var/lib/postgresql/data
+    ports:
+      - "5432:5432"
 
   postgres-exporter:
     image: prometheuscommunity/postgres-exporter:latest
-    container_name: postgres-exporter-${ENV}
+    container_name: postgres-exporter
     environment:
-      DATA_SOURCE_NAME: "postgresql://admin:admin@postgres_db-${ENV}:5432/mydatabase?sslmode=disable"
+      DATA_SOURCE_NAME: "postgresql://admin:admin@postgres_db:5432/mydatabase?sslmode=disable"
+    ports:
+      - "9187:9187"
     depends_on:
       - postgres_db
 
   pgadmin:
     image: dpage/pgadmin4
-    container_name: pgadmin-${ENV}
+    container_name: pgadmin
     environment:
       PGADMIN_DEFAULT_EMAIL: admin@admin.com
       PGADMIN_DEFAULT_PASSWORD: admin
+    ports:
+      - "5050:80"
     depends_on:
       - postgres_db
 
   api:
-    image: ${DOCKERHUB_USERNAME}/the-tip-top-api:latest
-    container_name: api-${ENV}
+    build:
+      context: ./api
+      dockerfile: Dockerfile
+    container_name: api
     env_file: ./.env
+    ports:
+      - $API_PORT:$API_PORT
     depends_on:
       - postgres_db
+    environment:
+      - DATABASE_URL=$DATABASE_URL
+      - API_PORT=$API_PORT
+      - JWT_SECRET=$JWT_SECRET
+      - GOOGLE_CLIENT_ID=$GOOGLE_CLIENT_ID
+      - GOOGLE_CLIENT_SECRET=$GOOGLE_CLIENT_SECRET
+      - FACEBOOK_CLIENT_ID=$FACEBOOK_CLIENT_ID
+      - FACEBOOK_CLIENT_SECRET=$FACEBOOK_CLIENT_SECRET
+      - SMTP_HOST=$SMTP_HOST
+      - SMTP_PORT=$SMTP_PORT
+      - SMTP_USER=$SMTP_USER
+      - SMTP_PASS=$SMTP_PASS
+      - SMTP_FROM=$SMTP_FROM
+    volumes:
+      - ./api:/usr/src/app/api
+      - /usr/src/app/api/node_modules
 
   front:
-    image: ${DOCKERHUB_USERNAME}/the-tip-top-front:latest
-    container_name: front-${ENV}
-    env_file: ./.env
+    build:
+      context: ./front
+      dockerfile: Dockerfile
+    container_name: front
+    ports:
+      - "3000:3000"
     depends_on:
       - api
+    environment:
+      - WATCHPACK_POLLING=true
+      - CHOKIDAR_USEPOLLING=true
+      - NODE_ENV=development
+      - NEXT_PUBLIC_API_URL=$NEXT_PUBLIC_API_URL
+      - NEXT_PUBLIC_FRONTEND_URL=$NEXT_PUBLIC_FRONTEND_URL
+    env_file:
+      - ./front/.env.production
+    volumes:
+      - ./front:/app
+      - /app/node_modules
+      - /app/.next
+    tty: true
+    stdin_open: true
 
   prometheus:
     image: prom/prometheus:latest
-    container_name: prometheus-${ENV}
+    container_name: prometheus
     volumes:
       - ./prometheus.yml:/etc/prometheus/prometheus.yml
+    ports:
+      - "9090:9090"
     restart: unless-stopped
 
   pushgateway:
     image: prom/pushgateway:latest
-    container_name: pushgateway-${ENV}
+    container_name: pushgateway
+    ports:
+      - "9091:9091"
     restart: unless-stopped
 
   grafana:
     image: grafana/grafana:latest
-    container_name: grafana-${ENV}
+    container_name: grafana
+    ports:
+      - "3004:3000"
     volumes:
       - grafana-data:/var/lib/grafana
     restart: unless-stopped
 
   cadvisor:
     image: gcr.io/cadvisor/cadvisor:v0.47.0
-    container_name: cadvisor-${ENV}
+    container_name: cadvisor
+    ports:
+      - "8080:8080"
     volumes:
-      - /var/run/docker.sock:/var/run/docker.sock:ro
+      - /Users/nalay/.docker/run/docker.sock:/var/run/docker.sock
+      - /sys:/sys:ro
+      - /var/lib/docker/:/var/lib/docker:ro
+      - /dev/disk/:/dev/disk:ro
     depends_on:
       - prometheus
-
 volumes:
   postgres_data:
   grafana-data:
