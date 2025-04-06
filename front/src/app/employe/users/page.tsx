@@ -5,6 +5,7 @@ import { useRouter } from 'next/navigation';
 import { useAuth } from '@/hooks/useAuth';
 import { getUsers } from '@/network/api-routes/User';
 import { User } from '@/domain/user/UserType';
+import { LoadingScreen } from '@/components/LoadingScreen/LoadingScreen';
 
 export default function UsersPage() {
   const router = useRouter();
@@ -13,7 +14,7 @@ export default function UsersPage() {
   const [users, setUsers] = useState<User[]>([]);
 
   useEffect(() => {
-    if (!isAuthenticated() || !user?.isEmploye) {
+    if (!isAuthenticated() || (!user?.isEmploye && !user?.isAdmin)) {
       router.push('/');
       return;
     }
@@ -29,93 +30,54 @@ export default function UsersPage() {
   }
 
   if (isLoading) {
-    return (
-      <div className="min-h-screen flex items-center justify-center">
-        <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-primary"></div>
-      </div>
-    );
+    return <LoadingScreen />;
   }
 
   return (
-    <div className="min-h-screen bg-gray-50">
-      <div className="max-w-7xl mx-auto py-6 sm:px-6 lg:px-8">
-        <div className="px-4 py-6 sm:px-0">
-          <div className="border-4 border-dashed border-gray-200 rounded-lg p-4">
-            <div className="sm:flex sm:items-center">
-              <div className="sm:flex-auto">
-                <h1 className="text-2xl font-semibold text-gray-900">
-                  Gestion des utilisateurs
-                </h1>
-                <p className="mt-2 text-sm text-gray-700">
-                  Liste de tous les utilisateurs de l&apos;application
-                </p>
-              </div>
-            </div>
+    <div className="p-4 md:p-8 max-w-7xl mx-auto">
+      <div className="mb-8">
+        <h1 className="text-xl md:text-2xl font-semibold text-gray-900">
+          Gestion des utilisateurs
+        </h1>
+        <p className="mt-2 text-sm text-gray-600">
+          Liste de tous les utilisateurs de la plateforme
+        </p>
+      </div>
 
-            <div className="mt-8 flex flex-col">
-              <div className="-my-2 -mx-4 overflow-x-auto sm:-mx-6 lg:-mx-8">
-                <div className="inline-block min-w-full py-2 align-middle md:px-6 lg:px-8">
-                  <div className="overflow-hidden shadow ring-1 ring-black ring-opacity-5 md:rounded-lg">
-                    <table className="min-w-full divide-y divide-gray-300">
-                      <thead className="bg-gray-50">
-                        <tr>
-                          <th
-                            scope="col"
-                            className="py-3.5 pl-4 pr-3 text-left text-sm font-semibold text-gray-900 sm:pl-6"
-                          >
-                            Nom
-                          </th>
-                          <th
-                            scope="col"
-                            className="px-3 py-3.5 text-left text-sm font-semibold text-gray-900"
-                          >
-                            Email
-                          </th>
-                          <th
-                            scope="col"
-                            className="px-3 py-3.5 text-left text-sm font-semibold text-gray-900"
-                          >
-                            Date d&apos;inscription
-                          </th>
-                          <th
-                            scope="col"
-                            className="relative py-3.5 pl-3 pr-4 sm:pr-6"
-                          >
-                            <span className="sr-only">Actions</span>
-                          </th>
-                        </tr>
-                      </thead>
-                      <tbody className="divide-y divide-gray-200 bg-white">
-                        {users.map((user) => (
-                          <tr key={user.id}>
-                            <td className="whitespace-nowrap py-4 pl-4 pr-3 text-sm font-medium text-gray-900 sm:pl-6">
-                              {user.firstName} {user.lastName}
-                            </td>
-                            <td className="whitespace-nowrap px-3 py-4 text-sm text-gray-500">
-                              {user.email}
-                            </td>
-                            <td className="whitespace-nowrap px-3 py-4 text-sm text-gray-500">
-                              {new Date(user.createdAt).toLocaleDateString()}
-                            </td>
-                            <td className="relative whitespace-nowrap py-4 pl-3 pr-4 text-right text-sm font-medium sm:pr-6">
-                              <button
-                                className="text-primary hover:text-primary-dark"
-                                onClick={() => {
-                                  // Action à implémenter
-                                }}
-                              >
-                                Modifier
-                              </button>
-                            </td>
-                          </tr>
-                        ))}
-                      </tbody>
-                    </table>
-                  </div>
-                </div>
-              </div>
-            </div>
-          </div>
+      <div className="bg-white rounded-lg shadow-sm p-6">
+        <div className="overflow-x-auto">
+          <table className="min-w-full divide-y divide-gray-200">
+            <thead>
+              <tr>
+                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                  Nom
+                </th>
+                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                  Email
+                </th>
+                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                  Date d&apos;inscription
+                </th>
+              </tr>
+            </thead>
+            <tbody className="bg-white divide-y divide-gray-200">
+              {users.map((user) => (
+                <tr key={user.id}>
+                  <td className="px-6 py-4 whitespace-nowrap">
+                    <div className="text-sm font-medium text-gray-900">
+                      {user.firstName} {user.lastName}
+                    </div>
+                  </td>
+                  <td className="px-6 py-4 whitespace-nowrap">
+                    <div className="text-sm text-gray-500">{user.email}</div>
+                  </td>
+                  <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                    {new Date(user.birthDate).toLocaleDateString()}
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
         </div>
       </div>
     </div>

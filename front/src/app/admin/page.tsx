@@ -6,7 +6,7 @@ import { useAuth } from '@/hooks/useAuth';
 import { getUsers } from '@/network/api-routes/User';
 import { User } from '@/domain/user/UserType';
 import AdminStats from '@/components/admin/AdminStats';
-import CreateSession from '@/components/admin/CreateSession';
+import { LoadingScreen } from '@/components/LoadingScreen';
 
 export default function AdminPage() {
   const router = useRouter();
@@ -31,24 +31,23 @@ export default function AdminPage() {
   }
 
   if (isLoading) {
-    return (
-      <div className="min-h-screen flex items-center justify-center">
-        <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-primary"></div>
-      </div>
-    );
+    return <LoadingScreen />;
   }
 
   return (
     <div className="p-4 md:p-8 max-w-7xl mx-auto">
       <div className="mb-8">
-        <h1 className="text-xl md:text-2xl font-semibold text-gray-900">
-          {user?.firstName}, bienvenue sur votre tableau de bord
+        <h1 className="text-2xl font-semibold text-gray-900">
+          Tableau de bord
         </h1>
+        <p className="mt-2 text-sm text-gray-600">
+          Bienvenue {user?.firstName}, voici l&apos;état actuel de votre
+          application
+        </p>
       </div>
 
-      <div className="space-y-6">
+      <div className="bg-white rounded-lg shadow-sm">
         <AdminStats usersCount={appUsers.length} users={appUsers} />
-        <CreateSession />
       </div>
     </div>
   );

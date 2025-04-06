@@ -2,10 +2,9 @@
 
 import { useState, useEffect } from 'react';
 import { dashboardContent } from '@/content/dashboardContent';
-import { FaChevronDown, FaSpinner } from 'react-icons/fa';
+import { FaChevronDown } from 'react-icons/fa';
 import { userService, User } from '@/services/userService';
 import { IoMdCheckmarkCircle } from 'react-icons/io';
-import { FiUser } from 'react-icons/fi';
 
 interface UpdateUserData {
   firstName: string;
@@ -261,7 +260,7 @@ export const AccountDetails = () => {
   }
 
   return (
-    <div className="bg-white rounded-xl shadow-sm border border-gray-200">
+    <div className="max-w-2xl mx-auto bg-white p-6 shadow-sm relative">
       {showNotification && (
         <Notification
           message="Modifications enregistrées avec succès !"
@@ -269,17 +268,13 @@ export const AccountDetails = () => {
           onClose={() => setShowNotification(false)}
         />
       )}
-      <div className="p-6 border-b border-gray-200">
-        <h2 className="text-xl font-semibold text-gray-900 flex items-center">
-          <FiUser className="mr-3 h-6 w-6 text-blue-600" />
-          {dashboardContent.accountSection.title}
-        </h2>
-      </div>
-
-      <form onSubmit={handleSubmit} className="p-6 space-y-6">
+      <h2 className="text-xl font-semibold mb-6">
+        {dashboardContent.accountSection.title}
+      </h2>
+      <form onSubmit={handleSubmit} className="space-y-6">
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-2">
+            <label className="block text-sm font-medium text-gray-700 mb-1">
               {dashboardContent.accountSection.fields.civility.label}
             </label>
             <div className="relative">
@@ -290,7 +285,7 @@ export const AccountDetails = () => {
                 }
                 onFocus={() => setIsSelectOpen(true)}
                 onBlur={() => setIsSelectOpen(false)}
-                className="w-full px-4 py-2.5 rounded-lg border border-gray-300 bg-white text-gray-900 appearance-none focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200"
+                className="w-full px-6 py-3 border-2 placeholder:text-black border-[#242E61]/40 focus:border-[#242E61] bg-white/60 text-black placeholder-gray-300 outline-none transition-all appearance-none"
                 aria-label="Sélectionnez votre civilité"
               >
                 <option value="">Sélectionnez</option>
@@ -304,7 +299,7 @@ export const AccountDetails = () => {
               </select>
               <span className="absolute right-3 top-1/2 transform -translate-y-1/2 pointer-events-none">
                 <FaChevronDown
-                  className={`w-4 h-4 text-gray-500 transition-transform duration-200 ${
+                  className={`w-4 h-4 text-[#242E61] transition-transform duration-200 ${
                     isSelectOpen ? 'rotate-180' : ''
                   }`}
                 />
@@ -316,7 +311,7 @@ export const AccountDetails = () => {
             .filter(([key]) => key !== 'civility')
             .map(([key, field]) => (
               <div key={key}>
-                <label className="block text-sm font-medium text-gray-700 mb-2">
+                <label className="block text-sm font-medium text-gray-700 mb-1">
                   {field.label}
                 </label>
                 {key === 'birthDate' ? (
@@ -326,7 +321,7 @@ export const AccountDetails = () => {
                     onChange={(e) =>
                       setFormData({ ...formData, [key]: e.target.value })
                     }
-                    className="w-full px-4 py-2.5 rounded-lg border border-gray-300 bg-white text-gray-900 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200"
+                    className="w-full px-6 py-3 border-2 placeholder:text-black border-[#242E61]/40 focus:border-[#242E61] bg-white/60 text-black placeholder-gray-300 outline-none transition-all"
                     aria-label={field.label}
                   />
                 ) : (
@@ -343,7 +338,7 @@ export const AccountDetails = () => {
                       setFormData({ ...formData, [key]: e.target.value })
                     }
                     placeholder={field.placeholder}
-                    className="w-full px-4 py-2.5 rounded-lg border border-gray-300 bg-white text-gray-900 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200"
+                    className="w-full px-6 py-3 border-2 placeholder:text-black border-[#242E61]/40 focus:border-[#242E61] bg-white/60 text-black placeholder-gray-300 outline-none transition-all"
                     aria-label={field.label}
                   />
                 )}
@@ -351,65 +346,58 @@ export const AccountDetails = () => {
             ))}
         </div>
 
-        <div className="pt-6 border-t border-gray-200">
-          <div className="flex flex-col space-y-4">
-            <button
-              type="submit"
-              disabled={isLoading}
-              className={`inline-flex justify-center items-center px-6 py-2.5 border border-transparent rounded-lg shadow-sm text-white bg-[#242E61] hover:bg-[#1a2347] focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-[#242E61] transition-all duration-200 ${
-                isLoading ? 'opacity-50 cursor-not-allowed' : ''
-              }`}
-            >
-              {isLoading ? (
-                <>
-                  <FaSpinner className="animate-spin -ml-1 mr-3 h-5 w-5" />
-                  Mise à jour...
-                </>
-              ) : (
-                dashboardContent.accountSection.buttons.save
-              )}
-            </button>
+        <div className="flex flex-col space-y-4">
+          <button
+            type="submit"
+            disabled={isLoading}
+            className={`w-full px-6 py-3 border-2 placeholder:text-black border-[#242E61]/40 focus:border-[#242E61] bg-[#242E61] text-white placeholder-gray-300 outline-none transition-all hover:bg-[#1a2347] ${
+              isLoading ? 'opacity-50 cursor-not-allowed' : ''
+            }`}
+          >
+            {isLoading
+              ? 'Mise à jour...'
+              : dashboardContent.accountSection.buttons.save}
+          </button>
 
-            <button
-              type="button"
-              onClick={handleDeleteAccount}
-              className="inline-flex justify-center items-center px-6 py-2.5 border border-transparent rounded-lg text-red-600 hover:bg-red-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-500 transition-all duration-200"
-            >
-              {dashboardContent.accountSection.buttons.deleteAccount}
-            </button>
-          </div>
+
+          <button
+            type="button"
+            onClick={handleDeleteAccount}
+            className="text-red-600 hover:text-red-700 transition-colors"
+          >
+            {dashboardContent.accountSection.buttons.deleteAccount}
+          </button>
         </div>
       </form>
 
       {/* Popup de confirmation */}
       {isDeletePopupOpen && (
         <div className="fixed inset-0 bg-black bg-opacity-50 backdrop-blur-sm flex items-center justify-center z-50">
-          <div className="bg-white rounded-xl p-6 shadow-lg max-w-sm w-full mx-4 md:mx-0">
-            <h3 className="text-lg font-semibold text-gray-900 mb-4">
+          <div className="bg-white p-6 shadow-lg max-w-sm w-full md:max-w-[400px] md:w-auto h-full md:h-auto">
+            <h3 className="text-lg font-semibold mb-4">
               Confirmer la suppression du compte
             </h3>
-            <p className="mb-4 text-gray-600">
-              Pour confirmer, tapez{' '}
-              <strong className="text-red-600">&quot;supprimer&quot;</strong>{' '}
+            <p className="mb-4 text-red-600">
+              Pour confirmer, tapez <strong>&quot;supprimer&quot;</strong>{' '}
               ci-dessous :
             </p>
             <input
               type="text"
               value={deleteInput}
               onChange={(e) => setDeleteInput(e.target.value)}
-              className="w-full px-4 py-2.5 rounded-lg border border-gray-300 focus:outline-none focus:ring-2 focus:ring-red-500 focus:border-transparent transition-all duration-200 mb-4"
+              className="w-full px-4 py-2 border-2 border-[#242E61]/40 focus:border-[#242E61] outline-none mb-4"
               placeholder="Tapez 'supprimer'"
             />
             <div className="flex justify-end space-x-4">
               <button
                 onClick={() => setIsDeletePopupOpen(false)}
-                className="px-4 py-2 text-gray-600 hover:text-gray-800 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-gray-500 transition-all duration-200"
+                className="px-4 py-2 text-gray-600 hover:text-gray-800"
               >
                 Annuler
               </button>
               <button
                 onClick={confirmDeleteAccount}
-                className="px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-500 transition-all duration-200"
+                className="px-4 py-2 bg-red-600 text-white hover:bg-red-700 transition-colors"
               >
                 Supprimer
               </button>

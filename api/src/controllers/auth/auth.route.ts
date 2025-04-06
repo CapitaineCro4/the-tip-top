@@ -285,4 +285,50 @@ router.post('/reset-password', (async (
     });
 }) as RequestHandler);
 
+router.post('/send-email', (async (req, res) => {
+  try {
+    const { email } = req.body;
+
+    if (!email) {
+      return res.status(400).json({ message: "L'email est requis" });
+    }
+
+    await EmailService.sendResetPasswordEmail(email, 'test-token');
+
+    res.status(200).json({
+      message: 'Email envoyé avec succès',
+    });
+  } catch (error) {
+    console.error("Erreur lors de l'envoi de l'email:", error);
+    res
+      .status(500)
+      .json({ message: "Une erreur est survenue lors de l'envoi de l'email" });
+  }
+}) as RequestHandler);
+
+router.post('/send-bulk-email', (async (req, res) => {
+  try {
+    const { to, subject, content } = req.body;
+
+    if (!to || !subject || !content) {
+      return res.status(400).json({
+        message: "Les champs 'to', 'subject' et 'content' sont requis",
+      });
+    }
+
+    await EmailService.sendBulkEmail(to, subject, content);
+
+    res.status(200).json({
+      success: true,
+      message: 'Emails envoyés avec succès',
+    });
+  } catch (error) {
+    console.error("Erreur lors de l'envoi des emails:", error);
+    res.status(500).json({
+      success: false,
+      error: "Une erreur est survenue lors de l'envoi des emails",
+    });
+  }
+}) as RequestHandler);
+
 export { router as AuthRoutes };

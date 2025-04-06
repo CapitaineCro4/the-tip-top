@@ -51,7 +51,7 @@ const Section = ({ title, content }: HowToPlaySection) => {
   const [isOpen, setIsOpen] = useState(false);
 
   return (
-    <div className="border border-gray-200 overflow-hidden">
+    <div className="border border-gray-200 rounded-md overflow-hidden">
       <button
         className="w-full px-6 py-4 text-left bg-white hover:bg-gray-50 flex justify-between items-center"
         onClick={() => setIsOpen(!isOpen)}
@@ -116,7 +116,7 @@ export default function HowToPlayPage() {
           </p>
           <Link
             href="/#products"
-            className="w-full bg-[#242E61] text-white  px-6 py-3 border-2 border-transparent hover:bg-[#16803C] transition-all duration-300 flex items-center justify-center"
+            className="w-full bg-[#242E61] text-white  px-6 py-3 border-2 border-transparent hover:bg-[#16803C] transition-all duration-300 flex items-center justify-center rounded-md"
           >
             Découvrir nos produits
           </Link>

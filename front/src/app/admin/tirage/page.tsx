@@ -6,6 +6,8 @@ import { useAuth } from '@/hooks/useAuth';
 import { User } from '@/domain/user/UserType';
 import { getUsers } from '@/network/api-routes/User';
 import ReactConfetti from 'react-confetti';
+import { FaTrophy, FaUsers, FaRandom } from 'react-icons/fa';
+import { toast } from 'sonner';
 
 export default function TiragePage() {
   const router = useRouter();
@@ -41,12 +43,18 @@ export default function TiragePage() {
 
   function fetchUsers() {
     getUsers().then((users) => {
-      setUsers(users.filter((user) => !user.isAdmin));
+      setUsers(users.filter((user) => !user.isAdmin && !user.isEmploye));
     });
   }
 
   const handleDraw = () => {
-    if (users.length === 0) return;
+    if (users.length === 0) {
+      toast.error('Aucun participant disponible', {
+        description: "Il n'y a pas de participants pour le tirage au sort.",
+        duration: 5000,
+      });
+      return;
+    }
 
     // Animation de tirage au sort
     setWinner(null);
@@ -62,6 +70,10 @@ export default function TiragePage() {
       if (shuffleCount >= maxShuffles) {
         clearInterval(shuffleInterval);
         setShowConfetti(true);
+        toast.success('Tirage au sort terminé', {
+          description: 'Le gagnant a été sélectionné avec succès.',
+          duration: 5000,
+        });
         // Arrêter les confettis après 5 secondes
         setTimeout(() => setShowConfetti(false), 5000);
       }
@@ -88,7 +100,8 @@ export default function TiragePage() {
       )}
 
       <div className="mb-8">
-        <h1 className="text-2xl font-semibold text-gray-900">
+        <h1 className="text-2xl font-semibold text-gray-900 flex items-center">
+          <FaTrophy className="mr-2 text-primary" />
           Grand Tirage au Sort
         </h1>
         <p className="mt-2 text-sm text-gray-700">
@@ -96,15 +109,21 @@ export default function TiragePage() {
         </p>
       </div>
 
-      <div className="bg-white p-6  shadow-sm">
-        <div className="mb-6">
-          <p className="text-gray-600">
-            Nombre total de participants : {users.length}
-          </p>
+      <div className="bg-white p-6 rounded-lg shadow-sm border border-gray-200">
+        <div className="mb-6 flex items-center space-x-3">
+          <div className="bg-blue-50 p-3 rounded-full">
+            <FaUsers className="w-6 h-6 text-blue-600" />
+          </div>
+          <div>
+            <p className="text-sm font-medium text-gray-600">Participants</p>
+            <p className="text-2xl font-semibold text-gray-900">
+              {users.length}
+            </p>
+          </div>
         </div>
 
         {winner && (
-          <div className="mb-8 p-6 bg-primary/5  text-center">
+          <div className="mb-8 p-6 bg-primary/5 rounded-lg text-center">
             <h2 className="text-xl font-semibold text-gray-900 mb-2">
               🎉 Gagnant(e) 🎉
             </h2>
@@ -119,8 +138,9 @@ export default function TiragePage() {
           <button
             onClick={handleDraw}
             disabled={users.length === 0}
-            className="w-max-w-4xl bg-[#242E61] text-white  px-6 py-3 border-2 border-transparent hover:bg-[#16803C] transition-all duration-300 flex items-center justify-center"
+            className="w-max-w-4xl bg-[#242E61] text-white px-6 py-3 border-2 border-transparent hover:bg-[#16803C] transition-all duration-300 flex items-center justify-center focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary disabled:opacity-50 disabled:cursor-not-allowed rounded-lg"
           >
+            <FaRandom className="mr-2" />
             Lancer le tirage
           </button>
         </div>
