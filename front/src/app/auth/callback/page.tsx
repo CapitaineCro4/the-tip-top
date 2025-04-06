@@ -9,19 +9,20 @@ import { LoadingScreen } from '@/components/LoadingScreen/LoadingScreen';
 function CallbackContent() {
   const router = useRouter();
   const searchParams = useSearchParams();
-  const { login } = useAuth();
+  const { loginWithGoogle } = useAuth();
 
   useEffect(() => {
-    const code = searchParams.get('code');
-    if (!code) {
+    const token = searchParams.get('token');
+    if (!token) {
       router.push('/');
       return;
     }
 
-    login(code, 'google').then(() => {
-      router.push('/');
+    loginWithGoogle(token).catch((error) => {
+      console.error('Erreur lors de la connexion Google:', error);
+      router.push('/?error=auth_failed');
     });
-  }, [searchParams, router, login]);
+  }, [searchParams, router, loginWithGoogle]);
 
   return <LoadingScreen />;
 }

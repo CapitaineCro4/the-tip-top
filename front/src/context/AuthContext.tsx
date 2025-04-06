@@ -23,6 +23,7 @@ export const AuthContext = createContext<{
   isUserEmploye: () => boolean;
   login: (email: string, password: string) => Promise<void>;
   loginWithToken: (token: string) => Promise<void>;
+  loginWithGoogle: (token: string) => Promise<void>;
   adminLogin: (email: string, password: string) => Promise<void>;
   employeLogin: (email: string, password: string) => Promise<void>;
   logout: () => Promise<void>;
@@ -38,6 +39,7 @@ export const AuthContext = createContext<{
   isUserEmploye: () => false,
   login: async () => {},
   loginWithToken: async () => {},
+  loginWithGoogle: async () => {},
   adminLogin: async () => {},
   employeLogin: async () => {},
   logout: async () => {},
@@ -83,9 +85,30 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
 
   const loginWithToken = async (token: string): Promise<void> => {
     setLoading(true);
-    Cookies.set(TOKEN_KEY, token);
-    await getCurrentUser();
-    setLoading(false);
+    try {
+      Cookies.set(TOKEN_KEY, token, { expires: 7 });
+      await getCurrentUser();
+      router.push('/dashboard');
+    } catch (error) {
+      console.error('Erreur lors de la connexion avec token:', error);
+      throw error;
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const loginWithGoogle = async (token: string): Promise<void> => {
+    setLoading(true);
+    try {
+      Cookies.set(TOKEN_KEY, token, { expires: 7 });
+      await getCurrentUser();
+      router.push('/dashboard');
+    } catch (error) {
+      console.error('Erreur lors de la connexion Google:', error);
+      throw error;
+    } finally {
+      setLoading(false);
+    }
   };
 
   const adminLogin = async (email: string, password: string): Promise<void> => {
@@ -184,6 +207,7 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
         isUserEmploye,
         login,
         loginWithToken,
+        loginWithGoogle,
         adminLogin,
         employeLogin,
         logout,
