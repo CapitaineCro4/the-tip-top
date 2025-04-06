@@ -38,8 +38,22 @@ jobs:
         working-directory: ./front
         run: yarn install --frozen-lockfile
 
+      # Ajout d'une étape pour vérifier les variables d'environnement
+      - name: Debug Front Environment Variables
+        working-directory: ./front
+        run: |
+          echo "Listing environment variables:"
+          env | grep NEXT_PUBLIC || echo "No NEXT_PUBLIC variables found"
+          echo "Checking if .env.production exists:"
+          ls -la .env.production || echo ".env.production not found"
+          echo "Content of .env.production:"
+          cat .env.production || echo "Cannot read .env.production"
+
       - name: Build Front
         working-directory: ./front
+        env:
+          NEXT_PUBLIC_API_URL: "http://localhost:3002/api"
+          NEXT_PUBLIC_FRONTEND_URL: "http://localhost:3000"
         run: yarn build || { echo "Front build failed"; exit 1; }
 
       # Ajout d'une étape de débogage pour vérifier le contenu de front/.next
@@ -61,8 +75,22 @@ jobs:
         working-directory: ./api
         run: yarn install --frozen-lockfile
 
+      # Ajout d'une étape pour vérifier les variables d'environnement
+      - name: Debug API Environment Variables
+        working-directory: ./api
+        run: |
+          echo "Listing environment variables:"
+          env | grep DATABASE_URL || echo "No DATABASE_URL found"
+          echo "Checking if .env exists:"
+          ls -la .env || echo ".env not found"
+          echo "Content of .env:"
+          cat .env || echo "Cannot read .env"
+
       - name: Build API
         working-directory: ./api
+        env:
+          DATABASE_URL: "postgresql://admin:admin@postgres_db:5432/mydatabase?schema=public"
+          JWT_SECRET: "secret"
         run: yarn build || { echo "API build failed"; exit 1; }
 
       # Ajout d'une étape de débogage pour vérifier le contenu de api/dist
