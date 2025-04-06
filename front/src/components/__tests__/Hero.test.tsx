@@ -22,8 +22,11 @@ describe('Hero Component', () => {
   });
 
   it('renders the hero content correctly', () => {
-    // Test titre
-    expect(screen.getByText(heroContent.title)).toBeInTheDocument();
+    // Test titre (en deux parties)
+    expect(screen.getByText('Jeu-concours Nice :')).toBeInTheDocument();
+    expect(
+      screen.getByText('500 000 Chances de Gagner des Prix 🎁')
+    ).toBeInTheDocument();
 
     // Test sous-titre
     expect(screen.getByText(heroContent.subtitle)).toBeInTheDocument();
