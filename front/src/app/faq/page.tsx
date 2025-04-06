@@ -71,12 +71,12 @@ const FAQSection = ({ category, questions }: FAQItem) => {
 
   return (
     <div className="mb-8">
-      <h2 className="text-xl md:text-2xl font-bold text-gray-800 mb-4">
+      <h2 className="text-xl md:text-2xl font-bold text-gray-800 mb-4 ">
         {category}
       </h2>
       <div className="space-y-4">
         {questions.map((item, index) => (
-          <div key={index} className="border border-gray-200 overflow-hidden">
+          <div key={index} className="border border-gray-200 rounded-md overflow-hidden">
             <button
               className="w-full px-6 py-4 text-left bg-white hover:bg-gray-50 flex justify-between items-center"
               onClick={() => setOpenIndex(openIndex === index ? null : index)}

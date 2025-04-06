@@ -1,7 +1,14 @@
 'use client';
 
 import { useEffect, useState, useCallback } from 'react';
-import { FaUser, FaMars, FaVenus, FaGift } from 'react-icons/fa';
+import {
+  FaUser,
+  FaMars,
+  FaVenus,
+  FaGift,
+  FaTicketAlt,
+  FaChartBar,
+} from 'react-icons/fa';
 import { TiTicket } from 'react-icons/ti';
 import { ticketService, Ticket } from '@/services/ticketService';
 import {
@@ -12,6 +19,9 @@ import {
   CartesianGrid,
   Tooltip,
   ResponsiveContainer,
+  PieChart,
+  Pie,
+  Cell,
 } from 'recharts';
 
 interface SessionStats {
@@ -28,18 +38,24 @@ interface GenderStats {
 }
 
 interface AgeStats {
-  range: string;
-  count: number;
+  '18-25': number;
+  '26-35': number;
+  '36-45': number;
+  '46+': number;
+}
+
+interface DeliveredStats {
+  total: number;
   percentage: number;
 }
 
 interface AdminStatsProps {
   usersCount: number;
-  users: Array<{
+  users: {
     gender: string;
-    isEmploye: boolean;
     birthDate: string;
-  }>;
+    isEmploye: boolean;
+  }[];
 }
 
 export default function AdminStats({ usersCount, users }: AdminStatsProps) {
@@ -52,8 +68,13 @@ export default function AdminStats({ usersCount, users }: AdminStatsProps) {
     female: 0,
     total: 0,
   });
-  const [ageStats, setAgeStats] = useState<AgeStats[]>([]);
-  const [deliveredStats, setDeliveredStats] = useState({
+  const [ageStats, setAgeStats] = useState<AgeStats>({
+    '18-25': 0,
+    '26-35': 0,
+    '36-45': 0,
+    '46+': 0,
+  });
+  const [deliveredStats, setDeliveredStats] = useState<DeliveredStats>({
     total: 0,
     percentage: 0,
   });
@@ -61,35 +82,6 @@ export default function AdminStats({ usersCount, users }: AdminStatsProps) {
   useEffect(() => {
     loadTickets();
   }, []);
-
-  const calculateAgeStats = useCallback((): AgeStats[] => {
-    const now = new Date();
-    const ranges = [
-      { min: 0, max: 17, label: '0-17 ans' },
-      { min: 18, max: 24, label: '18-24 ans' },
-      { min: 25, max: 34, label: '25-34 ans' },
-      { min: 35, max: 44, label: '35-44 ans' },
-      { min: 45, max: 54, label: '45-54 ans' },
-      { min: 55, max: 64, label: '55-64 ans' },
-      { min: 65, max: Infinity, label: '65+ ans' },
-    ];
-
-    const stats = ranges.map((range) => {
-      const count = users.filter((user) => {
-        const birthDate = new Date(user.birthDate);
-        const age = now.getFullYear() - birthDate.getFullYear();
-        return age >= range.min && age <= range.max;
-      }).length;
-
-      return {
-        range: range.label,
-        count,
-        percentage: users.length > 0 ? (count / users.length) * 100 : 0,
-      };
-    });
-
-    return stats;
-  }, [users]);
 
   const calculateGenderStats = useCallback((): GenderStats => {
     const stats = {
@@ -99,11 +91,28 @@ export default function AdminStats({ usersCount, users }: AdminStatsProps) {
     };
 
     users.forEach((user) => {
-      if (user.gender === 'MALE') {
-        stats.male++;
-      } else if (user.gender === 'FEMALE') {
-        stats.female++;
-      }
+      if (user.gender === 'MALE') stats.male++;
+      else if (user.gender === 'FEMALE') stats.female++;
+    });
+
+    return stats;
+  }, [users]);
+
+  const calculateAgeStats = useCallback((): AgeStats => {
+    const stats = {
+      '18-25': 0,
+      '26-35': 0,
+      '36-45': 0,
+      '46+': 0,
+    };
+
+    users.forEach((user) => {
+      const age =
+        new Date().getFullYear() - new Date(user.birthDate).getFullYear();
+      if (age <= 25) stats['18-25']++;
+      else if (age <= 35) stats['26-35']++;
+      else if (age <= 45) stats['36-45']++;
+      else stats['46+']++;
     });
 
     return stats;
@@ -183,213 +192,175 @@ export default function AdminStats({ usersCount, users }: AdminStatsProps) {
 
   if (isLoading) {
     return (
-      <div className="flex justify-center items-center min-h-[200px]">
-        <div className="animate-spin rounded-full h-12 w-12 border-4 border-[#242E61] border-t-transparent"></div>
+      <div className="flex justify-center items-center py-8">
+        <div className="animate-spin rounded-full h-8 w-8 border-t-2 border-b-2 border-primary"></div>
       </div>
     );
   }
 
   if (error) {
-    return (
-      <div className="bg-red-100 text-red-700 p-4 ">{error}</div>
-    );
+    return <div className="text-center text-red-600 py-8">{error}</div>;
   }
+
+  const totalTickets = sessionStats.reduce(
+    (acc, curr) => acc + curr.totalTickets,
+    0
+  );
+  const usedTickets = sessionStats.reduce(
+    (acc, curr) => acc + curr.usedTickets,
+    0
+  );
+
+  const COLORS = {
+    blue: '#2563eb',
+    green: '#16a34a',
+    red: '#dc2626',
+    purple: '#9333ea',
+    pink: '#db2777',
+  };
+
+  const prepareGenderData = () => [
+    { name: 'Hommes', value: genderStats.male, color: COLORS.blue },
+    { name: 'Femmes', value: genderStats.female, color: COLORS.pink },
+  ];
+
+  const prepareAgeData = () =>
+    Object.entries(ageStats).map(([range, value]) => ({
+      name: range,
+      value,
+      color: COLORS.green,
+    }));
+
+  const prepareSessionData = () =>
+    sessionStats.map((session) => ({
+      name: session.name,
+      Utilisés: session.usedTickets,
+      Disponibles: session.availableTickets,
+    }));
 
   return (
     <div className="space-y-6">
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-4">
-        <div className="bg-white overflow-hidden shadow ">
-          <div className="p-5">
-            <div className="flex items-center">
-              <div className="flex-shrink-0">
-                <FaUser className="h-6 w-6 text-gray-400" />
-              </div>
-              <div className="ml-5 w-0 flex-1">
-                <dl>
-                  <dt className="text-sm font-medium text-gray-500 truncate">
-                    Utilisateurs totaux
-                  </dt>
-                  <dd className="flex items-baseline">
-                    <div className="text-2xl font-semibold text-gray-900">
-                      {usersCount}
-                    </div>
-                  </dd>
-                </dl>
-              </div>
+      {/* Statistiques générales */}
+      <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+        <div className="bg-white rounded-lg p-6 border">
+          <div className="flex items-center space-x-3">
+            <div className="bg-blue-50 p-3 rounded-full">
+              <FaUser className="w-6 h-6 text-blue-600" />
+            </div>
+            <div>
+              <p className="text-sm font-medium text-gray-600">
+                Total Utilisateurs
+              </p>
+              <p className="text-2xl font-semibold text-gray-900">
+                {usersCount}
+              </p>
             </div>
           </div>
         </div>
-        <div className="bg-white overflow-hidden shadow ">
-          <div className="p-5">
-            <div className="flex items-center">
-              <div className="flex-shrink-0">
-                <TiTicket className="h-6 w-6 text-gray-400" />
-              </div>
-              <div className="ml-5 w-0 flex-1">
-                <dl>
-                  <dt className="text-sm font-medium text-gray-500 truncate">
-                    Tickets totaux
-                  </dt>
-                  <dd className="flex items-baseline">
-                    <div className="text-2xl font-semibold text-gray-900">
-                      {tickets.length}
-                    </div>
-                  </dd>
-                </dl>
-              </div>
+
+        <div className="bg-white rounded-lg p-6 border">
+          <div className="flex items-center space-x-3">
+            <div className="bg-green-50 p-3 rounded-full">
+              <TiTicket className="w-6 h-6 text-green-600" />
+            </div>
+            <div>
+              <p className="text-sm font-medium text-gray-600">Total Tickets</p>
+              <p className="text-2xl font-semibold text-gray-900">
+                {totalTickets}
+              </p>
             </div>
           </div>
         </div>
-        <div className="bg-white overflow-hidden shadow ">
-          <div className="p-5">
-            <div className="flex items-center">
-              <div className="flex-shrink-0">
-                <FaGift className="h-6 w-6 text-green-400" />
-              </div>
-              <div className="ml-5 w-0 flex-1">
-                <dl>
-                  <dt className="text-sm font-medium text-gray-500 truncate">
-                    Lots remis
-                  </dt>
-                  <dd className="flex items-baseline">
-                    <div className="text-2xl font-semibold text-gray-900">
-                      {deliveredStats.total}
-                    </div>
-                    <span className="ml-2 text-sm text-gray-500">
-                      {deliveredStats.percentage.toFixed(1)}%
-                    </span>
-                  </dd>
-                </dl>
-              </div>
+
+        <div className="bg-white rounded-lg p-6 border">
+          <div className="flex items-center space-x-3">
+            <div className="bg-red-50 p-3 rounded-full">
+              <FaTicketAlt className="w-6 h-6 text-red-600" />
+            </div>
+            <div>
+              <p className="text-sm font-medium text-gray-600">
+                Tickets Utilisés
+              </p>
+              <p className="text-2xl font-semibold text-gray-900">
+                {usedTickets}
+              </p>
             </div>
           </div>
         </div>
-        <div className="bg-white overflow-hidden shadow ">
-          <div className="p-5">
-            <div className="flex items-center">
-              <div className="flex-shrink-0">
-                <FaMars className="h-6 w-6 text-blue-400" />
-              </div>
-              <div className="ml-5 w-0 flex-1">
-                <dl>
-                  <dt className="text-sm font-medium text-gray-500 truncate">
-                    Hommes
-                  </dt>
-                  <dd className="flex items-baseline">
-                    <div className="text-2xl font-semibold text-gray-900">
-                      {genderStats.male}
-                    </div>
-                    <span className="ml-2 text-sm text-gray-500">
-                      {genderStats.total > 0
-                        ? `(${Math.round((genderStats.male / genderStats.total) * 100)}%)`
-                        : '(0%)'}
-                    </span>
-                  </dd>
-                </dl>
-              </div>
+
+        <div className="bg-white rounded-lg p-6 border">
+          <div className="flex items-center space-x-3">
+            <div className="bg-purple-50 p-3 rounded-full">
+              <FaGift className="w-6 h-6 text-purple-600" />
             </div>
-          </div>
-        </div>
-        <div className="bg-white overflow-hidden shadow ">
-          <div className="p-5">
-            <div className="flex items-center">
-              <div className="flex-shrink-0">
-                <FaVenus className="h-6 w-6 text-pink-400" />
-              </div>
-              <div className="ml-5 w-0 flex-1">
-                <dl>
-                  <dt className="text-sm font-medium text-gray-500 truncate">
-                    Femmes
-                  </dt>
-                  <dd className="flex items-baseline">
-                    <div className="text-2xl font-semibold text-gray-900">
-                      {genderStats.female}
-                    </div>
-                    <span className="ml-2 text-sm text-gray-500">
-                      {genderStats.total > 0
-                        ? `(${Math.round((genderStats.female / genderStats.total) * 100)}%)`
-                        : '(0%)'}
-                    </span>
-                  </dd>
-                </dl>
-              </div>
+            <div>
+              <p className="text-sm font-medium text-gray-600">Lots Remis</p>
+              <p className="text-2xl font-semibold text-gray-900">
+                {deliveredStats.total}
+              </p>
             </div>
           </div>
         </div>
       </div>
 
-      <div className="bg-white shadow  overflow-hidden">
-        <div className="px-4 py-5 sm:p-6">
-          <h3 className="text-lg font-medium leading-6 text-gray-900 mb-4">
-            Distribution par âge
-          </h3>
-          <div className="h-[300px]">
-            <ResponsiveContainer width="100%" height="100%">
-              <BarChart data={ageStats}>
-                <CartesianGrid strokeDasharray="3 3" />
-                <XAxis dataKey="range" />
-                <YAxis />
-                <Tooltip
-                  formatter={(value: number) => [
-                    `${value} personne(s)`,
-                    'Nombre',
-                  ]}
-                  labelFormatter={(label) => `Tranche d'âge: ${label}`}
-                />
-                <Bar dataKey="count" fill="#242E61" />
-              </BarChart>
-            </ResponsiveContainer>
-          </div>
-          <div className="mt-4 grid grid-cols-2 md:grid-cols-4 gap-4">
-            {ageStats.map((stat) => (
-              <div key={stat.range} className="bg-gray-50 p-3 ">
-                <p className="text-sm font-medium text-gray-900">
-                  {stat.range}
-                </p>
-                <p className="text-lg font-semibold text-[#242E61]">
-                  {stat.count}
-                </p>
-                <p className="text-sm text-gray-500">
-                  {stat.percentage.toFixed(1)}%
-                </p>
-              </div>
-            ))}
-          </div>
-        </div>
-      </div>
-
-      {sessionStats && sessionStats.length > 0 ? (
-        <div className="bg-white shadow  overflow-hidden">
-          <div className="px-4 py-5 sm:p-6">
-            <h3 className="text-lg font-medium leading-6 text-gray-900 mb-4">
+      {/* Statistiques par session avec graphique */}
+      <div className="bg-white rounded-lg border overflow-hidden">
+        <div className="p-6">
+          <div className="flex items-center justify-between mb-6">
+            <h3 className="text-lg font-semibold text-gray-900">
               Statistiques par Session
             </h3>
-            <div className="grid grid-cols-1 gap-4">
+            <div className="bg-blue-50 p-2 rounded-full">
+              <FaChartBar className="w-5 h-5 text-blue-600" />
+            </div>
+          </div>
+
+          <div className="space-y-6">
+            <div className="h-[300px]">
+              <ResponsiveContainer width="100%" height="100%">
+                <BarChart data={prepareSessionData()}>
+                  <CartesianGrid strokeDasharray="3 3" />
+                  <XAxis dataKey="name" />
+                  <YAxis />
+                  <Tooltip />
+                  <Bar dataKey="Utilisés" fill={COLORS.red} stackId="a" />
+                  <Bar dataKey="Disponibles" fill={COLORS.green} stackId="a" />
+                </BarChart>
+              </ResponsiveContainer>
+            </div>
+
+            <div className="space-y-4">
               {sessionStats.map((session) => (
-                <div
-                  key={session.name}
-                  className="border  p-4 bg-gray-50"
-                >
-                  <h4 className="font-semibold text-lg text-gray-800 mb-2">
-                    {session.name}
-                  </h4>
+                <div key={session.name} className="bg-gray-50 rounded-lg p-4">
+                  <div className="flex items-center justify-between mb-2">
+                    <h4 className="font-semibold text-gray-900">
+                      {session.name}
+                    </h4>
+                    <span className="text-sm text-gray-500">
+                      {(
+                        (session.usedTickets / session.totalTickets) *
+                        100
+                      ).toFixed(1)}
+                      % utilisés
+                    </span>
+                  </div>
                   <div className="grid grid-cols-3 gap-4">
                     <div>
                       <p className="text-sm text-gray-500">Total</p>
-                      <p className="text-xl font-semibold text-gray-900">
+                      <p className="text-lg font-semibold text-gray-900">
                         {session.totalTickets}
                       </p>
                     </div>
                     <div>
-                      <p className="text-sm text-gray-500">Disponibles</p>
-                      <p className="text-xl font-semibold text-green-600">
-                        {session.availableTickets}
+                      <p className="text-sm text-gray-500">Utilisés</p>
+                      <p className="text-lg font-semibold text-red-600">
+                        {session.usedTickets}
                       </p>
                     </div>
                     <div>
-                      <p className="text-sm text-gray-500">Utilisés</p>
-                      <p className="text-xl font-semibold text-red-600">
-                        {session.usedTickets}
+                      <p className="text-sm text-gray-500">Disponibles</p>
+                      <p className="text-lg font-semibold text-green-600">
+                        {session.availableTickets}
                       </p>
                     </div>
                   </div>
@@ -398,11 +369,114 @@ export default function AdminStats({ usersCount, users }: AdminStatsProps) {
             </div>
           </div>
         </div>
-      ) : (
-        <div className="bg-white shadow  p-6">
-          <p className="text-gray-500 text-center">Aucune session disponible</p>
+      </div>
+
+      {/* Statistiques démographiques avec graphiques */}
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+        <div className="bg-white rounded-lg border overflow-hidden">
+          <div className="p-6">
+            <div className="flex items-center justify-between mb-6">
+              <h3 className="text-lg font-semibold text-gray-900">
+                Répartition par Genre
+              </h3>
+              <div className="flex space-x-2">
+                <div className="bg-blue-50 p-2 rounded-full">
+                  <FaMars className="w-5 h-5 text-blue-600" />
+                </div>
+                <div className="bg-pink-50 p-2 rounded-full">
+                  <FaVenus className="w-5 h-5 text-pink-600" />
+                </div>
+              </div>
+            </div>
+
+            <div className="h-[200px] mb-4">
+              <ResponsiveContainer width="100%" height="100%">
+                <PieChart>
+                  <Pie
+                    data={prepareGenderData()}
+                    cx="50%"
+                    cy="50%"
+                    outerRadius={80}
+                    dataKey="value"
+                    label={({ name, percent }) =>
+                      `${name} ${(percent * 100).toFixed(1)}%`
+                    }
+                  >
+                    {prepareGenderData().map((entry, index) => (
+                      <Cell key={`cell-${index}`} fill={entry.color} />
+                    ))}
+                  </Pie>
+                  <Tooltip />
+                </PieChart>
+              </ResponsiveContainer>
+            </div>
+
+            <div className="grid grid-cols-2 gap-4">
+              <div className="bg-gray-50 rounded-lg p-4">
+                <p className="text-sm text-gray-500">Hommes</p>
+                <p className="text-2xl font-semibold text-blue-600">
+                  {genderStats.male}
+                </p>
+                <p className="text-sm text-gray-500">
+                  {((genderStats.male / genderStats.total) * 100).toFixed(1)}%
+                </p>
+              </div>
+              <div className="bg-gray-50 rounded-lg p-4">
+                <p className="text-sm text-gray-500">Femmes</p>
+                <p className="text-2xl font-semibold text-pink-600">
+                  {genderStats.female}
+                </p>
+                <p className="text-sm text-gray-500">
+                  {((genderStats.female / genderStats.total) * 100).toFixed(1)}%
+                </p>
+              </div>
+            </div>
+          </div>
         </div>
-      )}
+
+        <div className="bg-white rounded-lg border overflow-hidden">
+          <div className="p-6">
+            <div className="flex items-center justify-between mb-6">
+              <h3 className="text-lg font-semibold text-gray-900">
+                Répartition par Âge
+              </h3>
+              <div className="bg-green-50 p-2 rounded-full">
+                <FaChartBar className="w-5 h-5 text-green-600" />
+              </div>
+            </div>
+
+            <div className="h-[200px] mb-4">
+              <ResponsiveContainer width="100%" height="100%">
+                <BarChart data={prepareAgeData()}>
+                  <CartesianGrid strokeDasharray="3 3" />
+                  <XAxis dataKey="name" />
+                  <YAxis />
+                  <Tooltip />
+                  <Bar dataKey="value" fill={COLORS.green}>
+                    {prepareAgeData().map((entry, index) => (
+                      <Cell key={`cell-${index}`} fill={entry.color} />
+                    ))}
+                  </Bar>
+                </BarChart>
+              </ResponsiveContainer>
+            </div>
+
+            <div className="grid grid-cols-2 gap-4">
+              {Object.entries(ageStats).map(([range, count]) => (
+                <div key={range} className="bg-gray-50 rounded-lg p-4">
+                  <p className="text-sm text-gray-500">{range} ans</p>
+                  <p className="text-2xl font-semibold text-green-600">
+                    {count}
+                  </p>
+                  <p className="text-sm text-gray-500">
+                    {((count / users.length) * 100).toFixed(1)}%
+                  </p>
+                </div>
+              ))}
+            </div>
+          </div>
+        </div>
+      </div>
     </div>
   );
 }

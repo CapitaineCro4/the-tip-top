@@ -46,7 +46,7 @@ export const Newsletter = () => {
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
                 placeholder={newsletterContent.placeholder}
-                className="w-full px-6 py-3 border-2 border-transparent focus:border-white bg-white/10 text-white placeholder-gray-300 outline-none transition-all"
+                className="w-full px-6 py-3 border-2 border-transparent rounded-md focus:border-white bg-white/10 text-white placeholder-gray-300 outline-none transition-all"
                 required
               />
               {status === 'error' && (
@@ -58,7 +58,7 @@ export const Newsletter = () => {
             <button
               type="submit"
               disabled={isSubmitting}
-              className={`px-8 py-3 font-medium transition-all
+              className={`px-8 py-3 rounded-md font-medium transition-all
                 ${
                   isSubmitting
                     ? 'bg-gray-400 cursor-not-allowed'

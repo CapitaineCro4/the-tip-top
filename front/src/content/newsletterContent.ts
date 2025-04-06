@@ -4,8 +4,10 @@ export const newsletterContent = {
   placeholder: 'Votre email',
   buttonText: 'INSCRIPTION',
   buttonLoadingText: 'Inscription...',
-  legalText: 'En cliquant sur « INSCRIPTION », vous acceptez expressément de recevoir nos offres commerciales et nos actualités par email conformément à notre',
+  legalText:
+    'En cliquant sur « INSCRIPTION », vous acceptez de recevoir nos offres et actualités par email selon notre ',
   privacyLinkText: 'Politique de Confidentialité',
-  successMessage: 'Merci pour votre inscription ! Vous recevrez bientôt nos actualités.',
-  errorMessage: 'Une erreur est survenue. Veuillez réessayer.'
-}; 
+  successMessage:
+    'Merci pour votre inscription ! Vous recevrez bientôt nos actualités.',
+  errorMessage: 'Une erreur est survenue. Veuillez réessayer.',
+};

@@ -23,7 +23,7 @@ const Review: React.FC = () => {
           {reviews.map((review, index) => (
             <div
               key={index}
-              className="flex-none w-[70vw] md:w-auto snap-start border-2 border-[#242E61] p-6 "
+              className="flex-none w-[70vw] md:w-auto snap-start rounded-md border-2 border-[#242E61] p-6 "
             >
               <div className="flex justify-between items-center mb-2">
                 <h3 className="text-lg font-semibold">{review.name}</h3>
@@ -33,7 +33,7 @@ const Review: React.FC = () => {
                 {[...Array(5)].map((_, i) => (
                   <FaStar
                     key={i}
-                    className={`w-5 h-5 ${
+                    className={`w-5 h-5 roundeed-md ${
                       i < review.rating ? 'text-orange-400' : 'text-gray-300'
                     }`}
                   />

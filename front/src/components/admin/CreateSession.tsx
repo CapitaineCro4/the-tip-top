@@ -1,47 +1,57 @@
 import { useRef, useState } from 'react';
 import { createSession } from '@/network/api-routes/Session';
+import { FaCheck } from 'react-icons/fa';
+import { toast } from 'sonner';
 
 export default function CreateSession() {
-  const [message, setMessage] = useState<string>('');
+  const [isLoading, setIsLoading] = useState(false);
   const formRef = useRef<HTMLFormElement>(null);
 
-  function handleSubmit(e: React.FormEvent<HTMLFormElement>) {
+  async function handleSubmit(e: React.FormEvent<HTMLFormElement>) {
     e.preventDefault();
+    setIsLoading(true);
     const formData = new FormData(e.target as HTMLFormElement);
     const data = Object.fromEntries(formData);
 
-    createSession({
-      name: data.name as string,
-      startDate: data.startDate as string,
-      endDate: data.endDate as string,
-      claimEndDate: data.claimEndDate as string,
-      ticketsQuantity: parseInt(data.ticketsQuantity as string),
-    }).then(() => {
-      setMessage('Session créée avec succès');
-      formRef.current?.reset();
+    try {
+      await createSession({
+        name: data.name as string,
+        startDate: data.startDate as string,
+        endDate: data.endDate as string,
+        claimEndDate: data.claimEndDate as string,
+        ticketsQuantity: parseInt(data.ticketsQuantity as string),
+      });
 
-      setTimeout(() => {
-        setMessage('');
-      }, 6000);
-    });
+      toast.success('Session créée avec succès', {
+        description: 'La nouvelle session a été créée avec succès.',
+        duration: 5000,
+      });
+
+      formRef.current?.reset();
+    } catch (error) {
+      toast.error('Erreur lors de la création de la session', {
+        description:
+          error instanceof Error ? error.message : 'Une erreur est survenue',
+        duration: 5000,
+      });
+    } finally {
+      setIsLoading(false);
+    }
   }
 
   return (
-    <div className="mt-8">
-      <h2 className="text-lg font-medium text-gray-900 mb-4">
-        Créer une nouvelle session
-      </h2>
-      {message && (
-        <div
-          className="bg-green-100 border border-green-400 text-green-700 px-4 py-3 rounded relative mb-4"
-          role="alert"
-        >
-          <strong className="font-bold">Succès !</strong>
-          <span className="block sm:inline">{message}</span>
-        </div>
-      )}
-      <div className="bg-white shadow rounded-lg p-6">
-        <form className="space-y-4" onSubmit={handleSubmit} ref={formRef}>
+    <div className="p-4 mx-auto">
+      <div className="mb-8">
+        <h1 className="text-2xl font-semibold text-gray-900">
+          Créer une nouvelle session
+        </h1>
+        <p className="mt-2 text-sm text-gray-700">
+          Remplissez les informations ci-dessous pour créer une nouvelle session
+        </p>
+      </div>
+
+      <div className="bg-white p-6 rounded-lg shadow-sm border border-gray-200">
+        <form className="space-y-6" onSubmit={handleSubmit} ref={formRef}>
           <div>
             <label
               htmlFor="name"
@@ -53,8 +63,9 @@ export default function CreateSession() {
               type="text"
               name="name"
               id="name"
-              className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-primary focus:ring-primary sm:text-sm"
+              className="mt-1 block w-full px-6 py-3 border-2 border-[#242E61]/20 placeholder:text-black focus:border-[#242E61] bg-white/60 text-black placeholder-gray-300 outline-none transition-all rounded-lg"
               placeholder="Nom de la session"
+              required
             />
           </div>
 
@@ -66,12 +77,15 @@ export default function CreateSession() {
               >
                 Date de début
               </label>
-              <input
-                type="date"
-                name="startDate"
-                id="startDate"
-                className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-primary focus:ring-primary sm:text-sm"
-              />
+              <div className="mt-1 relative">
+                <input
+                  type="date"
+                  name="startDate"
+                  id="startDate"
+                  className="block w-full px-6 py-3 border-2 border-[#242E61]/20 placeholder:text-black focus:border-[#242E61] bg-white/60 text-black placeholder-gray-300 outline-none transition-all rounded-lg"
+                  required
+                />
+              </div>
             </div>
 
             <div>
@@ -81,12 +95,15 @@ export default function CreateSession() {
               >
                 Date de fin
               </label>
-              <input
-                type="date"
-                name="endDate"
-                id="endDate"
-                className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-primary focus:ring-primary sm:text-sm"
-              />
+              <div className="mt-1 relative">
+                <input
+                  type="date"
+                  name="endDate"
+                  id="endDate"
+                  className="block w-full px-6 py-3 border-2 border-[#242E61]/20 placeholder:text-black focus:border-[#242E61] bg-white/60 text-black placeholder-gray-300 outline-none transition-all rounded-lg"
+                  required
+                />
+              </div>
             </div>
 
             <div>
@@ -96,12 +113,15 @@ export default function CreateSession() {
               >
                 Date limite de réclamation
               </label>
-              <input
-                type="date"
-                name="claimEndDate"
-                id="claimEndDate"
-                className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-primary focus:ring-primary sm:text-sm"
-              />
+              <div className="mt-1 relative">
+                <input
+                  type="date"
+                  name="claimEndDate"
+                  id="claimEndDate"
+                  className="block w-full px-6 py-3 border-2 border-[#242E61]/20 placeholder:text-black focus:border-[#242E61] bg-white/60 text-black placeholder-gray-300 outline-none transition-all rounded-lg"
+                  required
+                />
+              </div>
             </div>
           </div>
 
@@ -112,22 +132,36 @@ export default function CreateSession() {
             >
               Nombre de tickets
             </label>
-            <input
-              type="number"
-              name="ticketsQuantity"
-              id="ticketsQuantity"
-              min="1"
-              className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-primary focus:ring-primary sm:text-sm"
-              placeholder="Quantité de tickets à générer"
-            />
+            <div className="mt-1 relative">
+              <input
+                type="number"
+                name="ticketsQuantity"
+                id="ticketsQuantity"
+                min="1"
+                className="block w-full px-6 py-3 border-2 border-[#242E61]/20 placeholder:text-black focus:border-[#242E61] bg-white/60 text-black placeholder-gray-300 outline-none transition-all rounded-lg"
+                placeholder="Quantité de tickets à générer"
+                required
+              />
+            </div>
           </div>
 
           <div className="flex justify-end">
             <button
               type="submit"
-              className="inline-flex items-center px-4 py-2 border border-transparent shadow-sm text-sm font-medium rounded-md text-white bg-primary hover:bg-primary-dark focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary"
+              disabled={isLoading}
+              className="w-max-w-4xl bg-[#242E61] text-white px-6 py-3 border-2 border-transparent hover:bg-[#16803C] transition-all duration-300 flex items-center justify-center focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary disabled:opacity-50 disabled:cursor-not-allowed rounded-lg"
             >
-              Créer la session
+              {isLoading ? (
+                <>
+                  <div className="animate-spin rounded-full h-4 w-4 border-t-2 border-b-2 border-white mr-2"></div>
+                  Création en cours...
+                </>
+              ) : (
+                <>
+                  <FaCheck className="mr-2" />
+                  Créer la session
+                </>
+              )}
             </button>
           </div>
         </form>

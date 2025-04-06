@@ -7,7 +7,7 @@ import { AnimatePresence } from 'motion/react';
 import { AuthForm } from '../Auth/AuthForm';
 
 const Hero: React.FC<{ imageSrc: string }> = ({ imageSrc }) => {
-  const { title, subtitle, description, buttonText, contestDates, alt } =
+  const { subtitle, description, buttonText, contestDates, alt } =
     heroContent;
   const [isAuthOpen, setIsAuthOpen] = useState(false);
 
@@ -41,7 +41,10 @@ const Hero: React.FC<{ imageSrc: string }> = ({ imageSrc }) => {
 
           {/* Title */}
           <h1 className="text-3xl md:text-3xl font-bold mb-4 leading-tight">
-            {title}
+            {/*  {title} */}
+            <span className="text-white/90">Jeu-concours Nice :</span>
+            <br />
+            <span className="text-white">500 000 Chances de Gagner des Prix 🎁</span>
           </h1>
 
           {/* Subtitle */}

@@ -4,6 +4,7 @@ import { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { useAuth } from '@/hooks/useAuth';
 import { TicketList } from '@/components/Tickets/TicketList';
+import { LoadingScreen } from '@/components/LoadingScreen/LoadingScreen';
 /* import { getUsers } from '@/network/api-routes/User';
 import { User } from '@/domain/user/UserType'; */
 
@@ -13,20 +14,15 @@ export default function EmployePage() {
   const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
-    if (!isAuthenticated() || !user?.isEmploye) {
+    if (!isAuthenticated() || (!user?.isEmploye && !user?.isAdmin)) {
       router.push('/');
       return;
     }
-
     setIsLoading(false);
   }, [isAuthenticated, user, router]);
 
   if (isLoading) {
-    return (
-      <div className="min-h-screen flex items-center justify-center">
-        <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-primary"></div>
-      </div>
-    );
+    return <LoadingScreen />;
   }
 
   return (

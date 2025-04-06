@@ -6,6 +6,7 @@ import { Footer } from '@/components/Footer/Footer';
 import { CookieConsent } from '@/components/CookieConsent/CookieConsent';
 import { AuthProvider } from '@/context/AuthContext';
 import Script from 'next/script';
+import { Toaster } from 'sonner';
 
 const montserrat = Montserrat({
   variable: '--font-montserrat',
@@ -62,6 +63,7 @@ export default function RootLayout({
             `,
           }}
         />
+        <Toaster richColors position="top-right" />
         <AuthProvider>
           <Header />
           <main className="flex-grow pt-16">{children}</main>

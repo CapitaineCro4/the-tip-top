@@ -15,12 +15,15 @@ export async function POST(request: Request) {
   try {
     const { to, subject, content } = await request.json();
 
+    // Vérifier si le contenu est déjà en HTML
+    const isHtml = content.includes('<') && content.includes('>');
+
     await transporter.sendMail({
       from: 'crochets.puma2i@icloud.com',
       to: Array.isArray(to) ? to.join(', ') : to,
       subject,
-      text: content,
-      html: content.replace(/\n/g, '<br>'),
+      text: isHtml ? content.replace(/<[^>]*>/g, '') : content, // Version texte pour les clients qui ne supportent pas HTML
+      html: isHtml ? content : content.replace(/\n/g, '<br>'), // Version HTML
     });
 
     return NextResponse.json({ success: true });

@@ -61,4 +61,36 @@ export const userService = {
   deleteUser: async (id: number): Promise<void> => {
     await apis.tiptop.delete(`/users/${id}`);
   },
+
+  getEmployees: async (): Promise<User[]> => {
+    const response = await apis.tiptop.get('/users');
+    // Filtrer pour ne garder que les employés
+    return response.data.filter((user: User) => user.isEmploye);
+  },
+
+  createEmployee: async (employeeData: {
+    firstName: string;
+    lastName: string;
+    email: string;
+    password: string;
+    gender: string;
+    birthDate: Date;
+  }): Promise<User> => {
+    const employeeWithRole = {
+      email: employeeData.email,
+      firstName: employeeData.firstName,
+      lastName: employeeData.lastName,
+      password: employeeData.password,
+      gender: employeeData.gender,
+      birthDate: employeeData.birthDate,
+      isAdmin: false,
+      isEmploye: true,
+    };
+    const response = await apis.tiptop.post('/auth/register', employeeWithRole);
+    return response.data;
+  },
+
+  deleteEmployee: async (employeeId: number): Promise<void> => {
+    await apis.tiptop.delete(`/users/${employeeId}`);
+  },
 };

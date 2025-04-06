@@ -53,9 +53,18 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
   const router = useRouter();
 
   useEffect(() => {
-    getCurrentUser();
-    loadUserGames();
-    setLoading(false);
+    const initAuth = async () => {
+      try {
+        await getCurrentUser();
+        await loadUserGames();
+      } catch (error) {
+        console.error("Erreur lors de l'initialisation de l'auth:", error);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    initAuth();
   }, []);
 
   const login = async (email: string, password: string): Promise<void> => {
@@ -93,7 +102,10 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
       .finally(() => setLoading(false));
   };
 
-  const employeLogin = async (email: string, password: string): Promise<void> => {
+  const employeLogin = async (
+    email: string,
+    password: string
+  ): Promise<void> => {
     setLoading(true);
 
     return employeLoginApi(email, password)
@@ -121,19 +133,24 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
   };
 
   const getCurrentUser = async (): Promise<void> => {
-    getMe()
-      .then((user) => setUser(user))
-      .catch(() => {
-        setUser(null);
-      });
+    try {
+      const user = await getMe();
+      setUser(user);
+    } catch (error) {
+      console.error('Erreur getCurrentUser:', error);
+      setUser(null);
+      throw error;
+    }
   };
 
   const loadUserGames = async (): Promise<void> => {
-    getMeGames()
-      .then((games) => setUserGames(games))
-      .catch(() => {
-        setUserGames([]);
-      });
+    try {
+      const games = await getMeGames();
+      setUserGames(games);
+    } catch (error) {
+      console.error('Erreur loadUserGames:', error);
+      setUserGames([]);
+    }
   };
 
   const isAuthenticated = useCallback(() => {
